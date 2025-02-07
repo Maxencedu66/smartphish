@@ -1,0 +1,131 @@
+/* Styles généraux */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Bandeau du haut */
+header {
+    background-color: #555;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 60px;
+    z-index: 100;
+}
+
+.logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.title {
+    font-size: 24px;
+    color: #00aaff;
+    margin-right: auto;
+}
+
+.header-buttons {
+    display: flex; /* Active flexbox */
+    align-items: center;
+    margin-right: 50px; /* Ajoute une marge à droite */
+    gap: 30px; /* Ajuste l’espace entre les boutons */
+}
+.header-buttons button {
+    padding: 8px 15px;
+    border: none;
+    background-color: #00aaff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+.header-buttons button:hover {
+    background-color: #0088cc;
+}
+
+/* Menu latéral */
+aside {
+    background-color: #777;
+    width: 220px;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    padding-top: 20px;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+}
+
+aside li {
+    padding: 15px;
+    color: white;
+    cursor: pointer;
+}
+
+aside li:hover {
+    background-color: #666;
+}
+
+/* Contenu principal */
+main {
+    margin-left: 240px;
+    margin-top: 70px;
+    padding: 20px;
+}
+
+/* Fenêtre modale */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    min-width: 300px;
+}
+
+/* Section spécifique à Home */
+.home-section {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: left; /* Aligne le texte à gauche */
+}
+
+.home-section h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.home-section p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+}
