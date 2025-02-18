@@ -1,0 +1,1 @@
+# Routes pour générer des emails via l'IA

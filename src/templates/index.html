@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartPhish</title>
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
     <!-- Bandeau du haut -->
     <header>
-        <img src="static/img/logo.png" alt="Logo SmartPhish" class="logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="logo">
+
         <h1 class="title">SmartPhish</h1>
         <div class="header-buttons">
             <button id="btnSettings">Settings</button>
@@ -60,7 +61,7 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 </body>
 </html>
