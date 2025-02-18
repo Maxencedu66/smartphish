@@ -1,3 +1,4 @@
+/* 
 // Fonction pour afficher le contenu d'un menu
 document.querySelectorAll("aside li").forEach(item => {
     item.addEventListener("click", function() {
@@ -25,6 +26,7 @@ document.querySelectorAll(".modal").forEach(modal => {
     });
 });
 
+
 // Fonction pour afficher le contenu de l'onglet sélectionné
 document.querySelectorAll("aside li").forEach(item => {
     item.addEventListener("click", function() {
@@ -48,9 +50,25 @@ document.querySelectorAll("aside li").forEach(item => {
         }
     });
 });
+*/
+
+// Renvoyer l'utilisateur sur la page nouvelle campagne
+document.addEventListener("DOMContentLoaded", function() {
+    // Sélectionne tous les éléments du menu latéral
+    document.querySelectorAll("aside ul li").forEach(item => {
+        item.addEventListener("click", function() {
+            let contentId = this.getAttribute("data-content");
+
+            // Vérifie si l'utilisateur a cliqué sur "Nouvelle Campagne"
+            if (contentId === "nouvelle_campagne") {
+                window.location.href = "/nouvelle_campagne"; // Redirige vers la page
+            }
+        });
+    });
+});
+
+
 /* Fonction pour nouvelle_campagne.html */
-
-
 
 function updateFormFields() {
     let scenario = document.getElementById("scenario").value;
