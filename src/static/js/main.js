@@ -48,3 +48,59 @@ document.querySelectorAll("aside li").forEach(item => {
         }
     });
 });
+/* Fonction pour nouvelle_campagne.html */
+
+
+
+function updateFormFields() {
+    let scenario = document.getElementById("scenario").value;
+    let additionalFields = document.getElementById("additionalFields");
+
+    if (scenario) {
+        additionalFields.style.display = "block";
+    } else {
+        additionalFields.style.display = "none";
+    }
+}
+
+function generateEmail() {
+    let scenario = document.getElementById("scenario").value;
+    let entreprise = document.getElementById("entreprise").value;
+    let expediteur = document.getElementById("expediteur").value;
+    let email_expediteur = document.getElementById("email_expediteur").value;
+
+    if (!scenario) {
+        alert("Veuillez sélectionner un scénario.");
+        return;
+    }
+
+    // Affiche la barre de chargement
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("emailResult").style.display = "none";
+
+    fetch('/generate_email', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario, entreprise, expediteur, email_expediteur })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("loading").style.display = "none"; // Cache la barre de chargement
+        document.getElementById("emailResult").style.display = "block";
+        document.getElementById("generatedEmail").value = data.email;
+    })
+    .catch(error => {
+        console.error("Erreur :", error);
+        document.getElementById("loading").style.display = "none";
+    });
+}
+
+function resetForm() {
+    document.getElementById("phishingForm").reset();
+    document.getElementById("additionalFields").style.display = "none";
+    document.getElementById("emailResult").style.display = "none";
+}
+
+function lancement() {
+    alert("Email validé et prêt à être envoyé.");
+}

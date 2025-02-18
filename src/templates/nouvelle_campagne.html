@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Campagne</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>Nouvelle Campagne</h1>
+    </header>
+
+    <main>
+        <form id="phishingForm">
+            <label for="scenario">Choisissez un scénario :</label>
+            <select id="scenario" name="scenario" onchange="updateFormFields()">
+                <option value="">-- Sélectionnez --</option>
+                <option value="Départ à la retraite">Départ à la retraite</option>
+                <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement - RIB nécessaire</option>
+                <option value="Alerte de sécurité - Connexion suspecte">Alerte de sécurité - Connexion suspecte</option>
+            </select>
+
+            <div id="additionalFields" style="display: none;">
+                <label for="entreprise">Nom de l'entreprise :</label>
+                <input type="text" id="entreprise" name="entreprise">
+                
+                <label for="expediteur">Nom de l'expéditeur :</label>
+                <input type="text" id="expediteur" name="expediteur">
+
+                <label for="email_expediteur">Email expéditeur :</label>
+                <input type="text" id="email_expediteur" name="email_expediteur">
+            </div>
+
+            <button type="button" onclick="generateEmail()">Générer l'email</button>
+        </form>
+
+        <div id="loading" style="display: none;">
+            <p>Génération en cours...</p>
+            <div class="loader"></div>
+        </div>
+
+        <div id="emailResult" style="display: none;">
+            <h2>Email généré</h2>
+            <textarea id="generatedEmail" rows="6"></textarea>
+            <button class="validate" onclick="lancement()">Valider</button>
+            <button class="regenerate" onclick="generateEmail()">Régénérer</button>
+            <button class="reset" onclick="resetForm()">🗑 Réinitialiser</button>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
