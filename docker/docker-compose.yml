@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  gophish:
+    image: gophish/gophish:latest  # Utilise l'image officielle
+    container_name: gophish
+    ports:
+      - "3333:3333"   # Interface admin (HTTPS)
+      - "80:80"       # Phishing server (HTTP)
+    restart: unless-stopped
+    environment:
+      - ADMIN_LISTEN_URL=0.0.0.0:3333
+      - PHISH_LISTEN_URL=0.0.0.0:80
+      - USE_TLS=false

@@ -2,7 +2,10 @@
 
 import os
 
+import os
+
 class Config:
-    GOPHISH_API_URL = "http://127.0.0.1:3333/api"
-    GOPHISH_API_KEY = os.getenv("GOPHISH_API_KEY", "TA_CLE_API")
+    GOPHISH_API_URL = os.getenv("GOPHISH_API_URL", "http://localhost:3333")
+    GOPHISH_API_KEY = "TA_CLE_API"  # Remplace par ta clé API GoPhish
+
     DATABASE_URI = os.getenv("DATABASE_URI", "postgresql://user:password@localhost/smartphish")
