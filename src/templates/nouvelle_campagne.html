@@ -12,6 +12,21 @@
         <h1>Nouvelle Campagne</h1>
     </header>
 
+    <!-- Menu latéral -->
+    <aside>
+        <ul>
+            <li data-content="home">🏠 Home</li>
+            <li data-content="historique">📜 Historique</li>
+            <li data-content="nouvelle_campagne">📩 Nouvelle Campagne</li>
+            <li data-content="suivi_campagne">📊 Suivi de campagne</li>
+            <li data-content="analyse_correction">🔍 Analyse et correction</li>
+            <li data-content="statut_llm">🤖 Statut du LLM</li>
+            <li data-content="entrainement_llm">📡 Entrainement du LLM</li>
+            <li data-content="parametres_llm">⚙️ Paramètres du LLM</li>
+            <li data-content="status_maj">📌 Status des MAJ</li>
+        </ul>
+    </aside>
+
     <main>
         <form id="phishingForm">
             <label for="scenario">Choisissez un scénario :</label>
@@ -43,7 +58,10 @@
 
         <div id="emailResult" style="display: none;">
             <h2>Email généré</h2>
-            <textarea id="generatedEmail" rows="6"></textarea>
+            <textarea id="generatedEmailObject" rows="1" cols="60"></textarea>
+            <br>
+            <textarea id="generatedEmailContent" rows="15" cols="60"></textarea>
+            <br>
             <button class="validate" onclick="lancement()">Valider</button>
             <button class="regenerate" onclick="generateEmail()">Régénérer</button>
             <button class="reset" onclick="resetForm()">🗑 Réinitialiser</button>

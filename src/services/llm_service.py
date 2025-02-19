@@ -1,4 +1,10 @@
 import ollama
+from pydantic import BaseModel
+
+# Define the schema for the response
+class EmailInfo(BaseModel):
+  objet_mail: str
+  contenu_mail: str
 
 def generate_prompt(user_data):
     """Génère un prompt adapté au scénario sélectionné."""
@@ -8,7 +14,8 @@ def generate_prompt(user_data):
         "Départ à la retraite": f"""
         Rédige un email informel annonçant le départ à la retraite d'un collègue. 
         Le mail doit être **court, direct et sans fioritures**. 
-        Il doit inciter les destinataires à **répondre rapidement** en fournissant leurs coordonnées (RIB, numéro de téléphone).
+        Il doit inciter les destinataires à **répondre rapidement** en fournissant leurs coordonnées (RIB et numéro de téléphone).
+        Ne pas laisser des informations à compléter.
         
         - **But** : Organiser un repas de départ et demander subtilement un RIB et des coordonnées.
         - **Ton** : Amical et détendu.
@@ -109,5 +116,6 @@ def generate_phishing_email(user_data):
     """Génère un email de phishing à l'aide de Mistral via Ollama."""
     prompt = generate_prompt(user_data)
 
-    response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-    return response['message']['content']
+    response: EmailInfo = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}], format=EmailInfo.model_json_schema())
+    response_obj = EmailInfo.model_validate_json(response.message.content)
+    return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail}

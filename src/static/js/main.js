@@ -63,6 +63,11 @@ document.addEventListener("DOMContentLoaded", function() {
             if (contentId === "nouvelle_campagne") {
                 window.location.href = "/nouvelle_campagne"; // Redirige vers la page
             }
+
+            // Vérifie si l'utilisateur a cliqué sur "Home"
+            if (contentId === "home") {
+                window.location.href = "/"; // Redirige vers la page d'accueil
+            }
         });
     });
 });
@@ -105,7 +110,8 @@ function generateEmail() {
     .then(data => {
         document.getElementById("loading").style.display = "none"; // Cache la barre de chargement
         document.getElementById("emailResult").style.display = "block";
-        document.getElementById("generatedEmail").value = data.email;
+        document.getElementById("generatedEmailObject").value = data.object;
+        document.getElementById("generatedEmailContent").value = data.content;
     })
     .catch(error => {
         console.error("Erreur :", error);
