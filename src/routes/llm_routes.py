@@ -22,6 +22,6 @@ def generate_email():
 
     try:
         generated_email = generate_phishing_email(user_data)
-        return jsonify({"email": generated_email})
+        return jsonify({"object": generated_email['object'], "content": generated_email['content']})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
