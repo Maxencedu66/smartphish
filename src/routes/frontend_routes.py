@@ -16,7 +16,7 @@ def index():
 
 @bp.route('/nouvelle_campagne')
 def nouvelle_campagne():
-    return render_template('new_campaign.html')
+    return render_template('waiting2.html')
 
 @bp.route('/generate_email', methods=['POST'])
 def generate_email():
