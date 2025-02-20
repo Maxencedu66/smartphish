@@ -81,6 +81,21 @@ aside li:hover {
     background-color: #666;
 }
 
+/* Empêcher les liens d'être violet après visite et soulignés */
+aside ul li a {
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+aside ul li a:visited {
+    color: white; /* Garde la couleur noire après la visite */
+}
+
+aside ul li a:hover {
+    color: #007bff; /* Change la couleur au survol */
+    text-decoration: underline; /* Ajoute un soulignement au survol */
+}
+
+
 /* Contenu principal */
 main {
     margin-left: 240px;

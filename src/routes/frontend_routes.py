@@ -7,7 +7,7 @@ bp = Blueprint('frontend', __name__, static_folder='../static', template_folder=
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
 
 
 #@bp.route('/dashboard')
@@ -16,7 +16,7 @@ def index():
 
 @bp.route('/nouvelle_campagne')
 def nouvelle_campagne():
-    return render_template('nouvelle_campagne.html')
+    return render_template('new_campaign.html')
 
 @bp.route('/generate_email', methods=['POST'])
 def generate_email():
@@ -37,3 +37,24 @@ def generate_email():
     generated_email = generate_phishing_email(user_data)
 
     return jsonify({"email": generated_email})
+
+@bp.route('/history')
+def history():
+    return render_template('historic.html')
+
+@bp.route('/suivi')
+def suivi():
+    return render_template('follow_campaign.html')
+
+@bp.route('/analyse')
+def analyse():
+    return render_template('analyse_correction.html')
+
+@bp.route('/llm_statut')
+def llm_statut():
+    return render_template('status_llm.html')
+
+@bp.route('/maj')
+def maj():
+    return render_template('status_maj.html')
+

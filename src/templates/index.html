@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPhish</title>
+    <title>{% block title %}SmartPhish{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
-    <!-- Bandeau du haut -->
     <header>
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="logo">
-
         <h1 class="title">SmartPhish</h1>
         <div class="header-buttons">
             <button id="btnSettings">Settings</button>
@@ -19,49 +17,24 @@
         </div>
     </header>
 
-    <!-- Menu latéral -->
     <aside>
         <ul>
-            <li data-content="home">🏠 Home</li>
-            <li data-content="historique">📜 Historique</li>
-            <li data-content="nouvelle_campagne">📩 Nouvelle Campagne</li>
-            <li data-content="suivi_campagne">📊 Suivi de campagne</li>
-            <li data-content="analyse_correction">🔍 Analyse et correction</li>
-            <li data-content="statut_llm">🤖 Statut du LLM</li>
-            <li data-content="entrainement_llm">📡 Entrainement du LLM</li>
-            <li data-content="parametres_llm">⚙️ Paramètres du LLM</li>
-            <li data-content="status_maj">📌 Status des MAJ</li>
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/history">📜 Historique</a></li>
+            <li><a href="/nouvelle_campagne">📩 Nouvelle Campagne</a></li>
+            <li><a href="/suivi">📊 Suivi de campagne</a></li>
+            <li><a href="/analyse">🔍 Analyse et correction</a></li>
+            <li><a href="/llm_statut">🤖 Statut du LLM</a></li>
+            <li><a href="/llm_train">📡 Entrainement du LLM</a></li>
+            <li><a href="/llm_param">⚙️ Paramètres du LLM</a></li>
+            <li><a href="/maj">📌 Status des MAJ</a></li>
         </ul>
     </aside>
 
-    <!-- Contenu principal -->
     <main id="content">
-        <h2>Bienvenue sur SmartPhish</h2>
-        <p>Sélectionnez un élément du menu pour afficher son contenu.</p>
-        <div id="homeContent" class="home-section">
-            <h2>Mon Titre pour Home</h2>
-            <p>Ceci est le contenu qui ne s'affiche que dans l'onglet Home.</p>
-        </div>
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Fenêtre de paramètres -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h3>Paramètres</h3>
-            <p>Ici, vous pourrez modifier les paramètres de l'application.</p>
-        </div>
-    </div>
-
-    <!-- Fenêtre du compte utilisateur -->
-    <div id="accountModal" class="modal">
-        <div class="modal-content">
-            <h3>Informations du compte</h3>
-            <p>Nom d'utilisateur : <strong>Utilisateur123</strong></p>
-            <p>Email : <strong>user@example.com</strong></p>
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
+    <script src=""></script>
 </body>
 </html>
