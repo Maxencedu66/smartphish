@@ -1,0 +1,11 @@
+docker-compose pull  # Télécharge l'image officielle
+docker-compose up -d gophish
+
+docker ps
+
+
+https://127.0.0.1:3333
+
+curl -k https://127.0.0.1:3333/api/campaigns
+
+http://127.0.0.1
