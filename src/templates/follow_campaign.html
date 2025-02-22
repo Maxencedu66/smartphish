@@ -1,8 +1,12 @@
 {% extends "index.html" %}
 
-{% block title %}Nouvelle Campagne - SmartPhish{% endblock %}
+{% block title %}Suivi des campagnes - SmartPhish{% endblock %}
 
 {% block content %}
-<h2>📩 Nouvelle Campagne</h2>
-<p>Contenu de la section nouvelle campagne.</p>
+<h2>📩 Suivi des campagnes</h2>
+<p>Voici la liste brute des campagnes déjà créées :</p>
+<p>A vous de jouer pour afficher proprement ces données !</p>
+
+<pre>{{ campaigns | tojson(indent=2) }}</pre>  <!-- Affiche les campagnes en JSON brut -->
+
 {% endblock %}

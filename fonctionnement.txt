@@ -1,3 +1,21 @@
+
+Avancement JJ backend:
+    - J'ai crée l'API pour récupérer le json de la liste des campagnes de gophish, actuellement les campagnes sont stockée dans la base de donnée de gophish et pas sur notre base de donnée car j'en ai pas encore crée une pour les stocker.
+    - J'ai commencé à crée l'API pour créer une campagne sur gophish, actuellement je n'ai pas encore réussi à la faire fonctionner car il faut bien maitriser le format d'une camapgne, ce qui doit etre créer en amont (les templats, groupes, sending profiles, ...) => donc il faut egalement créer les API pour les templates, les groupes, les sending profiles, ...
+    - J'affiche dans la page suivi de campagne la liste en brutes des camapgnes de gophish, il faut maintenant les afficher de manière plus lisible et plus jolie. => pour le front
+    - Si vous lancez chez vous le projet, la liste de camapgne pourrait etre vide car je push pas mon image modifiée de gophish (bcp trop gros), cependant je sauvegarde le volume du docker contenant la base de données de gophish donc vous devriez retrouver les campagnes que vous créez sur votre ordinatuer quand vous relancer le docker => je vais bientot créer une base de donnée pour stocker les campagnes sur notre base de donnée et non sur celle de gophish, ainsi on pourra avoir une base de données de test qsur le git.
+
+A faire la prochaine fois:
+    - Continuer à crée les API pour créer une campagne sur gophish
+    - Créer les API pour les templates, les groupes, les sending profiles, ...
+    - Créer une base de donnée pour stocker les campagnes sur notre base de donnée et non sur celle de gophish
+
+Pour le front :     
+    - Afficher de manière plus lisible et plus jolie la liste des campagnes de gophish
+    - Regarder les pages deja existantes sur gophish accessible uen fois le docker lancer (ajoute la commande pour lancer le docker) avec ce lien: https://127.0.0.1:3333/
+    - On va avoir besoin des pages pour créer les User, campgagne, tempaltes emial, landing pages, sending profiles : je m'occupe de faire les api pour communiquer avec le back, vous vous occupez de faire les pages pour les utilisateurs
+
+
 docker-compose pull  # Télécharge l'image officielle
 docker-compose up -d gophish
 
@@ -16,29 +34,23 @@ http://127.0.0.1
 1️⃣ Lancer GoPhish via Docker :
 
 bash
-Copier
-Modifier
+
 cd docker
 docker-compose up -d gophish
 2️⃣ Lancer Flask normalement (hors Docker) :
 
 bash
-Copier
-Modifier
+
 python app.py
 3️⃣ Vérifier si tout tourne bien :
 
-bash
-Copier
-Modifier
+
 docker ps
 ✅ Tu devrais voir gophish en Up.
 
 📌 8. Tester l'intégration Flask + GoPhish
 1️⃣ Tester avec curl
-bash
-Copier
-Modifier
+
 curl -X GET http://127.0.0.1:5000/api/gophish/campaigns
 ✅ Si ça retourne une liste JSON, tout fonctionne ! 🎯
 
@@ -51,4 +63,87 @@ curl -X POST http://127.0.0.1:5000/api/gophish/campaigns -H "Content-Type: appli
 
 
 
-Bien penser a changer la clé api de gophish
+Bien penser a changer la clé api de gophish: 
+https://127.0.0.1:3333/
+Admin et mot de passe sur discord
+Aller dans son compte et prendre la clé api et la mettre dans config.py
+
+
+
+
+
+
+Template d'une campagne:
+[
+  {
+    "completed_date": "0001-01-01T00:00:00Z",
+    "created_date": "2025-02-22T01:07:00.791678322Z",
+    "id": 1,
+    "launch_date": "2025-02-22T01:06:00Z",
+    "name": "test_campagne",
+    "page": {
+      "capture_credentials": false,
+      "capture_passwords": false,
+      "html": "\u003chtml\u003e\u003chead\u003e\u003c/head\u003e\u003cbody\u003eBIenvenue\u003c/body\u003e\u003c/html\u003e",
+      "id": 1,
+      "modified_date": "2025-02-22T01:06:44.556476766Z",
+      "name": "test_page",
+      "redirect_url": ""
+    },
+    "results": [
+      {
+        "email": "thomasjj@gmail.com",
+        "first_name": "Thomas",
+        "id": "Jlvwzw9",
+        "ip": "",
+        "last_name": "JJ",
+        "latitude": 0,
+        "longitude": 0,
+        "modified_date": "2025-02-22T01:07:01.357345688Z",
+        "position": "",
+        "reported": false,
+        "send_date": "2025-02-22T01:06:00Z",
+        "status": "Error"
+      }
+    ],
+    "send_by_date": "0001-01-01T00:00:00Z",
+    "smtp": {
+      "from_address": "test_sending@exemple.com",
+      "headers": [],
+      "host": "smtp.exemple",
+      "id": 1,
+      "ignore_cert_errors": true,
+      "interface_type": "SMTP",
+      "modified_date": "2025-02-22T01:06:10.000025483Z",
+      "name": "test_sending"
+    },
+    "status": "In progress",
+    "template": {
+      "attachments": [],
+      "envelope_sender": "test@exemple.com",
+      "html": "",
+      "id": 1,
+      "modified_date": "2025-02-22T01:03:33.134516947Z",
+      "name": "template_test",
+      "subject": "Test mail objet",
+      "text": "JE test un mail"
+    },
+    "timeline": [
+      {
+        "campaign_id": 1,
+        "details": "",
+        "email": "",
+        "message": "Campaign Created",
+        "time": "2025-02-22T01:07:00.806849086Z"
+      },
+      {
+        "campaign_id": 1,
+        "details": "{\"error\":\"Max connection attempts exceeded - dial tcp: lookup smtp.exemple: no such host\"}",
+        "email": "thomasjj@gmail.com",
+        "message": "Error Sending Email",
+        "time": "2025-02-22T01:07:01.357345688Z"
+      }
+    ],
+    "url": ""
+  }
+]

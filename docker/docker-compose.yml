@@ -12,3 +12,5 @@ services:
       - ADMIN_LISTEN_URL=0.0.0.0:3333
       - PHISH_LISTEN_URL=0.0.0.0:80
       - USE_TLS=false
+    volumes:
+      - ./gophish-data:/opt/gophish

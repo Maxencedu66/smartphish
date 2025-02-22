@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify
 from src.services.llm_service import generate_phishing_email 
+from src.services.gophish_service import get_campaigns
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -44,7 +45,8 @@ def history():
 
 @bp.route('/suivi')
 def suivi():
-    return render_template('follow_campaign.html')
+    campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
+    return render_template('follow_campaign.html', campaigns=campaigns)
 
 @bp.route('/analyse')
 def analyse():
