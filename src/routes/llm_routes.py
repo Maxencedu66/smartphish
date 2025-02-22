@@ -2,9 +2,9 @@
 from flask import Blueprint, request, jsonify
 from src.services.llm_service import generate_phishing_email
 
-bp = Blueprint('llm', __name__)
+llm_bp = Blueprint('llm', __name__)
 
-@bp.route('/generate_email', methods=['POST'])
+@llm_bp.route('/generate_email', methods=['POST'])
 def generate_email():
     """Appelle le service LLM pour générer un email de phishing et retourne le résultat en JSON."""
     data = request.json
