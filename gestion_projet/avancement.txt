@@ -1,0 +1,72 @@
+### **📌 Avancement Backend (JJ)**
+#### **✅ Ce qui a été fait :**
+1. **Récupération des campagnes GoPhish via l’API**  
+   - J’ai créé une API qui permet de récupérer **le JSON des campagnes GoPhish**.  
+   - **Actuellement, les campagnes sont stockées dans la base de données de GoPhish**, et non sur notre propre base de données, car elle n’a pas encore été mise en place.
+
+2. **Début de l’API pour créer une campagne GoPhish**  
+   - J’ai commencé à travailler sur **l’API permettant de créer une campagne directement via Flask**.  
+   - **Actuellement, la création ne fonctionne pas encore**, car une campagne nécessite **plusieurs éléments préalablement configurés** (`templates`, `groupes`, `sending profiles`...).  
+   - Il faudra donc **créer des API pour ces éléments** avant de pouvoir finaliser la création des campagnes.
+
+3. **Affichage des campagnes dans `/suivi`**  
+   - J’ai ajouté une page `/suivi` qui affiche **la liste brute des campagnes récupérées depuis GoPhish**.  
+   - **Prochaine étape : rendre cet affichage plus lisible et plus esthétique** (côté front).
+
+4. **Gestion des données GoPhish dans Docker**  
+   - **Je ne push pas mon image GoPhish sur Git** (trop volumineuse).  
+   - Cependant, **le volume Docker contenant la base de données GoPhish est conservé**, ce qui permet de retrouver les campagnes sur son ordinateur après un redémarrage du conteneur.  
+   - **Prochaine étape : créer une base de données dédiée à notre projet**, pour stocker les campagnes indépendamment de GoPhish et permettre une base de test commune sur Git.
+
+---
+
+### **📌 À faire la prochaine fois :**
+1. **Finaliser l’API de création de campagne GoPhish**  
+   - Continuer à tester et adapter le format des campagnes pour qu’elles puissent être créées correctement.  
+2. **Créer les API pour gérer les éléments nécessaires aux campagnes :**  
+   - `Templates`
+   - `Groupes`
+   - `Sending profiles`
+   - `Landing pages`
+3. **Mettre en place une base de données dédiée pour stocker les campagnes**  
+   - Permettre de **ne plus dépendre de la base interne de GoPhish**  
+   - Stocker et récupérer les campagnes depuis **notre propre base de données**  
+
+---
+
+### **📌 Pour l’équipe Front :**
+1. **Améliorer l'affichage de la liste des campagnes**  
+   - Rendre **la page `/suivi` plus lisible et plus esthétique**.  
+2. **Explorer l’interface GoPhish**  
+   - Une fois le Docker lancé, **tester les pages accessibles ici** :  
+     ```
+     https://127.0.0.1:3333/
+     ```
+   - **Voir comment GoPhish structure ses campagnes et ses éléments.**
+3. **Préparer les pages suivantes pour les utilisateurs :**  
+   - **Création d’un utilisateur**  
+   - **Création d’une campagne**  
+   - **Création d’un template email**  
+   - **Création d’une landing page**  
+   - **Création d’un sending profile**  
+   - 💡 **Je m’occupe des API backend, vous vous occupez de l’interface pour que les utilisateurs puissent les utiliser.**
+
+---
+
+### **📌 Commande pour lancer GoPhish avec Docker :**
+Si vous voulez tester GoPhish localement :  
+```bash
+cd docker
+docker-compose up -d gophish
+```
+Puis ouvrez l’interface ici :  
+```
+https://127.0.0.1:3333/
+```
+✅ **Identifiants par défaut :**  
+- **Utilisateur** : `admin`  
+- **Mot de passe** : `affiché dans les logs avec :`  
+  ```bash
+  docker logs gophish | grep "Please login with the username"
+  ```
+
