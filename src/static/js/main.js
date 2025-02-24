@@ -101,7 +101,7 @@ function generateEmail() {
     document.getElementById("loading").style.display = "block";
     document.getElementById("emailResult").style.display = "none";
 
-    fetch('/generate_email', {
+    fetch('/generate-email', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scenario, entreprise, expediteur, email_expediteur })

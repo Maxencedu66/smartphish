@@ -6,20 +6,12 @@ from src.services.gophish_service import get_campaigns
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
-@bp.route('/')
-def index():
-    return render_template('home.html')
-
 
 #@bp.route('/dashboard')
 #def dashboard():
 #    return render_template('dashboard.html')
 
-@bp.route('/nouvelle_campagne')
-def nouvelle_campagne():
-    return render_template('new_campaign.html')
-
-@bp.route('/generate_email', methods=['POST'])
+@bp.route('/generate-email', methods=['POST'])
 def generate_email():
     """ Appelle LLM.py pour générer un email de phishing et le retourne en JSON. """
     data = request.json
@@ -39,23 +31,42 @@ def generate_email():
 
     return jsonify({"object": generated_email['object'], "content": generated_email['content']})
 
+
+# Routes pour afficher les pages HTML
+
+@bp.route('/')
+def index():
+    return render_template('home.html')
+
 @bp.route('/history')
 def history():
-    return render_template('historic.html')
+    return render_template('history.html')
 
-@bp.route('/suivi')
-def suivi():
+@bp.route('/new-campaign')
+def new_campaign():
+    return render_template('new-campaign.html')
+
+@bp.route('/follow-campaign')
+def follow_campaign():
     campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
-    return render_template('follow_campaign.html', campaigns=campaigns)
+    return render_template('follow-campaign.html', campaigns=campaigns)
 
-@bp.route('/analyse')
-def analyse():
-    return render_template('analyse_correction.html')
+@bp.route('/analysis-correction')
+def analysis_correction():
+    return render_template('analysis-correction.html')
 
-@bp.route('/llm_statut')
-def llm_statut():
-    return render_template('status_llm.html')
+@bp.route('/llm-status')
+def llm_status():
+    return render_template('llm-status.html')
 
-@bp.route('/maj')
-def maj():
-    return render_template('status_maj.html')
+@bp.route('/llm-training')
+def llm_training():
+    return render_template('llm-training.html')
+
+@bp.route('/llm-settings')
+def llm_settings():
+    return render_template('llm-settings.html')
+
+@bp.route('/maj-status')
+def maj_status():
+    return render_template('maj-status.html')
