@@ -78,10 +78,11 @@ aside ul {
 }
 
 aside li {
-    padding: 15px;
+    /* padding: 15px; */
     color: white;
     cursor: pointer;
     border: 1px solid #415a772a;
+    cursor: pointer;
 }
 
 aside li:hover {
@@ -89,18 +90,16 @@ aside li:hover {
     transition: background-color 0.3s ease;
 }
 
-/* Empêcher les liens d'être violet après visite et soulignés */
-aside ul li a {
-    text-decoration: none; /* Supprime le soulignement */
+.menu-link {
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+    display: block;
 }
 
-aside ul li a:visited {
-    color: white; /* Garde la couleur noire après la visite */
-}
-
-aside ul li a:hover {
-    color: #007bff; /* Change la couleur au survol */
-    text-decoration: underline; /* Ajoute un soulignement au survol */
+.menu-link.active {
+    /* Change highlight color */
+    background-color: #354961;
 }
 
 

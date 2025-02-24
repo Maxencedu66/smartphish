@@ -19,15 +19,37 @@
 
     <aside>
         <ul>
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/history">📜 Historique</a></li>
-            <li><a href="/nouvelle_campagne">📩 Nouvelle Campagne</a></li>
-            <li><a href="/suivi">📊 Suivi de campagne</a></li>
-            <li><a href="/analyse">🔍 Analyse et correction</a></li>
-            <li><a href="/llm_statut">🤖 Statut du LLM</a></li>
-            <li><a href="/llm_train">📡 Entrainement du LLM</a></li>
-            <li><a href="/llm_param">⚙️ Paramètres du LLM</a></li>
-            <li><a href="/maj">📌 Status des MAJ</a></li>
+            <li >
+                <a class="menu-link {% if request.path == '/' %}active{% endif %}" href="/">🏠 Home</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/history' %}active{% endif %}" href="/history">📜 Historique</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/nouvelle_campagne' %}active{% endif %}" href="/nouvelle_campagne">📩
+                    Nouvelle Campagne</a>
+            </li>
+            <li >
+                <a class="menu-link {% if request.path == '/suivi' %}active{% endif %}" href="/suivi">📊 Suivi de campagne</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/analyse' %}active{% endif %}" href="/analyse">🔍 Analyse et
+                    correction</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/llm_statut' %}active{% endif %}" href="/llm_statut">🤖 Statut du LLM</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/llm_train' %}active{% endif %}" href="/llm_train">📡 Entrainement du
+                    LLM</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/llm_param' %}active{% endif %}" href="/llm_param">⚙️ Paramètres du
+                    LLM</a>
+            </li>
+            <li>
+                <a class="menu-link {% if request.path == '/maj' %}active{% endif %}" href="/maj">📌 Status des MAJ</a>
+        </li>
         </ul>
     </aside>
 

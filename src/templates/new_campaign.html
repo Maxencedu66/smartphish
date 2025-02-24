@@ -4,5 +4,48 @@
 
 {% block content %}
 <h2>📩 Nouvelle Campagne</h2>
-<p>Contenu de la section nouvelle campagne.</p>
+
+<div>
+    <form id="phishingForm">
+        <label for="scenario">Choisissez un scénario :</label>
+        <select id="scenario" name="scenario" onchange="updateFormFields()">
+            <option value="">-- Sélectionnez --</option>
+            <option value="Départ à la retraite">Départ à la retraite</option>
+            <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement - RIB nécessaire</option>
+            <option value="Alerte de sécurité - Connexion suspecte">Alerte de sécurité - Connexion suspecte</option>
+        </select>
+
+        <div id="additionalFields" style="display: none;">
+            <label for="entreprise">Nom de l'entreprise :</label>
+            <input type="text" id="entreprise" name="entreprise">
+
+            <label for="expediteur">Nom de l'expéditeur :</label>
+            <input type="text" id="expediteur" name="expediteur">
+
+            <label for="email_expediteur">Email expéditeur :</label>
+            <input type="text" id="email_expediteur" name="email_expediteur">
+        </div>
+
+        <button type="button" onclick="generateEmail()">Générer l'email</button>
+    </form>
+
+    <div id="loading" style="display: none;">
+        <p>Génération en cours...</p>
+        <div class="loader"></div>
+    </div>
+
+    <div id="emailResult" style="display: none;">
+        <h2>Email généré</h2>
+        <textarea id="generatedEmailObject" rows="1" cols="60"></textarea>
+        <br>
+        <textarea id="generatedEmailContent" rows="15" cols="60"></textarea>
+        <br>
+        <button class="validate" onclick="lancement()">Valider</button>
+        <button class="regenerate" onclick="generateEmail()">Régénérer</button>
+        <button class="reset" onclick="resetForm()">🗑 Réinitialiser</button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
 {% endblock %}
