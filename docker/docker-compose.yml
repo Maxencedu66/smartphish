@@ -14,4 +14,4 @@ services:
       - PHISH_LISTEN_URL=0.0.0.0:80
       - USE_TLS=false
     volumes:
-      - ./gophish-data:/opt/gophishÒ
+      - ./gophish-data:/opt/gophish
