@@ -52,6 +52,10 @@ document.querySelectorAll("aside li").forEach(item => {
 });
 */
 
+// Import Bootstrap
+//import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
+
 // Renvoyer l'utilisateur sur la page nouvelle campagne
 document.addEventListener("DOMContentLoaded", function() {
     // Sélectionne tous les éléments du menu latéral
