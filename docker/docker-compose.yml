@@ -14,4 +14,4 @@ services:
       - PHISH_LISTEN_URL=0.0.0.0:80
       - USE_TLS=false
     volumes:
-      - ../src/models/gophish.db:/opt/gophish/gophish.db  # Montage direct du fichier DB
+      - ../src/data/gophish.db:/opt/gophish/gophish.db  # Montage direct du fichier DB
