@@ -3,6 +3,7 @@ version: '3.8'
 services:
   gophish:
     image: gophish/gophish:latest  # Utilise l'image officielle
+    platform: linux/amd64  # Force l'émulation x86_64 sur Mac M1/M2
     container_name: gophish
     ports:
       - "3333:3333"   # Interface admin (HTTPS)
@@ -13,4 +14,4 @@ services:
       - PHISH_LISTEN_URL=0.0.0.0:80
       - USE_TLS=false
     volumes:
-      - ./gophish-data:/opt/gophish
+      - ./gophish-data:/opt/gophishÒ

@@ -4,42 +4,45 @@
 📌 7. Lancer Flask et GoPhish
 1️⃣ Lancer GoPhish via Docker :
 
-bash
-
 cd docker
-docker-compose up -d gophish
+docker-compose up -d gophish (pour les autres) ou docker compose up -d gophish (pour mac)
+si ça fonctionne pas faire ça : docker pull gophish/gophish
+puis docker-compose up -d gophish ou docker-compose up -d gophish
+
 2️⃣ Lancer Flask normalement (hors Docker) :
 
-bash
 
 python app.py
 3️⃣ Vérifier si tout tourne bien :
 
-
 docker ps
 ✅ Tu devrais voir gophish en Up.
 
-📌 8. Tester l'intégration Flask + GoPhish
-1️⃣ Tester avec curl
-
-curl -X GET http://127.0.0.1:5000/api/gophish/campaigns
-✅ Si ça retourne une liste JSON, tout fonctionne ! 🎯
-
-2️⃣ Créer une campagne via Flask
-bash
-Copier
-Modifier
-curl -X POST http://127.0.0.1:5000/api/gophish/campaigns -H "Content-Type: application/json" -d '{"name": "Campagne Test", "template_id": 1}'
-✅ Si la campagne est créée, l'intégration est réussie ! 🎉
-
-
-
 Bien penser a changer la clé api de gophish: 
 https://127.0.0.1:3333/
-compte : Admin et mot de passe avec la commande:
-docker logs gophish | grep "Please login with the username"
+compte : admin et mot de passe avec la commande:
+docker logs gophish | grep "Please login with the username" puis control f "password" pour le mot de passe
 
-Aller dans son compte et prendre la clé api et la mettre dans config.py
+Aller dans son UserAccount et prendre la clé api et la mettre dans src/config.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
