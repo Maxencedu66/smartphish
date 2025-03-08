@@ -1,8 +1,8 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 
-from flask import Blueprint, render_template, Flask, render_template, request, jsonify
+from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
 from src.services.llm_service import generate_phishing_email 
-from src.services.gophish_service import get_campaigns
+from src.services.gophish_service import get_campaigns, get_groups, create_group, delete_group, update_group, get_groupsid
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -82,4 +82,72 @@ def llm_settings():
 @bp.route('/maj-status')
 def maj_status():
     return render_template('maj-status.html')
+
+@bp.route('/groups')
+def groups():
+    """
+    Affiche la page HTML 'groups.html' en récupérant tous les groupes GoPhish.
+    """
+    groups_data = get_groups()  # Renvoie un tableau de groupes
+    return render_template('groups.html', groups=groups_data)
+
+@bp.route('/groups/<int:group_id>', methods=['GET'])
+def get_group_frontend(group_id):
+    """
+    Retourne UN groupe en JSON (pour remplir la modale "Edit Group").
+    """
+    group_data = get_groupsid(group_id)
+    return jsonify(group_data)
+
+@bp.route('/groups', methods=['POST'])
+def newgroup_submit():
+    """
+    Crée un nouveau groupe depuis une requête JSON (Fetch API).
+    Retourne une réponse JSON.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
+
+    name = data.get('name')
+    targets = data.get('targets', [])
+
+    if not name:
+        return jsonify({"error": "Le champ 'name' est requis"}), 400
+    
+    # Appel GoPhish
+    response = create_group({"name": name, "targets": targets})
+
+    if 'error' in response:
+        return jsonify(response), 400
+
+    return jsonify(response), 200
+
+@bp.route('/groups/<int:group_id>', methods=['PUT'])
+def update_group_frontend(group_id):
+    """
+    Reçoit la requête PUT du front-end, et met à jour ce groupe via GoPhish.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
+
+    # GoPhish exige "id": group_id dans le JSON complet.
+    if "id" not in data:
+        data["id"] = group_id
+
+    response = update_group(group_id, data)
+
+    if "error" in response:
+        return jsonify(response), 400
+
+    return jsonify(response), 200
+
+@bp.route('/groups/<int:group_id>', methods=['DELETE'])
+def delete_group_frontend(group_id):
+    """
+    Supprime un groupe (DELETE) via GoPhish.
+    """
+    response = delete_group(group_id)
+    return jsonify(response)
 

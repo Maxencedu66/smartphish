@@ -1,1 +1,0 @@
-# Modèle pour stocker les campagnes localement

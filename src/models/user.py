@@ -1,1 +1,0 @@
-# Modèle utilisateur si nécessaire

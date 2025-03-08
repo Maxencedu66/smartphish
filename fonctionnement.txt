@@ -1,5 +1,64 @@
+Pour lancer l'application:
+Depuis le dossier racine du projet, lancer la commande suivante:
+
+python app.py
+
+Bien penser a Ctrl+C pour arreter le serveur Flask et le docker proprement.
+
+Ca va vous lancer automatiquement le docker et le serveur Flask. Tout est sensé fonctionner correctement.
+
+https://127.0.0.1:3333/ pour accéder à l'interface de GoPhish (compte: admin, mot de passe: Voir le discord)
+http://127.0.0.1:5000/ pour accéder à l'interface de SmartPhish
+
+To do :
+Pour le front :     
+    - Afficher de manière plus lisible et plus jolie la liste des campagnes de gophish
+    - Regarder les pages deja existantes sur gophish accessible uen fois le docker lancer (ajoute la commande pour lancer le docker) avec ce lien: https://127.0.0.1:3333/
+    - On va avoir besoin des pages pour créer les User, campgagne, tempaltes emial, landing pages, sending profiles : je m'occupe de faire les api pour communiquer avec le back, vous vous occupez de faire les pages pour les utilisateurs
+
+Pour le back :
+    - Continuer à crée les API pour créer une campagne sur gophish
+    - Créer les API pour les templates, les groupes, les sending profiles, ...
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ancienne version
 
 📌 7. Lancer Flask et GoPhish
 1️⃣ Lancer GoPhish via Docker :
@@ -10,7 +69,6 @@ si ça fonctionne pas faire ça : docker pull gophish/gophish
 puis docker-compose up -d gophish ou docker-compose up -d gophish
 
 2️⃣ Lancer Flask normalement (hors Docker) :
-
 
 python app.py
 3️⃣ Vérifier si tout tourne bien :
@@ -33,47 +91,8 @@ Aller dans son UserAccount et prendre la clé api et la mettre dans src/config.p
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Avancement JJ backend:
-    - J'ai crée l'API pour récupérer le json de la liste des campagnes de gophish, actuellement les campagnes sont stockée dans la base de donnée de gophish et pas sur notre base de donnée car j'en ai pas encore crée une pour les stocker.
-    - J'ai commencé à crée l'API pour créer une campagne sur gophish, actuellement je n'ai pas encore réussi à la faire fonctionner car il faut bien maitriser le format d'une camapgne, ce qui doit etre créer en amont (les templats, groupes, sending profiles, ...) => donc il faut egalement créer les API pour les templates, les groupes, les sending profiles, ...
-    - J'affiche dans la page suivi de campagne la liste en brutes des camapgnes de gophish, il faut maintenant les afficher de manière plus lisible et plus jolie. => pour le front
-    - Si vous lancez chez vous le projet, la liste de camapgne pourrait etre vide car je push pas mon image modifiée de gophish (bcp trop gros), cependant je sauvegarde le volume du docker contenant la base de données de gophish donc vous devriez retrouver les campagnes que vous créez sur votre ordinatuer quand vous relancer le docker => je vais bientot créer une base de donnée pour stocker les campagnes sur notre base de donnée et non sur celle de gophish, ainsi on pourra avoir une base de données de test qsur le git.
-
-A faire la prochaine fois:
-    - Continuer à crée les API pour créer une campagne sur gophish
-    - Créer les API pour les templates, les groupes, les sending profiles, ...
-    - Créer une base de donnée pour stocker les campagnes sur notre base de donnée et non sur celle de gophish
-
-Pour le front :     
-    - Afficher de manière plus lisible et plus jolie la liste des campagnes de gophish
-    - Regarder les pages deja existantes sur gophish accessible uen fois le docker lancer (ajoute la commande pour lancer le docker) avec ce lien: https://127.0.0.1:3333/
-    - On va avoir besoin des pages pour créer les User, campgagne, tempaltes emial, landing pages, sending profiles : je m'occupe de faire les api pour communiquer avec le back, vous vous occupez de faire les pages pour les utilisateurs
-
-
 docker-compose pull  # Télécharge l'image officielle
 docker-compose up -d gophish
-
-docker ps
-
-
-https://127.0.0.1:3333
-
-curl -k https://127.0.0.1:3333/api/campaigns
-
-http://127.0.0.1
 
 
 
