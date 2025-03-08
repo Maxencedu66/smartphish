@@ -1,5 +1,50 @@
+Pour lancer l'application:
+Depuis le dossier racine du projet, lancer la commande suivante:
+
+python app.py
+
+Ca va vous lancer automatiquement le docker et le serveur Flask. Tout est sensé fonctionner correctement.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ancienne version
 
 📌 7. Lancer Flask et GoPhish
 1️⃣ Lancer GoPhish via Docker :
