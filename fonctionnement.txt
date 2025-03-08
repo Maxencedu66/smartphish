@@ -3,6 +3,8 @@ Depuis le dossier racine du projet, lancer la commande suivante:
 
 python app.py
 
+Bien penser a Ctrl+C pour arreter le serveur Flask et le docker proprement.
+
 Ca va vous lancer automatiquement le docker et le serveur Flask. Tout est sensé fonctionner correctement.
 
 
