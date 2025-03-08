@@ -35,8 +35,20 @@ def create_campaign(data):
 # ---------------------------
 
 def get_groups():
-    """Récupère la liste des groupes GoPhish"""
+    """Récupère la liste de tous les groupes GoPhish"""
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/groups/", headers=HEADERS, verify=False)
+    return response.json()  # ou gestion d'erreur
+
+def get_groupsid(group_id):
+    """Récupère un groupe GoPhish par son ID"""
+    response = requests.get(f"{Config.GOPHISH_API_URL}/api/groups/{group_id}", headers=HEADERS, verify=False)
+    return response.json()  # ou gestion d'erreur
+
+
+def create_group(data):
+    """Crée un nouveau groupe GoPhish"""
+    url = f"{Config.GOPHISH_API_URL}/api/groups/"
+    response = requests.post(url, json=data, headers=HEADERS, verify=False)
     try:
         return response.json()
     except requests.exceptions.JSONDecodeError:
@@ -46,29 +58,11 @@ def get_groups():
             "content": response.text
         }
 
-def create_group(data):
-    print("🔹 create_group() data:", data)
-    url = f"{Config.GOPHISH_API_URL}/api/groups/"
-    print("🔹 URL:", url)
-
-    response = requests.post(url, json=data, headers=HEADERS, verify=False)
-
-    print("🔹 Status code:", response.status_code)
-    print("🔹 Response text:", response.text)
-
-    try:
-        return response.json()  # On renvoie le JSON décodé
-    except requests.exceptions.JSONDecodeError:
-        # En cas de JSON invalide, on renvoie un dict d'erreur
-        return {
-            "error": "Réponse invalide de GoPhish",
-            "status_code": response.status_code,
-            "content": response.text
-        }
-
-
 def update_group(group_id, data):
-    """Met à jour un groupe existant sur Gophish"""
+    """
+    Met à jour un groupe existant sur Gophish.
+    Selon la doc, data doit inclure : { "id": group_id, "name": "...", "targets": [...] }
+    """
     url = f"{Config.GOPHISH_API_URL}/api/groups/{group_id}"
     response = requests.put(url, json=data, headers=HEADERS, verify=False)
     try:

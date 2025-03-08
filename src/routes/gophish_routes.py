@@ -22,14 +22,13 @@ def new_campaign():
 
 @gophish_bp.route('/groups', methods=['GET'])
 def list_groups():
-    """Retourne la liste des groupes GoPhish."""
+    """Retourne la liste des groupes GoPhish en JSON."""
     return jsonify(get_groups())
 
 @gophish_bp.route('/groups/<int:group_id>', methods=['GET'])
 def fetch_group(group_id):
-    """Renvoie le détail d'un groupe en JSON."""
+    """Retourne UN groupe en JSON."""
     return jsonify(get_group(group_id))
-    
 
 @gophish_bp.route('/groups', methods=['POST'])
 def new_gophish_group():
@@ -37,14 +36,13 @@ def new_gophish_group():
     data = request.json
     return jsonify(create_group(data))
 
-@gophish_bp.route('/groups/<int:group_id>', methods=['DELETE'])
-def delete_gophish_group(group_id):
-    """Supprime un groupe GoPhish."""
-    return jsonify(delete_group(group_id))
-
 @gophish_bp.route('/groups/<int:group_id>', methods=['PUT'])
 def update_gophish_group(group_id):
     """Met à jour un groupe GoPhish."""
     data = request.json
     return jsonify(update_group(group_id, data))
-    
+
+@gophish_bp.route('/groups/<int:group_id>', methods=['DELETE'])
+def delete_gophish_group(group_id):
+    """Supprime un groupe GoPhish."""
+    return jsonify(delete_group(group_id))

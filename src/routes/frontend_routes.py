@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
 from src.services.llm_service import generate_phishing_email 
-from src.services.gophish_service import get_campaigns, get_groups, create_group
+from src.services.gophish_service import get_campaigns, get_groups, create_group, delete_group, update_group, get_groupsid
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -74,18 +74,18 @@ def maj_status():
 @bp.route('/groups')
 def groups():
     """
-    Affiche la page des groupes en récupérant la liste
-    depuis Gophish via la fonction de service.
+    Affiche la page HTML 'groups.html' en récupérant tous les groupes GoPhish.
     """
     groups_data = get_groups()  # Renvoie un tableau de groupes
     return render_template('groups.html', groups=groups_data)
 
-@bp.route('/newgroup', methods=['GET'])
-def newgroup_form():
+@bp.route('/groups/<int:group_id>', methods=['GET'])
+def get_group_frontend(group_id):
     """
-    Affiche le formulaire pour créer un nouveau groupe.
+    Retourne UN groupe en JSON (pour remplir la modale "Edit Group").
     """
-    return render_template('new_group.html')
+    group_data = get_groupsid(group_id)
+    return jsonify(group_data)
 
 @bp.route('/groups', methods=['POST'])
 def newgroup_submit():
@@ -93,7 +93,6 @@ def newgroup_submit():
     Crée un nouveau groupe depuis une requête JSON (Fetch API).
     Retourne une réponse JSON.
     """
-    # Récupérer le JSON envoyé par fetch
     data = request.get_json()
     if not data:
         return jsonify({"error": "Aucune donnée reçue"}), 400
@@ -104,29 +103,38 @@ def newgroup_submit():
     if not name:
         return jsonify({"error": "Le champ 'name' est requis"}), 400
     
-    # Appel au service GoPhish pour créer le groupe
-    response = create_group({
-        "name": name,
-        "targets": targets
-    })
+    # Appel GoPhish
+    response = create_group({"name": name, "targets": targets})
 
-    # Si GoPhish renvoie une erreur (ex: nom de groupe manquant)
     if 'error' in response:
-        # Selon ta logique, tu peux choisir un code HTTP, ex: 400
         return jsonify(response), 400
 
-    # Retourne la réponse brute de GoPhish ou un message de succès
     return jsonify(response), 200
 
-
-@bp.route('/editgroup/<int:group_id>', methods=['GET'])
-def editgroup_form(group_id):
+@bp.route('/groups/<int:group_id>', methods=['PUT'])
+def update_group_frontend(group_id):
     """
-    Affiche le formulaire pour éditer un groupe existant.
+    Reçoit la requête PUT du front-end, et met à jour ce groupe via GoPhish.
     """
-    # Exemple : récupérer le groupe complet depuis Gophish
-    group = get_group(group_id)
-    if "error" in group:
-        return f"Group not found: {group.get('error')}", 404
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
 
-    return render_template('edit_group.html', group=group)
+    # GoPhish exige "id": group_id dans le JSON complet.
+    if "id" not in data:
+        data["id"] = group_id
+
+    response = update_group(group_id, data)
+
+    if "error" in response:
+        return jsonify(response), 400
+
+    return jsonify(response), 200
+
+@bp.route('/groups/<int:group_id>', methods=['DELETE'])
+def delete_group_frontend(group_id):
+    """
+    Supprime un groupe (DELETE) via GoPhish.
+    """
+    response = delete_group(group_id)
+    return jsonify(response)
