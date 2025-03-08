@@ -49,9 +49,6 @@ def configuration():
 #def config_groups():
 #    return render_template('config-groups.html')
 
-@bp.route('/config-emails')
-def config_emails():
-    return render_template('config-emails.html')
 
 @bp.route('/config-landing-pages')
 def config_landing_pages():
@@ -166,3 +163,85 @@ def delete_group_frontend(group_id):
     response = delete_group(group_id)
     return jsonify(response)
 
+
+# Routes pour les templates de mail
+
+@bp.route('/config-emails', methods=['GET'])
+def config_emails():
+    """
+    Récupère la liste des email templates depuis GoPhish,
+    puis rend la page config-emails.html avec ces données.
+    """
+    from src.services.gophish_service import get_templates
+    email_templates = get_templates()
+    return render_template('config-emails.html', email_templates=email_templates)
+
+@bp.route('/templates', methods=['POST'])
+def create_template_frontend():
+    from src.services.gophish_service import create_template
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
+
+    # Extraire champs nécessaires
+    name = data.get("name")
+    subject = data.get("subject")
+    text = data.get("text", "")
+    html = data.get("html", "")
+
+    if not name or not subject:
+        return jsonify({"error": "Nom et sujet sont obligatoires"}), 400
+    if not text and not html:
+        return jsonify({"error": "Au moins 'text' ou 'html' est obligatoire"}), 400
+
+    payload = {
+        "name": name,
+        "subject": subject,
+        "text": text,
+        "html": html,
+        "attachments": []
+    }
+
+    response = create_template(payload)
+    if "error" in response:
+        return jsonify(response), 400  # ou autre code
+    return jsonify(response), 201
+
+@bp.route('/templates/<int:template_id>', methods=['GET'])
+def get_template_frontend(template_id):
+    """
+    Récupère UN template en JSON pour remplir la modale d’édition (front).
+    """
+    from src.services.gophish_service import get_template
+    data = get_template(template_id)
+    return jsonify(data)
+
+@bp.route('/templates/<int:template_id>', methods=['PUT'])
+def update_template_frontend(template_id):
+    """
+    Reçoit le JSON pour modifier le template via GoPhish.
+    """
+    from src.services.gophish_service import update_template
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
+
+    # GoPhish exige un template complet : id, name, subject, text/html...
+    if "id" not in data:
+        data["id"] = template_id
+
+    response = update_template(template_id, data)
+    if "error" in response:
+        return jsonify(response), 400
+
+    return jsonify(response), 200
+
+@bp.route('/templates/<int:template_id>', methods=['DELETE'])
+def delete_template_frontend(template_id):
+    """
+    Supprime un template via GoPhish.
+    """
+    from src.services.gophish_service import delete_template
+    response = delete_template(template_id)
+    return jsonify(response)

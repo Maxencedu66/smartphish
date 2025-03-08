@@ -91,6 +91,91 @@ def delete_group(group_id):
             "status_code": response.status_code,
             "content": response.text
         }
+
+# ---------------------------
+#  Fonctions pour les Templates de Mail
+# ---------------------------
+
+def get_templates():
+    """
+    Récupère la liste des templates GoPhish
+    via GET /api/templates
+    """
+    url = f"{Config.GOPHISH_API_URL}/api/templates"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()  # renvoie un tableau de templates
+    except requests.exceptions.JSONDecodeError:
+        return {
+            "error": "Réponse invalide de GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
+
+def create_template(data):
+    """
+    Crée un nouveau template GoPhish
+    via POST /api/templates/
+    """
+    url = f"{Config.GOPHISH_API_URL}/api/templates/"
+    response = requests.post(url, json=data, headers=HEADERS, verify=False)
+    try:
+        # L'API renvoie le template créé
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {
+            "error": "Réponse invalide de GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
+def get_template(template_id):
+    """
+    Récupère un template précis via GET /api/templates/<id>
+    """
+    url = f"{Config.GOPHISH_API_URL}/api/templates/{template_id}"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {
+            "error": "Réponse invalide de GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
+def update_template(template_id, data):
+    """
+    Modifie un template existant via PUT /api/templates/<id>.
+    Vous devez fournir tout le JSON du template (id, name, subject, text/html).
+    """
+    url = f"{Config.GOPHISH_API_URL}/api/templates/{template_id}"
+    response = requests.put(url, json=data, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {
+            "error": "Réponse invalide de GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
+def delete_template(template_id):
+    """
+    Supprime un template via DELETE /api/templates/<id>
+    """
+    url = f"{Config.GOPHISH_API_URL}/api/templates/{template_id}"
+    response = requests.delete(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {
+            "error": "Réponse invalide de GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
         
         
 # ---------------------------

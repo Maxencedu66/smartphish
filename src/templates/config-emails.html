@@ -4,6 +4,7 @@
 {% block content %}
 <h2>⚙️ Configuration</h2>
 
+<!-- Barre d'onglets -->
 <ul class="nav nav-tabs">
     <li class="nav-item">
       <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
@@ -17,47 +18,291 @@
 </ul>
 
 <div class="tab-content mt-3">
-    <div id="emailTemplates">
-      <h3>Email Templates</h3>
-  
-      <form id="emailTemplateForm" class="mb-4">
-          <div class="mb-3">
-            <label for="templateName" class="form-label">Nom du Template :</label>
-            <input type="text" id="templateName" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label for="envelopeSender" class="form-label">Expéditeur :</label>
-            <input type="text" id="envelopeSender" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label for="emailSubject" class="form-label">Sujet :</label>
-            <input type="text" id="emailSubject" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label for="emailText" class="form-label">Contenu :</label>
-            <textarea id="emailText" class="form-control" rows="4" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-success">Créer</button>
-          </form>
-  
-      <table class="table table-striped">
-        <thead>
-          <tr><th>Nom</th><th>Expéditeur</th><th>Sujet</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          {% for template in email_templates %}
-          <tr>
-            <td>{{ template.name }}</td>
-            <td>{{ template.envelope_sender }}</td>
-            <td>{{ template.subject }}</td>
-            <td>
-              <button class="btn btn-primary btn-sm">Modifier</button>
-              <button class="btn btn-danger btn-sm">Supprimer</button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div id="emailTemplates">
+    <h3>Email Templates</h3>
+    
+    <!-- Formulaire pour créer un template -->
+    <form id="emailTemplateForm" class="mb-4">
+      <div class="mb-3">
+        <label for="templateName" class="form-label">Nom du Template :</label>
+        <input type="text" id="templateName" class="form-control" required>
+      </div>
 
+      <div class="mb-3">
+        <label for="envelopeSender" class="form-label">Expéditeur (optionnel) :</label>
+        <input type="text" id="envelopeSender" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label for="emailSubject" class="form-label">Sujet :</label>
+        <input type="text" id="emailSubject" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="emailText" class="form-label">Contenu (texte) :</label>
+        <textarea id="emailText" class="form-control" rows="4" required></textarea>
+      </div>
+
+      <!-- Optionnel: champ HTML séparé -->
+      <!--
+      <div class="mb-3">
+        <label for="emailHTML" class="form-label">Contenu (HTML) :</label>
+        <textarea id="emailHTML" class="form-control" rows="4"></textarea>
+      </div>
+      -->
+
+      <button type="submit" class="btn btn-success">Créer</button>
+    </form>
+
+    <!-- Tableau listant les templates existants -->
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Sujet</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for template in email_templates %}
+        <tr>
+          <td>{{ template.name }}</td>
+          <td>{{ template.subject }}</td>
+          <td>
+            <!-- Bouton Modifier -->
+            <button class="btn btn-primary btn-sm edit-template" data-id="{{ template.id }}">
+              Modifier
+            </button>
+            <!-- Bouton Supprimer -->
+            <button class="btn btn-danger btn-sm delete-template" data-id="{{ template.id }}">
+              Supprimer
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== MODAL: EDIT TEMPLATE ========== -->
+<div class="modal fade" id="editTemplateModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTemplateForm">
+          <!-- ID caché -->
+          <input type="hidden" id="editTemplateId" value="">
+          
+          <div class="mb-3">
+            <label for="editTemplateName" class="form-label">Nom du Template :</label>
+            <input type="text" id="editTemplateName" class="form-control" required>
+          </div>
+
+          <!-- Si tu veux conserver l’expéditeur, idem qu'au-dessus -->
+          <div class="mb-3">
+            <label for="editEnvelopeSender" class="form-label">Expéditeur (optionnel) :</label>
+            <input type="text" id="editEnvelopeSender" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label for="editEmailSubject" class="form-label">Sujet :</label>
+            <input type="text" id="editEmailSubject" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editEmailText" class="form-label">Contenu (texte) :</label>
+            <textarea id="editEmailText" class="form-control" rows="4" required></textarea>
+          </div>
+
+          <!-- Champ HTML séparé si besoin -->
+          <!--
+          <div class="mb-3">
+            <label for="editEmailHTML" class="form-label">Contenu (HTML) :</label>
+            <textarea id="editEmailHTML" class="form-control" rows="4"></textarea>
+          </div>
+          -->
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn btn-primary" onclick="submitEditTemplate()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+sNR6x7ZBHD1Z9ltB+Z+Ov1Zq/fZVhOR5mF7Gkg="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/**
+ * Création d'un nouveau template (POST).
+ */
+document.getElementById("emailTemplateForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("templateName").value.trim();
+  const subject = document.getElementById("emailSubject").value.trim();
+  const envelopeSender = document.getElementById("envelopeSender").value.trim();
+  const textVal = document.getElementById("emailText").value.trim();
+  // const htmlVal = document.getElementById("emailHTML")?.value.trim() || "";
+
+  // On insère l’expéditeur dans le texte, si nécessaire
+  let text = textVal;
+  if (envelopeSender) {
+    text = `Expéditeur: ${envelopeSender}\n\n${textVal}`;
+  }
+
+  const payload = {
+    name: name,
+    subject: subject,
+    text: text
+    // "html": htmlVal,
+    // "attachments": []
+  };
+
+  fetch("/templates", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert("Erreur: " + data.error);
+    } else {
+      alert("Template créé !");
+      location.reload();
+    }
+  })
+  .catch(err => console.error(err));
+});
+
+
+/**
+ * Récupération du template pour le bouton "Modifier".
+ * Au clic, on ouvre la modale avec les infos du template.
+ */
+document.querySelectorAll(".edit-template").forEach(btn => {
+  btn.addEventListener("click", function() {
+    const templateId = this.getAttribute("data-id");
+    // Nettoyer le contenu du formulaire
+    document.getElementById("editTemplateForm").reset();
+
+    // Récupérer le template en JSON
+    fetch(`/templates/${templateId}`, { method: "GET" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("Erreur: " + data.error);
+          return;
+        }
+
+        // Remplir les champs
+        document.getElementById("editTemplateId").value = data.id;
+        document.getElementById("editTemplateName").value = data.name || "";
+        document.getElementById("editEmailSubject").value = data.subject || "";
+        
+        // On recherche si "Expéditeur" est dans data.text (si on l'avait mis comme ça)
+        const textContent = data.text || "";
+        let envelopeSender = "";
+        let lines = textContent.split("\n");
+        if (lines[0].startsWith("Expéditeur: ")) {
+          // On extrait la première ligne
+          envelopeSender = lines[0].replace("Expéditeur: ", "").trim();
+          // On enlève la première ligne
+          lines.shift();
+        }
+        const finalText = lines.join("\n");
+
+        document.getElementById("editEnvelopeSender").value = envelopeSender;
+        document.getElementById("editEmailText").value = finalText;
+
+        // Si tu gères un champ HTML : 
+        // document.getElementById("editEmailHTML").value = data.html || "";
+
+        // Ouvrir la modale
+        const modal = new bootstrap.Modal(document.getElementById("editTemplateModal"));
+        modal.show();
+      })
+      .catch(err => console.error(err));
+  });
+});
+
+/**
+ * Soumission du formulaire "Edit Template" (PUT).
+ */
+function submitEditTemplate() {
+  const templateId = document.getElementById("editTemplateId").value;
+  const name = document.getElementById("editTemplateName").value.trim();
+  const subject = document.getElementById("editEmailSubject").value.trim();
+  const envSender = document.getElementById("editEnvelopeSender").value.trim();
+  const textVal = document.getElementById("editEmailText").value.trim();
+  // const htmlVal = document.getElementById("editEmailHTML")?.value.trim() || "";
+
+  let text = textVal;
+  if (envSender) {
+    text = `Expéditeur: ${envSender}\n\n${textVal}`;
+  }
+
+  // Selon la doc GoPhish, on doit envoyer tout le template : 
+  const payload = {
+    id: Number(templateId),
+    name: name,
+    subject: subject,
+    text: text
+    // "html": htmlVal,
+    // "attachments": []
+  };
+
+  fetch(`/templates/${templateId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert("Erreur: " + data.error);
+    } else {
+      alert("Template modifié !");
+      location.reload();
+    }
+  })
+  .catch(err => console.error(err));
+}
+
+/**
+ * Bouton "Supprimer".
+ */
+document.querySelectorAll(".delete-template").forEach(btn => {
+  btn.addEventListener("click", function() {
+    if (!confirm("Voulez-vous vraiment supprimer ce template ?")) return;
+
+    const templateId = this.getAttribute("data-id");
+    fetch(`/templates/${templateId}`, {
+      method: "DELETE"
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        alert("Erreur: " + data.error);
+      } else {
+        alert("Template supprimé !");
+        location.reload();
+      }
+    })
+    .catch(err => console.error(err));
+  });
+});
+</script>
 {% endblock %}
