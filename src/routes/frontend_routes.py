@@ -37,7 +37,9 @@ def generate_email():
 
 @bp.route('/')
 def index():
-    return render_template('home.html')
+    campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
+    campaigns = [c for c in campaigns if c["status"] == "In progress"]
+    return render_template('home.html', active_campaigns_length=len(campaigns))
 
 @bp.route('/configuration')
 def configuration():

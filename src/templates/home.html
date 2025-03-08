@@ -4,5 +4,29 @@
 
 {% block content %}
 <h2>Bienvenue sur SmartPhish</h2>
-<p>Sélectionnez un élément du menu pour afficher son contenu.</p>
+<!-- <p>Sélectionnez un élément du menu pour afficher son contenu.</p> -->
+
+<div style="margin-top: 20px;"></div>
+
+<div class="container m-0 p-0 w-100 mw-100">
+    <div class="row">
+        <div class="col min-vw-60">
+            <div class="alert alert-secondary" role="alert" style="max-width: 800px;">
+                <span class={{"red-circle" if active_campaigns_length}}></span> <b>{{ active_campaigns_length }}</b> campagne{{"s"
+                if active_campaigns_length!=1}} active{{"s" if active_campaigns_length!=1}}
+                <a href="/follow-campaign" class="alert-link position-absolute end-0" style="margin-right: 20px;">Suivre les
+                    campagnes</a>
+            </div>
+            <a class="btn btn-success m-auto" href="/new-campaign" role="button">
+                <img style="width: 20px; vertical-align: sub;" src="{{ url_for('static', filename='img/add-icon.png') }}"></img>
+                Nouvelle campagne
+            </a>
+        </div>
+        <div class="col d-none d-xl-block">
+            <img src="{{ url_for('static', filename='img/with_logo_white.png') }}" style="right: 0px; max-height: 70%; max-width: 100%;"></img>
+        </div>
+    </div>
+</div>
+
+
 {% endblock %}

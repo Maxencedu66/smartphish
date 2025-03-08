@@ -169,3 +169,26 @@ main {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Style du cercle rouge clignotant */
+@keyframes fade-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.red-circle {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 7px;
+    background-color: red;
+    border-radius: 50%;
+    animation: fade-blink 2s ease-in-out infinite;
+}
