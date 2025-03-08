@@ -1,7 +1,7 @@
 # Routes pour interagir avec GoPhish
 
 from flask import Blueprint, request, jsonify
-from src.services.gophish_service import get_campaigns, create_campaign, get_groups, create_group, delete_group, update_group
+from src.services.gophish_service import *
 
 gophish_bp = Blueprint('gophish', __name__)
 
@@ -28,7 +28,7 @@ def list_groups():
 @gophish_bp.route('/groups/<int:group_id>', methods=['GET'])
 def fetch_group(group_id):
     """Retourne UN groupe en JSON."""
-    return jsonify(get_group(group_id))
+    return jsonify(get_groupsid(group_id))
 
 @gophish_bp.route('/groups', methods=['POST'])
 def new_gophish_group():
