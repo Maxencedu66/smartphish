@@ -1,8 +1,8 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 
-from flask import Blueprint, render_template, Flask, render_template, request, jsonify
+from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
 from src.services.llm_service import generate_phishing_email 
-from src.services.gophish_service import get_campaigns
+from src.services.gophish_service import get_campaigns, get_groups, create_group
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -70,3 +70,63 @@ def llm_settings():
 @bp.route('/maj-status')
 def maj_status():
     return render_template('maj-status.html')
+
+@bp.route('/groups')
+def groups():
+    """
+    Affiche la page des groupes en récupérant la liste
+    depuis Gophish via la fonction de service.
+    """
+    groups_data = get_groups()  # Renvoie un tableau de groupes
+    return render_template('groups.html', groups=groups_data)
+
+@bp.route('/newgroup', methods=['GET'])
+def newgroup_form():
+    """
+    Affiche le formulaire pour créer un nouveau groupe.
+    """
+    return render_template('new_group.html')
+
+@bp.route('/groups', methods=['POST'])
+def newgroup_submit():
+    """
+    Crée un nouveau groupe depuis une requête JSON (Fetch API).
+    Retourne une réponse JSON.
+    """
+    # Récupérer le JSON envoyé par fetch
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Aucune donnée reçue"}), 400
+
+    name = data.get('name')
+    targets = data.get('targets', [])
+
+    if not name:
+        return jsonify({"error": "Le champ 'name' est requis"}), 400
+    
+    # Appel au service GoPhish pour créer le groupe
+    response = create_group({
+        "name": name,
+        "targets": targets
+    })
+
+    # Si GoPhish renvoie une erreur (ex: nom de groupe manquant)
+    if 'error' in response:
+        # Selon ta logique, tu peux choisir un code HTTP, ex: 400
+        return jsonify(response), 400
+
+    # Retourne la réponse brute de GoPhish ou un message de succès
+    return jsonify(response), 200
+
+
+@bp.route('/editgroup/<int:group_id>', methods=['GET'])
+def editgroup_form(group_id):
+    """
+    Affiche le formulaire pour éditer un groupe existant.
+    """
+    # Exemple : récupérer le groupe complet depuis Gophish
+    group = get_group(group_id)
+    if "error" in group:
+        return f"Group not found: {group.get('error')}", 404
+
+    return render_template('edit_group.html', group=group)
