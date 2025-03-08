@@ -25,7 +25,7 @@ header {
     position: fixed;
     top: 0;
     left: 0;
-    height: 60px;
+    height: 80px;
     z-index: 100;
 }
 
@@ -44,7 +44,7 @@ header {
 .header-buttons {
     display: flex; /* Active flexbox */
     align-items: center;
-    margin-right: 50px; /* Ajoute une marge à droite */
+    margin-right: 8px; /* Ajoute une marge à droite */
     gap: 30px; /* Ajuste l’espace entre les boutons */
 }
 .header-buttons button {
@@ -107,7 +107,7 @@ aside li:hover {
 /* Contenu principal */
 main {
     margin-left: 240px;
-    margin-top: 70px;
+    margin-top: 80px;
     padding: 20px;
 }
 
