@@ -1,0 +1,54 @@
+{% extends "index.html" %}
+{% block title %}Configuration Landing Pages - SmartPhish{% endblock %}
+
+{% block content %}
+<h2>⚙️ Configuration</h2>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
+    </li>
+</ul>
+  
+
+<div id="landingPages">
+    <h3>Landing Pages</h3>
+
+    <form id="landingPageForm" class="mb-4">
+        <div class="mb-3">
+          <label for="landingPageName" class="form-label">Nom de la Landing Page :</label>
+          <input type="text" id="landingPageName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="landingPageHTML" class="form-label">HTML :</label>
+          <textarea id="landingPageHTML" class="form-control" rows="6" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Créer</button>
+    </form>
+
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Nom</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for page in landing_pages %}
+        <tr>
+          <td>{{ page.name }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm">Modifier</button>
+            <button class="btn btn-danger btn-sm">Supprimer</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

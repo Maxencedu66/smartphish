@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+{% block title %}Configuration Emails - SmartPhish{% endblock %}
+
+{% block content %}
+<h2>⚙️ Configuration</h2>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
+    </li>
+</ul>
+
+<div class="tab-content mt-3">
+    <div id="emailTemplates">
+      <h3>Email Templates</h3>
+  
+      <form id="emailTemplateForm" class="mb-4">
+          <div class="mb-3">
+            <label for="templateName" class="form-label">Nom du Template :</label>
+            <input type="text" id="templateName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="envelopeSender" class="form-label">Expéditeur :</label>
+            <input type="text" id="envelopeSender" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="emailSubject" class="form-label">Sujet :</label>
+            <input type="text" id="emailSubject" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="emailText" class="form-label">Contenu :</label>
+            <textarea id="emailText" class="form-control" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-success">Créer</button>
+          </form>
+  
+      <table class="table table-striped">
+        <thead>
+          <tr><th>Nom</th><th>Expéditeur</th><th>Sujet</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for template in email_templates %}
+          <tr>
+            <td>{{ template.name }}</td>
+            <td>{{ template.envelope_sender }}</td>
+            <td>{{ template.subject }}</td>
+            <td>
+              <button class="btn btn-primary btn-sm">Modifier</button>
+              <button class="btn btn-danger btn-sm">Supprimer</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+{% endblock %}

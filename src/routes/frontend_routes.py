@@ -3,6 +3,7 @@
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
 from src.services.llm_service import generate_phishing_email 
 from src.services.gophish_service import get_campaigns, get_groups, create_group, delete_group, update_group, get_groupsid
+import json
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -38,9 +39,21 @@ def generate_email():
 def index():
     return render_template('home.html')
 
-@bp.route('/history')
-def history():
-    return render_template('history.html')
+@bp.route('/configuration')
+def configuration():
+    return render_template('configuration.html')
+
+#@bp.route('/config-groups')
+#def config_groups():
+#    return render_template('config-groups.html')
+
+@bp.route('/config-emails')
+def config_emails():
+    return render_template('config-emails.html')
+
+@bp.route('/config-landing-pages')
+def config_landing_pages():
+    return render_template('config-landing-pages.html')
 
 @bp.route('/new-campaign')
 def new_campaign():
@@ -49,6 +62,7 @@ def new_campaign():
 @bp.route('/follow-campaign')
 def follow_campaign():
     campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
+    
     return render_template('follow-campaign.html', campaigns=campaigns)
 
 @bp.route("/details_campaign/<int:campaign_id>")
@@ -83,15 +97,12 @@ def llm_settings():
 def maj_status():
     return render_template('maj-status.html')
 
-@bp.route('/groups')
-def groups():
-    """
-    Affiche la page HTML 'groups.html' en récupérant tous les groupes GoPhish.
-    """
+@bp.route('/config-groups')
+def config_groups():
     groups_data = get_groups()  # Renvoie un tableau de groupes
-    return render_template('groups.html', groups=groups_data)
+    return render_template('config-groups.html', groups=groups_data)
 
-@bp.route('/groups/<int:group_id>', methods=['GET'])
+@bp.route('/config-groups/<int:group_id>', methods=['GET'])
 def get_group_frontend(group_id):
     """
     Retourne UN groupe en JSON (pour remplir la modale "Edit Group").
@@ -99,7 +110,7 @@ def get_group_frontend(group_id):
     group_data = get_groupsid(group_id)
     return jsonify(group_data)
 
-@bp.route('/groups', methods=['POST'])
+@bp.route('/config-groups', methods=['POST'])
 def newgroup_submit():
     """
     Crée un nouveau groupe depuis une requête JSON (Fetch API).
@@ -123,7 +134,7 @@ def newgroup_submit():
 
     return jsonify(response), 200
 
-@bp.route('/groups/<int:group_id>', methods=['PUT'])
+@bp.route('/config-groups/<int:group_id>', methods=['PUT'])
 def update_group_frontend(group_id):
     """
     Reçoit la requête PUT du front-end, et met à jour ce groupe via GoPhish.
@@ -143,7 +154,7 @@ def update_group_frontend(group_id):
 
     return jsonify(response), 200
 
-@bp.route('/groups/<int:group_id>', methods=['DELETE'])
+@bp.route('/config-groups/<int:group_id>', methods=['DELETE'])
 def delete_group_frontend(group_id):
     """
     Supprime un groupe (DELETE) via GoPhish.
