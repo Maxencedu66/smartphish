@@ -4,5 +4,27 @@
 
 {% block content %}
 <h2>⚙️ Paramètres du LLM</h2>
-<p>Contenu de la section paramètres du LLM.</p>
+<!-- <p>Contenu de la section paramètres du LLM.</p> -->
+
+<h5 style="margin-top: 20px; margin-bottom: 13px;">Modèle conversationnel</h5>
+
+<div class="form-check mt-2">
+    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+    <label class="form-check-label" for="exampleRadios1">
+        Mistral (par défaut) (~4 Go), équilibré entre performance et rapidité
+    </label>
+</div>
+<div class="form-check mt-2">
+    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+    <label class="form-check-label" for="exampleRadios2">
+        Mixtral (~25 Go), plus performant mais plus lent
+    </label>
+</div>
+<div class="form-check mt-2">
+    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" disabled>
+    <label class="form-check-label" for="exampleRadios3">
+        Autre...
+    </label>
+</div>
+
 {% endblock %}
