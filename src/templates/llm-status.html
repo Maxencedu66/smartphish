@@ -4,5 +4,35 @@
 
 {% block content %}
 <h2>🤖 Statut du LLM</h2>
-<p>Contenu de la section statut du LLM.</p>
+<!-- <p>Contenu de la section statut du LLM.</p> -->
+
+<br>
+
+<h4>Modèles téléchargés</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Nom</th>
+            <th>Taille (MB)</th>
+            <th>Famille</th>
+            <th>Paramètres</th>
+            <th>Dernière modification</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for model in status %}
+        <tr>
+            <td><span class="badge bg-{{ "success" if model.expires_at else "danger" }}">{{"En mémoire" if model.expires_at else "Non chargé" }}</span></td>
+            <td>{{ model.name }}</td>
+            <td>{{ model.size_mb }}</td>
+            <td>{{ model.family }}</td>
+            <td>{{ model.parameter_size }}</td>
+            <td>{{ model.modified_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

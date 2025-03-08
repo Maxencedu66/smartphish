@@ -1,7 +1,7 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
-from src.services.llm_service import generate_phishing_email 
+from src.services.llm_service import generate_phishing_email, get_ollama_status
 from src.services.gophish_service import get_campaigns, get_groups, create_group, delete_group, update_group, get_groupsid
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
@@ -69,7 +69,9 @@ def analysis_correction():
 
 @bp.route('/llm-status')
 def llm_status():
-    return render_template('llm-status.html')
+    status = get_ollama_status()
+    print(status)
+    return render_template('llm-status.html', status=status)
 
 @bp.route('/llm-training')
 def llm_training():

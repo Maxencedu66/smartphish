@@ -1,4 +1,5 @@
 import ollama
+from ollama import ListResponse, ProcessResponse
 from pydantic import BaseModel
 
 # Define the schema for the response
@@ -119,3 +120,33 @@ def generate_phishing_email(user_data):
     response: EmailInfo = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}], format=EmailInfo.model_json_schema())
     response_obj = EmailInfo.model_validate_json(response.message.content)
     return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail}
+
+def get_ollama_status():
+    """Récupère les informations sur les modèles téléchargés et/ou en mémoire via Ollama."""
+    
+    # Modèles en mémoire
+    response_memory: ProcessResponse = ollama.ps()
+    
+    # Modèles téléchargés
+    response: ListResponse = ollama.list()
+    
+    info_dicts = list()
+    for model in response.models:
+        info_dicts.append({
+            'name': model.model,
+            'size_mb': f'{(model.size.real / 1024 / 1024):.2f}',
+            'family': model.details.family if model.details else None,
+            'parameter_size': model.details.parameter_size if model.details else None,
+            'modified_at': model.modified_at.strftime('%Y-%m-%d %H:%M:%S') if model.modified_at else None,
+            'expires_at': None,
+            'size_vram': None
+        })
+        
+    for model in response_memory.models:
+        for i in range(len(info_dicts)):
+            if model.model == info_dicts[i]['name']:
+                info_dicts[i]['expires_at'] = model.expires_at.strftime('%Y-%m-%d %H:%M:%S')
+                info_dicts[i]['size_vram'] = model.size_vram
+                break
+    
+    return info_dicts
