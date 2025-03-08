@@ -4,9 +4,30 @@
 
 {% block content %}
 <h2>📩 Suivi des campagnes</h2>
-<p>Voici la liste brute des campagnes déjà créées :</p>
-<p>A vous de jouer pour afficher proprement ces données !</p>
 
-<pre>{{ campaigns | tojson(indent=2) }}</pre>  <!-- Affiche les campagnes en JSON brut -->
+<div class="container">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Identifiant</th>
+                <th>Nom</th>
+                <th>Date de création</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+            <tr>
+                <td>{{ campaign.id }}</td>
+                <td>{{ campaign.name }}</td>
+                <td>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }} </td>
+                <td>
+                    <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}

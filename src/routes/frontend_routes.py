@@ -51,6 +51,18 @@ def follow_campaign():
     campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
     return render_template('follow-campaign.html', campaigns=campaigns)
 
+@bp.route("/details_campaign/<int:campaign_id>")
+def details_campaign(campaign_id):
+    campaigns = get_campaigns()
+
+    # Recherche de la campagne avec l'ID reçu
+    selected_campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
+
+    if not selected_campaign:
+        return "Campagne non trouvée", 404
+    
+    return render_template("details-campaign.html", campaign=selected_campaign)
+
 @bp.route('/analysis-correction')
 def analysis_correction():
     return render_template('analysis-correction.html')
@@ -70,3 +82,4 @@ def llm_settings():
 @bp.route('/maj-status')
 def maj_status():
     return render_template('maj-status.html')
+
