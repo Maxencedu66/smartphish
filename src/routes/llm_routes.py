@@ -1,6 +1,6 @@
 # Routes pour la gestion du LLM (Génération des emails)
 from flask import Blueprint, request, jsonify
-from src.services.llm_service import generate_phishing_email
+from src.services.llm_service import generate_phishing_email, get_ollama_status
 
 llm_bp = Blueprint('llm', __name__)
 
@@ -25,3 +25,8 @@ def generate_email():
         return jsonify({"object": generated_email['object'], "content": generated_email['content']})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@llm_bp.route('/status', methods=['GET'])
+def get_status():
+    """Retourne les informations sur les modèles téléchargés et/ou en mémoire via Ollama."""
+    return jsonify(get_ollama_status())
