@@ -24,18 +24,41 @@ def get_campaigns():
 
 ### A refaire car pas fonctionnelle
 def create_campaign(data):
-    """Crée une nouvelle campagne de phishing"""
-    print("🔹 Envoi des données à GoPhish :", data)  # DEBUG
-    response = requests.post(f"{Config.GOPHISH_API_URL}/api/campaigns", json=data, headers=HEADERS, verify=False)
+    """Crée une campagne sur GoPhish avec validation des éléments existants."""
+    # IMPORTANT : Ajout du slash final à l'URL pour respecter le endpoint de création
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/"
 
-    print("🔹 Réponse GoPhish :", response.status_code, response.text)  # DEBUG
+    campaign_data = {
+        "name": data.get("name", "Default Campaign"),
+        "template": {"name": data["template"]["name"]} if "template" in data else None,
+        "page": {"name": data["page"]["name"]} if "page" in data else None,
+        "smtp": {"name": data["smtp"]["name"]} if "smtp" in data else None,
+        "groups": [{"name": group["name"]} for group in data.get("groups", [])],
+        "url": data.get("url", "http://localhost"),
+        "launch_date": data.get("launch_date", None),
+        # On peut aussi accepter send_by_date s’il est fourni dans data, sinon None
+        "send_by_date": data.get("send_by_date", None)
+    }
+
+    print("🔹 Données envoyées à GoPhish :", campaign_data)  # DEBUG
+
+    response = requests.post(url, json=campaign_data, headers=HEADERS, verify=False)
+
+    print("🔹 Réponse brute de GoPhish :", response.status_code, response.text)  # DEBUG
 
     try:
-        return response.json()
+        result = response.json()
+        if response.status_code == 201:
+            return {"success": True, "message": "Campaign created successfully", "campaign": result}
+        else:
+            return {"error": "Failed to create campaign", "status_code": response.status_code, "response": result}
     except requests.exceptions.JSONDecodeError:
-        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
-    
-    
+        return {
+            "error": "Invalid response from GoPhish",
+            "status_code": response.status_code,
+            "content": response.text
+        }
+
 
 # ---------------------------
 #  Fonctions pour les Groupes
