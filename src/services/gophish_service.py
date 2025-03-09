@@ -22,7 +22,7 @@ def get_campaigns():
     except requests.exceptions.JSONDecodeError:
         return {"error": "Réponse de GoPhish invalide", "status_code": response.status_code, "content": response.text}
 
-### A refaire car pas fonctionnelle
+
 def create_campaign(data):
     """Crée une campagne sur GoPhish en utilisant le payload basé sur les noms,
     en corrigeant le format de la date si nécessaire."""
@@ -70,6 +70,79 @@ def create_campaign(data):
             "status_code": response.status_code,
             "content": response.text
         }
+
+
+def get_campaign(campaign_id):
+    """Récupère les détails d'une campagne spécifique."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide", "status_code": response.status_code, "content": response.text}
+
+
+def get_campaign_events(campaign_id):
+    """Récupère la timeline (les événements) d'une campagne."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}/timeline"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide", "status_code": response.status_code, "content": response.text}
+
+
+def get_campaign_results(campaign_id):
+    """Récupère les résultats d'une campagne."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}/results"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide", "status_code": response.status_code, "content": response.text}
+
+
+def get_campaign_summary(campaign_id):
+    """Récupère le résumé d'une campagne."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}/summary"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide", "status_code": response.status_code, "content": response.text}
+
+
+def delete_campaign(campaign_id):
+    """Supprime une campagne."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}"
+    response = requests.delete(url, headers=HEADERS, verify=False)
+    try:
+        if response.status_code in [200, 204]:
+            return {"success": True, "message": "Campagne supprimée"}
+        else:
+            return {"error": "Échec de la suppression", "status_code": response.status_code, "response": response.json()}
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide", "status_code": response.status_code, "content": response.text}
+
+
+def complete_campaign(campaign_id):
+    """Marque une campagne comme terminée."""
+    url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}/complete"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    
+    if response.status_code == 200:
+        try:
+            # Dans certains cas, le corps de réponse peut être vide ou contenir "null"
+            data = response.json() if response.text.strip() != "" else None
+            return {"success": True, "message": "Campaign completed successfully!", "data": data}
+        except requests.exceptions.JSONDecodeError:
+            return {"success": True, "message": "Campaign completed successfully!", "data": None}
+    else:
+        try:
+            return {"error": "Failed to complete campaign", "status_code": response.status_code, "response": response.json()}
+        except requests.exceptions.JSONDecodeError:
+            return {"error": "Failed to complete campaign", "status_code": response.status_code, "content": response.text}
+
 
 
 

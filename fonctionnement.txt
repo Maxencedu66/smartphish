@@ -24,6 +24,12 @@ Pour le back :
 
 
 
+Piste améliorations:
+-porposer une version anglaise et une francaise
+- gerer l'envoie des mails
+- gestion des erreurs et mauvais remplissage des champs
+- créer un système de connection pour les utilisateurs
+- passer en https pour plus de sécurité et retrait des warnings
 
 
 
@@ -41,136 +47,3 @@ Pour le back :
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Ancienne version
-
-📌 7. Lancer Flask et GoPhish
-1️⃣ Lancer GoPhish via Docker :
-
-cd docker
-docker-compose up -d gophish (pour les autres) ou docker compose up -d gophish (pour mac)
-si ça fonctionne pas faire ça : docker pull gophish/gophish
-puis docker-compose up -d gophish ou docker-compose up -d gophish
-
-2️⃣ Lancer Flask normalement (hors Docker) :
-
-python app.py
-3️⃣ Vérifier si tout tourne bien :
-
-docker ps
-✅ Tu devrais voir gophish en Up.
-
-Bien penser a changer la clé api de gophish: 
-https://127.0.0.1:3333/
-compte : admin et mot de passe avec la commande:
-docker logs gophish | grep "Please login with the username" puis control f "password" pour le mot de passe
-
-Aller dans son UserAccount et prendre la clé api et la mettre dans src/config.py
-
-
-
-
-
-
-
-
-
-docker-compose pull  # Télécharge l'image officielle
-docker-compose up -d gophish
-
-
-
-
-
-
-
-Template d'une campagne:
-[
-  {
-    "completed_date": "0001-01-01T00:00:00Z",
-    "created_date": "2025-02-22T01:07:00.791678322Z",
-    "id": 1,
-    "launch_date": "2025-02-22T01:06:00Z",
-    "name": "test_campagne",
-    "page": {
-      "capture_credentials": false,
-      "capture_passwords": false,
-      "html": "\u003chtml\u003e\u003chead\u003e\u003c/head\u003e\u003cbody\u003eBIenvenue\u003c/body\u003e\u003c/html\u003e",
-      "id": 1,
-      "modified_date": "2025-02-22T01:06:44.556476766Z",
-      "name": "test_page",
-      "redirect_url": ""
-    },
-    "results": [
-      {
-        "email": "thomasjj@gmail.com",
-        "first_name": "Thomas",
-        "id": "Jlvwzw9",
-        "ip": "",
-        "last_name": "JJ",
-        "latitude": 0,
-        "longitude": 0,
-        "modified_date": "2025-02-22T01:07:01.357345688Z",
-        "position": "",
-        "reported": false,
-        "send_date": "2025-02-22T01:06:00Z",
-        "status": "Error"
-      }
-    ],
-    "send_by_date": "0001-01-01T00:00:00Z",
-    "smtp": {
-      "from_address": "test_sending@exemple.com",
-      "headers": [],
-      "host": "smtp.exemple",
-      "id": 1,
-      "ignore_cert_errors": true,
-      "interface_type": "SMTP",
-      "modified_date": "2025-02-22T01:06:10.000025483Z",
-      "name": "test_sending"
-    },
-    "status": "In progress",
-    "template": {
-      "attachments": [],
-      "envelope_sender": "test@exemple.com",
-      "html": "",
-      "id": 1,
-      "modified_date": "2025-02-22T01:03:33.134516947Z",
-      "name": "template_test",
-      "subject": "Test mail objet",
-      "text": "JE test un mail"
-    },
-    "timeline": [
-      {
-        "campaign_id": 1,
-        "details": "",
-        "email": "",
-        "message": "Campaign Created",
-        "time": "2025-02-22T01:07:00.806849086Z"
-      },
-      {
-        "campaign_id": 1,
-        "details": "{\"error\":\"Max connection attempts exceeded - dial tcp: lookup smtp.exemple: no such host\"}",
-        "email": "thomasjj@gmail.com",
-        "message": "Error Sending Email",
-        "time": "2025-02-22T01:07:01.357345688Z"
-      }
-    ],
-    "url": ""
-  }
-]

@@ -5,6 +5,12 @@ from src.services.gophish_service import *
 
 gophish_bp = Blueprint('gophish', __name__)
 
+
+
+#------------------------------
+# Routes pour la gestion des campagnes
+# ------------------------------
+
 @gophish_bp.route('/campaigns', methods=['GET'])
 def list_campaigns():
     """Retourne la liste des campagnes actives."""
@@ -15,6 +21,40 @@ def new_campaign():
     """Crée une nouvelle campagne de phishing."""
     data = request.json
     return jsonify(create_campaign(data))
+
+# Récupérer les détails d'une campagne
+@gophish_bp.route('/campaigns/<int:campaign_id>', methods=['GET'])
+def get_campaign_route(campaign_id):
+    return jsonify(get_campaign(campaign_id))
+
+# Récupérer les événements d'une campagne
+@gophish_bp.route('/campaigns/<int:campaign_id>/timeline', methods=['GET'])
+def get_campaign_events_route(campaign_id):
+    return jsonify(get_campaign_events(campaign_id))
+
+# Récupérer les résultats d'une campagne
+@gophish_bp.route('/campaigns/<int:campaign_id>/results', methods=['GET'])
+def get_campaign_results_route(campaign_id):
+    return jsonify(get_campaign_results(campaign_id))
+
+# Récupérer le résumé d'une campagne
+@gophish_bp.route('/campaigns/<int:campaign_id>/summary', methods=['GET'])
+def get_campaign_summary_route(campaign_id):
+    return jsonify(get_campaign_summary(campaign_id))
+
+
+# Supprimer une campagne
+@gophish_bp.route('/campaigns/<int:campaign_id>', methods=['DELETE'])
+def delete_campaign_route(campaign_id):
+    return jsonify(delete_campaign(campaign_id))
+
+# Marquer une campagne comme terminée
+@gophish_bp.route('/campaigns/<int:campaign_id>/complete', methods=['GET'])
+def complete_campaign_route(campaign_id):
+    return jsonify(complete_campaign(campaign_id))
+
+
+
 
 #------------------------------
 # Routes pour la gestion des groupes

@@ -12,17 +12,31 @@
                 <th>Identifiant</th>
                 <th>Nom</th>
                 <th>Date de création</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for campaign in campaigns %}
-            <tr>
+            <tr id="campaign-row-{{ campaign.id }}">
                 <td>{{ campaign.id }}</td>
                 <td>{{ campaign.name }}</td>
-                <td>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }} </td>
+                <td>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</td>
+                <td>
+                    {% if campaign.status == "Completed" %}
+                        <span class="badge bg-success">Complétée</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">In progress</span>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
+                    <button class="btn btn-danger" onclick="deleteCampaign({{ campaign.id }})">Supprimer</button>
+                    {% if campaign.status == "In progress" %}
+                        <button class="btn btn-success" onclick="completeCampaign({{ campaign.id }})">Terminer</button>
+                    {% else %}
+                        <button class="btn btn-secondary" disabled>Terminé</button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -30,4 +44,49 @@
     </table>
 </div>
 
+<script>
+  function deleteCampaign(campaignId) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette campagne ?")) {
+      fetch(`/api/gophish/campaigns/${campaignId}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          alert(response.message);
+          document.getElementById(`campaign-row-${campaignId}`).remove();
+        } else {
+          alert("Erreur lors de la suppression : " + response.error);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Une erreur s'est produite.");
+      });
+    }
+  }
+
+  function completeCampaign(campaignId) {
+    if (confirm("Marquer cette campagne comme terminée ?")) {
+      fetch(`/api/gophish/campaigns/${campaignId}/complete`, {
+        method: 'GET', // Comme la doc précise que c'est un GET
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          alert(response.message);
+          // Vous pouvez ici rafraîchir la page ou mettre à jour l'interface pour refléter le nouveau statut
+          location.reload();
+        } else {
+          alert("Erreur lors de la finalisation : " + response.error);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Une erreur s'est produite.");
+      });
+    }
+  }
+</script>
 {% endblock %}
