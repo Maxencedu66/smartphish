@@ -79,3 +79,34 @@ def update_sending_profile_route(profile_id):
 @gophish_bp.route('/sending_profiles/<int:profile_id>', methods=['DELETE'])
 def delete_sending_profile_route(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+#------------------------------
+# Routes pour la gestion des landing pages
+# ------------------------------
+
+@gophish_bp.route('/landing_pages', methods=['GET'])
+def list_landing_pages():
+    """Retourne la liste des Landing Pages."""
+    return jsonify(get_landing_pages())
+
+@gophish_bp.route('/landing_pages/<int:landing_page_id>', methods=['GET'])
+def fetch_landing_page(landing_page_id):
+    """Retourne une Landing Page spécifique."""
+    return jsonify(get_landing_page(landing_page_id))
+
+@gophish_bp.route('/landing_pages', methods=['POST'])
+def new_landing_page():
+    """Crée une nouvelle Landing Page."""
+    data = request.json
+    return jsonify(create_landing_page(data))
+
+@gophish_bp.route('/landing_pages/<int:landing_page_id>', methods=['PUT'])
+def update_landing_page_route(landing_page_id):
+    """Met à jour une Landing Page existante."""
+    data = request.json
+    return jsonify(update_landing_page(landing_page_id, data))
+
+@gophish_bp.route('/landing_pages/<int:landing_page_id>', methods=['DELETE'])
+def delete_landing_page_route(landing_page_id):
+    """Supprime une Landing Page."""
+    return jsonify(delete_landing_page(landing_page_id))

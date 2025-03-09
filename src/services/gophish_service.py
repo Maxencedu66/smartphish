@@ -227,3 +227,59 @@ def delete_sending_profile(profile_id):
         return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
 
 
+# ---------------------------
+#  Fonctions pour les Landing Pages
+# ---------------------------
+
+import requests
+from src.config import Config
+
+HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {Config.GOPHISH_API_KEY}"
+}
+
+def get_landing_pages():
+    """Récupère la liste des Landing Pages de GoPhish"""
+    url = f"{Config.GOPHISH_API_URL}/api/pages/"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+
+def get_landing_page(landing_page_id):
+    """Récupère une Landing Page spécifique"""
+    url = f"{Config.GOPHISH_API_URL}/api/pages/{landing_page_id}"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+
+def create_landing_page(data):
+    """Crée une nouvelle Landing Page"""
+    url = f"{Config.GOPHISH_API_URL}/api/pages/"
+    response = requests.post(url, json=data, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+
+def update_landing_page(landing_page_id, data):
+    """Met à jour une Landing Page"""
+    url = f"{Config.GOPHISH_API_URL}/api/pages/{landing_page_id}"
+    response = requests.put(url, json=data, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+
+def delete_landing_page(landing_page_id):
+    """Supprime une Landing Page"""
+    url = f"{Config.GOPHISH_API_URL}/api/pages/{landing_page_id}"
+    response = requests.delete(url, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
