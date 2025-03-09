@@ -54,9 +54,35 @@ def configuration():
 def config_landing_pages():
     return render_template('config-landing-pages.html')
 
-@bp.route('/new-campaign')
-def new_campaign():
-    return render_template('new-campaign.html')
+
+# Route pour la page de création de campagne
+
+@bp.route('/new-campaign', methods=['GET'])
+def new_campaign_page():
+    """Affiche la page de création de campagne avec les éléments disponibles."""
+    groups = get_groups()
+    templates = get_templates()
+    pages = get_landing_pages()  # Fonction à créer dans `gophish_service.py`
+    sending_profiles = get_sending_profiles()
+
+    return render_template('new-campaign.html', 
+                           groups=groups, 
+                           templates=templates, 
+                           pages=pages, 
+                           sending_profiles=sending_profiles)
+
+@bp.route('/new-campaign', methods=['POST'])
+def create_new_campaign():
+    """Reçoit les données du formulaire et envoie la requête à GoPhish."""
+    data = request.get_json()
+    return jsonify(create_campaign(data))
+
+
+# Route pour la page de génération de mail
+@bp.route('/gen-mail')
+def gen_mail():
+    return render_template('gen_mail_llm.html')
+
 
 @bp.route('/follow-campaign')
 def follow_campaign():

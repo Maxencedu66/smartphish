@@ -34,6 +34,8 @@ def create_campaign(data):
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+    
+    
 
 # ---------------------------
 #  Fonctions pour les Groupes
