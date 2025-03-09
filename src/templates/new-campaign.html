@@ -2,65 +2,84 @@
 {% block title %}Create a New Campaign - SmartPhish{% endblock %}
 
 {% block content %}
-<h2>🚀 Create a New Phishing Campaign</h2>
+<h2 class="mb-4"><i class="bi bi-bullseye"></i>🚀 Create a New Phishing Campaign</h2>
 
-<form id="campaignForm">
-  <div class="mb-3">
-    <label for="campaignName" class="form-label">Campaign Name:</label>
-    <input type="text" id="campaignName" class="form-control" required>
-  </div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form id="campaignForm">
+        <div class="mb-3">
+            <label for="campaignName" class="form-label fw-bold"><i class="bi bi-pencil-square"></i> Campaign Name:</label>
+            <input type="text" id="campaignName" class="form-control" required placeholder="Enter campaign name">
+        </div>
 
-  <div class="mb-3">
-    <label for="campaignGroups" class="form-label">Select Target Groups:</label>
-    <select id="campaignGroups" class="form-select" multiple required>
-      {% for group in groups %}
-        <option value="{{ group.name }}">{{ group.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="campaignGroups" class="form-label fw-bold"><i class="bi bi-people-fill"></i> Select Target Groups:</label>
+                <select id="campaignGroups" class="form-select" required>
+                <option value="" hidden disabled selected>Choose Groups</option>
+                {% for group in groups %}
+                    <option value="{{ group.name }}">{{ group.name }}</option>
+                {% endfor %}
+                </select>
+            </div>  
 
-  <div class="mb-3">
-    <label for="campaignTemplate" class="form-label">Select Email Template:</label>
-    <select id="campaignTemplate" class="form-select" required>
-      {% for template in templates %}
-        <option value="{{ template.name }}">{{ template.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+            <div class="col-md-6 mb-3">
+                <label for="campaignTemplate" class="form-label fw-bold"><i class="bi bi-envelope-fill"></i> Select Email Template:</label>
+                <select id="campaignTemplate" class="form-select" required>
+                <option value="" hidden disabled selected>Choose Email Template</option>
+                {% for template in templates %}
+                    <option value="{{ template.name }}">{{ template.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
 
-  <div class="mb-3">
-    <label for="campaignLandingPage" class="form-label">Select Landing Page:</label>
-    <select id="campaignLandingPage" class="form-select" required>
-      {% for page in pages %}
-        <option value="{{ page.name }}">{{ page.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="campaignLandingPage" class="form-label fw-bold"><i class="bi bi-globe"></i> Select Landing Page:</label>
+                <select id="campaignLandingPage" class="form-select" required>
+                    <option value="" hidden disabled selected>Choose Landing Page</option>
+                {% for page in pages %}
+                    <option value="{{ page.name }}">{{ page.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
 
-  <div class="mb-3">
-    <label for="campaignSmtp" class="form-label">Select Sending Profile:</label>
-    <select id="campaignSmtp" class="form-select" required>
-      {% for smtp in sending_profiles %}
-        <option value="{{ smtp.name }}">{{ smtp.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+            <div class="col-md-6 mb-3">
+                <label for="campaignSmtp" class="form-label fw-bold"><i class="bi bi-send-fill"></i> Select Sending Profile:</label>
+                <select id="campaignSmtp" class="form-select" required>
+                    <option value="" hidden disabled selected>Choose Profile</option>
+                {% for smtp in sending_profiles %}
+                    <option value="{{ smtp.name }}">{{ smtp.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
 
-  <div class="mb-3">
-    <label for="campaignLaunchDate" class="form-label">Launch Date:</label>
-    <input type="datetime-local" id="campaignLaunchDate" class="form-control">
-  </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="campaignLaunchDate" class="form-label fw-bold"><i class="bi bi-calendar"></i> Launch Date:</label>
+                <input type="datetime-local" id="campaignLaunchDate" class="form-control">
+            </div>
+    
+            <div class="col-md-6 mb-3">
+                <label for="campaignUrl" class="form-label fw-bold"><i class="bi bi-link-45deg"></i> Phishing URL:</label>
+                <input type="url" id="campaignUrl" class="form-control" value="http://localhost">
+            </div>
+        </div>
+        
 
-  <div class="mb-3">
-    <label for="campaignUrl" class="form-label">Phishing URL:</label>
-    <input type="url" id="campaignUrl" class="form-control" value="http://localhost">
-  </div>
-
-  <button type="button" class="btn btn-success" onclick="submitCampaign()">🚀 Launch Campaign</button>
-</form>
+        <button type="button" class="btn btn-success w-100 py-2" onclick="submitCampaign()" id="submitBtn">🚀 Launch Campaign</button>
+        </form>
+    </div>
+</div>
 
 <script>
   function submitCampaign() {
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Launching...';
+    submitBtn.disabled = true;
+
     const data = {
       name: document.getElementById("campaignName").value,
       groups: Array.from(document.getElementById("campaignGroups").selectedOptions).map(option => ({ name: option.value })),
@@ -80,12 +99,18 @@
     .then(response => {
       if (response.error) {
         alert("Error: " + response.error);
+        submitBtn.innerHTML = "🚀 Launch Campaign";
+        submitBtn.disabled = false;
       } else {
         alert("✅ Campaign created successfully!");
         window.location.href = "/follow-campaign"; // Rediriger vers la liste des campagnes
       }
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      console.error(err);
+      submitBtn.innerHTML = "🚀 Launch Campaign";
+      submitBtn.disabled = false;
+    });
   }
 </script>
 
