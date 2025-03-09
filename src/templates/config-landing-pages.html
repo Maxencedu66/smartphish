@@ -5,54 +5,176 @@
 <h2>⚙️ Configuration</h2>
 
 <ul class="nav nav-tabs">
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a>
-    </li>
-
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_groups') }}">Groupes</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_emails') }}">Email Templates</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a></li>
 </ul>
-  
 
-<div id="landingPages">
-    <h3>Landing Pages</h3>
+<h3>📄 Gestion des Landing Pages</h3>
 
-    <form id="landingPageForm" class="mb-4">
-        <div class="mb-3">
-          <label for="landingPageName" class="form-label">Nom de la Landing Page :</label>
-          <input type="text" id="landingPageName" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label for="landingPageHTML" class="form-label">HTML :</label>
-          <textarea id="landingPageHTML" class="form-control" rows="6" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Créer</button>
-    </form>
+<!-- Bouton pour créer une nouvelle landing page -->
+<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newLandingPageModal">➕ Nouvelle Landing Page</button>
 
-    <table class="table table-striped">
-      <thead>
+<!-- Table des landing pages -->
+<table class="table table-striped">
+    <thead>
         <tr><th>Nom</th><th>Actions</th></tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody id="landingPageTableBody">
         {% for page in landing_pages %}
-        <tr>
-          <td>{{ page.name }}</td>
-          <td>
-            <button class="btn btn-primary btn-sm">Modifier</button>
-            <button class="btn btn-danger btn-sm">Supprimer</button>
-          </td>
+        <tr data-id="{{ page.id }}">
+            <td>{{ page.name }}</td>
+            <td>
+                <button class="btn btn-primary btn-sm edit-landing-page" data-id="{{ page.id }}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
+                <button class="btn btn-danger btn-sm delete-landing-page" data-id="{{ page.id }}">🗑️ Supprimer</button>
+            </td>
         </tr>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </tbody>
+</table>
+
+<!-- ========== MODAL: CREATE NEW LANDING PAGE ========== -->
+<div class="modal fade" id="newLandingPageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer une Landing Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label for="newLandingPageName" class="form-label">Nom :</label>
+                <input type="text" id="newLandingPageName" class="form-control mb-2" required>
+
+                <label for="newLandingPageHTML" class="form-label">HTML :</label>
+                <textarea id="newLandingPageHTML" class="form-control" rows="5" required></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="submitNewLandingPage()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- ========== MODAL: EDIT LANDING PAGE ========== -->
+<div class="modal fade" id="editLandingPageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier une Landing Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editLandingPageId">
+                
+                <label for="editLandingPageName" class="form-label">Nom :</label>
+                <input type="text" id="editLandingPageName" class="form-control mb-2" required>
+
+                <label for="editLandingPageHTML" class="form-label">HTML :</label>
+                <textarea id="editLandingPageHTML" class="form-control" rows="5" required></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="submitEditedLandingPage()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Charger les landing pages existantes
+    fetch('/config-landing-pages')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById("landingPageTableBody");
+            tbody.innerHTML = ""; 
+            data.forEach(page => {
+                tbody.innerHTML += `
+                    <tr data-id="${page.id}">
+                        <td>${page.name}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm edit-landing-page" data-id="${page.id}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
+                            <button class="btn btn-danger btn-sm delete-landing-page" data-id="${page.id}">🗑️ Supprimer</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+});
+
+// Création d'une nouvelle landing page
+function submitNewLandingPage() {
+    const data = {
+        name: document.getElementById("newLandingPageName").value,
+        html: document.getElementById("newLandingPageHTML").value,
+        capture_credentials: true,
+        capture_passwords: false,
+        redirect_url: "http://example.com"
+    };
+
+    fetch("/config-landing-pages", {  // 🔹 Correction ici
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => console.error(err));
+}
+
+// Chargement des données pour modification
+document.querySelectorAll(".edit-landing-page").forEach(btn => {
+    btn.addEventListener("click", function() {
+        const pageId = this.getAttribute("data-id");
+
+        fetch(`/config-landing-pages/${pageId}`)  // 🔹 Correction ici
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("editLandingPageId").value = data.id;
+                document.getElementById("editLandingPageName").value = data.name;
+                document.getElementById("editLandingPageHTML").value = data.html;
+            })
+            .catch(err => console.error("Erreur lors du chargement de la landing page :", err));
+    });
+});
+
+// Modification d'une landing page
+function submitEditedLandingPage() {
+    const pageId = document.getElementById("editLandingPageId").value;
+    const data = {
+        id: parseInt(pageId, 10),
+        name: document.getElementById("editLandingPageName").value,
+        html: document.getElementById("editLandingPageHTML").value,
+        capture_credentials: true,
+        capture_passwords: false,
+        redirect_url: "http://example.com"
+    };
+
+    fetch(`/config-landing-pages/${pageId}`, {  // 🔹 Correction ici
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => console.error(err));
+}
+
+// Suppression d'une landing page
+document.querySelectorAll(".delete-landing-page").forEach(btn => {
+    btn.addEventListener("click", function() {
+        const pageId = this.getAttribute("data-id");
+
+        if (!confirm("Voulez-vous vraiment supprimer cette Landing Page ?")) return;
+
+        fetch(`/config-landing-pages/${pageId}`, {  // 🔹 Correction ici
+            method: "DELETE"
+        })
+        .then(res => res.json())
+        .then(() => location.reload())
+        .catch(err => console.error("Erreur lors de la suppression :", err));
+    });
+});
+</script>
 
 {% endblock %}

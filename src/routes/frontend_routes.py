@@ -50,9 +50,9 @@ def configuration():
 #    return render_template('config-groups.html')
 
 
-@bp.route('/config-landing-pages')
-def config_landing_pages():
-    return render_template('config-landing-pages.html')
+#@bp.route('/config-landing-pages')
+#def config_landing_pages():
+#    return render_template('config-landing-pages.html')
 
 @bp.route('/new-campaign')
 def new_campaign():
@@ -260,6 +260,7 @@ def delete_template_frontend(template_id):
 # ---------------------------
 # Routes pour les Sending Profiles (Profils SMTP)
 # ---------------------------
+
 @bp.route('/config-smtp')
 def config_smtp():
     smtp_profiles = get_sending_profiles()  # Récupérer tous les profils SMTP
@@ -282,3 +283,55 @@ def update_smtp_submit(profile_id):
 @bp.route('/config-smtp/<int:profile_id>', methods=['DELETE'])
 def delete_smtp(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+# ---------------------------
+# Routes pour les Landing Pages
+# ---------------------------
+
+@bp.route('/config-landing-pages', methods=['GET'])
+def config_landing_pages():
+    """
+    Récupère la liste des landing pages et rend la page de configuration.
+    """
+    landing_pages = get_landing_pages()
+    return render_template('config-landing-pages.html', landing_pages=landing_pages)
+
+@bp.route('/config-landing-pages/<int:landing_page_id>', methods=['GET'])
+def get_landing_page_frontend(landing_page_id):
+    """
+    Retourne une Landing Page en JSON pour remplissage de formulaire.
+    """
+    data = get_landing_page(landing_page_id)
+    return jsonify(data)
+
+@bp.route('/config-landing-pages', methods=['POST'])
+def create_landing_page_frontend():
+    """
+    Crée une nouvelle Landing Page.
+    """
+    data = request.get_json()
+    if not data or "name" not in data or "html" not in data:
+        return jsonify({"error": "Nom et HTML sont requis"}), 400
+
+    response = create_landing_page(data)
+    return jsonify(response), 201 if "error" not in response else 400
+
+@bp.route('/config-landing-pages/<int:landing_page_id>', methods=['PUT'])
+def update_landing_page_frontend(landing_page_id):
+    """
+    Met à jour une Landing Page.
+    """
+    data = request.get_json()
+    if not data or "id" not in data:
+        data["id"] = landing_page_id
+
+    response = update_landing_page(landing_page_id, data)
+    return jsonify(response), 200 if "error" not in response else 400
+
+@bp.route('/config-landing-pages/<int:landing_page_id>', methods=['DELETE'])
+def delete_landing_page_frontend(landing_page_id):
+    """
+    Supprime une Landing Page.
+    """
+    response = delete_landing_page(landing_page_id)
+    return jsonify(response)
