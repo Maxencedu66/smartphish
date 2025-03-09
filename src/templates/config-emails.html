@@ -6,43 +6,45 @@
 
 <ul class="nav nav-tabs">
     <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_groups') }}">Groupes</a></li>
-    <li class="nav-item"><a class="nav-link active" href="{{ url_for('frontend.config_emails') }}">Email Templates</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('frontend.config_emails') }}">Modèles d'e-mails</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_landing_pages') }}">Page de destination</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a></li>
 </ul>
 
-<h3>📩 Gestion des Email Templates</h3>
+<h3>📩 Gestion des modèles d'e-mails</h3>
 
-<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newEmailTemplateModal">➕ Nouveau Template</button>
+<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newEmailTemplateModal">➕ Nouveau Modèles</button>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Sujet</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody id="emailTemplateTableBody">
-        {% for template in email_templates %}
-        <tr>
-            <td>{{ template.name }}</td>
-            <td>{{ template.subject }}</td>
-            <td>
-                <button class="btn btn-primary btn-sm edit-template" data-id="{{ template.id }}" data-bs-toggle="modal" data-bs-target="#editEmailTemplateModal">✏️ Modifier</button>
-                <button class="btn btn-danger btn-sm delete-template" data-id="{{ template.id }}">🗑️ Supprimer</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nom</th>
+                <th>Sujet</th>
+                <th class="text-end"></th>
+            </tr>
+        </thead>
+        <tbody id="emailTemplateTableBody">
+            {% for template in email_templates %}
+            <tr>
+                <td>{{ template.name }}</td>
+                <td>{{ template.subject }}</td>
+                <td class="text-end">
+                    <button class="btn btn-primary btn-sm edit-template" data-id="{{ template.id }}" data-bs-toggle="modal" data-bs-target="#editEmailTemplateModal">✏️ Modifier</button>
+                    <button class="btn btn-danger btn-sm delete-template" data-id="{{ template.id }}">🗑️ Supprimer</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- ========== MODAL: CREATE NEW EMAIL TEMPLATE ========== -->
 <div class="modal fade" id="newEmailTemplateModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Créer un Email Template</h5>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Créer un modèle d'e-mails</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -136,8 +138,8 @@
 <div class="modal fade" id="editEmailTemplateModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Modifier un Email Template</h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Modifier un modèle d'e-mails</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -162,6 +164,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // Basculement entre les champs manuels et IA
@@ -185,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 .then(response => response.json())
                 .then(data => {
                     if (!data || data.error) {
-                        alert("Erreur lors de la récupération du template.");
+                        alert("Erreur lors de la récupération du modèle.");
                         return;
                     }
                     document.getElementById("editTemplateId").value = data.id;
@@ -193,21 +197,50 @@ document.addEventListener("DOMContentLoaded", function() {
                     document.getElementById("editEmailSubject").value = data.subject;
                     document.getElementById("editEmailText").value = data.text || "";
                 })
-                .catch(err => console.error("Erreur lors du chargement du template :", err));
+                .catch(err => console.error("Erreur lors du chargement du modèle :", err));
         });
     });
 
     // Suppression d'un template
     document.querySelectorAll(".delete-template").forEach(btn => {
         btn.addEventListener("click", function() {
-            const templateId = this.getAttribute("data-id");
-            if (!confirm("Voulez-vous vraiment supprimer cet Email Template ?")) return;
+        const templateId = this.getAttribute("data-id");
+
+        // Affichage du popup de confirmation avec SweetAlert2
+        Swal.fire({
+            title: "Supprimer ce modèle d'e-mails ?",
+            text: "Cette action est irréversible. Voulez-vous continuer ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Oui, supprimer",
+            cancelButtonText: "Annuler",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+            // Si l'utilisateur confirme, on envoie la requête DELETE
             fetch(`/templates/${templateId}`, {
                 method: "DELETE"
             })
             .then(res => res.json())
-            .then(() => location.reload())
-            .catch(err => console.error("Erreur lors de la suppression :", err));
+            .then(() => {
+                Swal.fire({
+                title: "Supprimé !",
+                text: "Le modèle d'e-mails a été supprimé avec succès.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+                }).then(() => {
+                location.reload();
+                });
+            })
+            .catch(err => {
+                console.error("Erreur lors de la suppression :", err);
+                Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+            });
+            }
+        });
         });
     });
 });

@@ -2,21 +2,21 @@
 {% block title %}Create a New Campaign - SmartPhish{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-bullseye"></i>🚀 Create a New Phishing Campaign</h2>
+<h2 class="mb-4"><i class="bi bi-bullseye"></i>🚀 Créer une nouvelle campagne</h2>
 
 <div class="card shadow-sm">
   <div class="card-body">
     <form id="campaignForm">
       <div class="mb-3">
-        <label for="campaignName" class="form-label fw-bold"><i class="bi bi-pencil-square"></i> Campaign Name:</label>
-        <input type="text" id="campaignName" class="form-control" required placeholder="Enter campaign name">
+        <label for="campaignName" class="form-label fw-bold"><i class="bi bi-pencil-square"></i> Nom de Campagne:</label>
+        <input type="text" id="campaignName" class="form-control" required placeholder="Entrer le nom de la campagne">
       </div>
 
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="campaignGroups" class="form-label fw-bold"><i class="bi bi-people-fill"></i> Select Target Groups:</label>
+          <label for="campaignGroups" class="form-label fw-bold"><i class="bi bi-people-fill"></i> Sélectionner le groupe cible:</label>
           <select id="campaignGroups" class="form-select" required>
-            <option value="" hidden disabled selected>Choose Groups</option>
+            <option value="" hidden disabled selected>Choix du groupe</option>
             {% for group in groups %}
               <option value="{{ group.name }}">{{ group.name }}</option>
             {% endfor %}
@@ -24,9 +24,9 @@
         </div>  
 
         <div class="col-md-6 mb-3">
-          <label for="campaignTemplate" class="form-label fw-bold"><i class="bi bi-envelope-fill"></i> Select Email Template:</label>
+          <label for="campaignTemplate" class="form-label fw-bold"><i class="bi bi-envelope-fill"></i> Sélectionner un modèle d'e-mails</label>
           <select id="campaignTemplate" class="form-select" required>
-            <option value="" hidden disabled selected>Choose Email Template</option>
+            <option value="" hidden disabled selected>Choix du modèle</option>
             {% for template in templates %}
               <option value="{{ template.name }}">{{ template.name }}</option>
             {% endfor %}
@@ -36,9 +36,9 @@
 
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="campaignLandingPage" class="form-label fw-bold"><i class="bi bi-globe"></i> Select Landing Page:</label>
+          <label for="campaignLandingPage" class="form-label fw-bold"><i class="bi bi-globe"></i> Sélectionner la page de destination:</label>
           <select id="campaignLandingPage" class="form-select" required>
-            <option value="" hidden disabled selected>Choose Landing Page</option>
+            <option value="" hidden disabled selected>Choix page de destination</option>
             {% for page in pages %}
               <option value="{{ page.name }}">{{ page.name }}</option>
             {% endfor %}
@@ -46,9 +46,9 @@
         </div>
 
         <div class="col-md-6 mb-3">
-          <label for="campaignSmtp" class="form-label fw-bold"><i class="bi bi-send-fill"></i> Select Sending Profile:</label>
+          <label for="campaignSmtp" class="form-label fw-bold"><i class="bi bi-send-fill"></i> Sélectionner le profil d'envoi:</label>
           <select id="campaignSmtp" class="form-select" required>
-            <option value="" hidden disabled selected>Choose Profile</option>
+            <option value="" hidden disabled selected>Choix du profil</option>
             {% for smtp in sending_profiles %}
               <option value="{{ smtp.name }}">{{ smtp.name }}</option>
             {% endfor %}
@@ -58,17 +58,17 @@
 
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="campaignLaunchDate" class="form-label fw-bold"><i class="bi bi-calendar"></i> Launch Date:</label>
+          <label for="campaignLaunchDate" class="form-label fw-bold"><i class="bi bi-calendar"></i> Date de lancement:</label>
           <input type="datetime-local" id="campaignLaunchDate" class="form-control">
         </div>
 
         <div class="col-md-6 mb-3">
-          <label for="campaignUrl" class="form-label fw-bold"><i class="bi bi-link-45deg"></i> Phishing URL:</label>
+          <label for="campaignUrl" class="form-label fw-bold"><i class="bi bi-link-45deg"></i> URL de phishing:</label>
           <input type="url" id="campaignUrl" class="form-control" value="http://localhost">
         </div>
       </div>
 
-      <button type="button" class="btn btn-success w-100 py-2" onclick="submitCampaign()" id="submitBtn">🚀 Launch Campaign</button>
+      <button type="button" class="btn btn-success w-100 py-2" onclick="submitCampaign()" id="submitBtn">🚀 Lancer la campagne</button>
     </form>
   </div>
 </div>
@@ -76,7 +76,7 @@
 <script>
   function submitCampaign() {
     const submitBtn = document.getElementById("submitBtn");
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Launching...';
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Lancement...';
     submitBtn.disabled = true;
 
     // Récupération et correction du format de la date
@@ -104,16 +104,16 @@
     .then(response => {
       if (response.error) {
         alert("Error: " + response.error);
-        submitBtn.innerHTML = "🚀 Launch Campaign";
+        submitBtn.innerHTML = "🚀 Lancement de la campagne";
         submitBtn.disabled = false;
       } else {
-        alert("✅ Campaign created successfully!");
+        alert("✅ Campagne créée avec succès!");
         window.location.href = "/follow-campaign";
       }
     })
     .catch(err => {
       console.error(err);
-      submitBtn.innerHTML = "🚀 Launch Campaign";
+      submitBtn.innerHTML = "🚀 Lancement de la campagne";
       submitBtn.disabled = false;
     });
   }
