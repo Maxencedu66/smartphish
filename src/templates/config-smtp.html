@@ -1,0 +1,243 @@
+{% extends "index.html" %}
+{% block title %}Configuration SMTP Profiles - SmartPhish{% endblock %}
+
+{% block content %}
+<h2>⚙️ Configuration</h2>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a>
+    </li>
+
+</ul>
+  
+
+
+<h2> SMTP Profiles</h2>
+
+<!-- Button to open "New Sending Profile" modal -->
+<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newSmtpModal">
+    ➕ New Sending Profile
+  </button>
+  
+
+<!-- Table des Sending Profiles -->
+<table id="smtpTable" class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Host</th>
+      <th>From Address</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for profile in smtp_profiles %}
+    <tr>
+      <td>{{ profile.name }}</td>
+      <td>{{ profile.host }}</td>
+      <td>{{ profile.from_address }}</td>
+      <td>
+        <button class="btn btn-primary btn-sm edit-smtp" 
+                data-id="{{ profile.id }}"
+                data-bs-toggle="modal" 
+                data-bs-target="#editSmtpModal">
+          ✏️ Edit
+        </button>
+
+        <button class="btn btn-danger btn-sm delete-smtp" data-id="{{ profile.id }}">
+          🗑️ Delete
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ========== MODAL: CREATE NEW SMTP PROFILE ========== -->
+<div class="modal fade" id="newSmtpModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create a New SMTP Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="newSmtpForm">
+          <div class="mb-3">
+            <label for="newSmtpName" class="form-label">Profile Name:</label>
+            <input type="text" id="newSmtpName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="newSmtpHost" class="form-label">SMTP Host:</label>
+            <input type="text" id="newSmtpHost" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="newSmtpFromAddress" class="form-label">From Address:</label>
+            <input type="email" id="newSmtpFromAddress" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="newSmtpUsername" class="form-label">Username:</label>
+            <input type="text" id="newSmtpUsername" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="newSmtpPassword" class="form-label">Password:</label>
+            <input type="password" id="newSmtpPassword" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label>
+              <input type="checkbox" id="newSmtpIgnoreCert"> Ignore SSL Errors
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-success" onclick="submitNewSmtp()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: EDIT SMTP PROFILE ========== -->
+<div class="modal fade" id="editSmtpModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit SMTP Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editSmtpForm">
+          <input type="hidden" id="editSmtpId">
+          <div class="mb-3">
+            <label for="editSmtpName" class="form-label">Profile Name:</label>
+            <input type="text" id="editSmtpName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="editSmtpHost" class="form-label">SMTP Host:</label>
+            <input type="text" id="editSmtpHost" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="editSmtpFromAddress" class="form-label">From Address:</label>
+            <input type="email" id="editSmtpFromAddress" class="form-control" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEditedSmtp()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function submitNewSmtp() {
+    const data = {
+      name: document.getElementById("newSmtpName").value,
+      host: document.getElementById("newSmtpHost").value,
+      from_address: document.getElementById("newSmtpFromAddress").value,
+      username: document.getElementById("newSmtpUsername").value,
+      password: document.getElementById("newSmtpPassword").value,
+      ignore_cert_errors: document.getElementById("newSmtpIgnoreCert").checked
+    };
+
+    fetch("/config-smtp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => console.error(err));
+  }
+
+  function submitEditedSmtp() {
+    const profileId = document.getElementById("editSmtpId").value;
+    const data = {
+      id: parseInt(profileId, 10),
+      name: document.getElementById("editSmtpName").value,
+      host: document.getElementById("editSmtpHost").value,
+      from_address: document.getElementById("editSmtpFromAddress").value
+    };
+
+    fetch(`/config-smtp/${profileId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(() => location.reload())
+    .catch(err => console.error(err));
+  }
+
+    //    SUPPRESSION D'UN SMTP PROFILE
+    document.querySelectorAll(".delete-smtp").forEach(btn => {
+        btn.addEventListener("click", function() {
+        const profileId = this.getAttribute("data-id");
+    
+        if (!confirm("Are you sure you want to delete this sending profile?")) return;
+    
+        fetch(`/config-smtp/${profileId}`, {
+            method: "DELETE"
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+            alert("Error: " + data.error);
+            } else {
+            location.reload();  // Recharge la page pour mettre à jour la liste
+            }
+        })
+        .catch(err => console.error("Error deleting SMTP profile:", err));
+        });
+    });
+
+
+    // -----------------------------------------------
+    //         CHARGER UN SENDING PROFILE POUR EDITION
+    // -----------------------------------------------
+    document.querySelectorAll(".edit-smtp").forEach(btn => {
+        btn.addEventListener("click", function() {
+        const profileId = this.getAttribute("data-id");
+    
+        // Nettoyer les champs avant de charger les nouvelles données
+        document.getElementById("editSmtpId").value = "";
+        document.getElementById("editSmtpName").value = "";
+        document.getElementById("editSmtpHost").value = "";
+        document.getElementById("editSmtpFromAddress").value = "";
+    
+        fetch(`/config-smtp/${profileId}`)
+            .then(response => response.json())
+            .then(data => {
+            if (data.error) {
+                alert("Error fetching SMTP profile: " + data.error);
+                return;
+            }
+    
+            // Remplir les champs du formulaire avec les données récupérées
+            document.getElementById("editSmtpId").value = data.id;
+            document.getElementById("editSmtpName").value = data.name;
+            document.getElementById("editSmtpHost").value = data.host;
+            document.getElementById("editSmtpFromAddress").value = data.from_address;
+            })
+            .catch(err => console.error("Error fetching SMTP profile:", err));
+        });
+    });
+    
+  
+</script>
+
+{% endblock %}

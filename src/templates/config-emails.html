@@ -15,6 +15,10 @@
     <li class="nav-item">
       <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a>
+    </li>
+
 </ul>
 
 <div class="tab-content mt-3">

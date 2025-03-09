@@ -1,8 +1,8 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
-from src.services.llm_service import generate_phishing_email, get_ollama_status
-from src.services.gophish_service import get_campaigns, get_groups, create_group, delete_group, update_group, get_groupsid
+from src.services.llm_service import *
+from src.services.gophish_service import *
 import json
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
@@ -98,6 +98,11 @@ def llm_settings():
 def maj_status():
     return render_template('maj-status.html')
 
+
+
+# ---------------------------
+# Routes pour les groupes
+# ---------------------------
 @bp.route('/config-groups')
 def config_groups():
     groups_data = get_groups()  # Renvoie un tableau de groupes
@@ -164,7 +169,11 @@ def delete_group_frontend(group_id):
     return jsonify(response)
 
 
+
+# ---------------------------
 # Routes pour les templates de mail
+# ---------------------------
+
 
 @bp.route('/config-emails', methods=['GET'])
 def config_emails():
@@ -245,3 +254,31 @@ def delete_template_frontend(template_id):
     from src.services.gophish_service import delete_template
     response = delete_template(template_id)
     return jsonify(response)
+
+
+
+# ---------------------------
+# Routes pour les Sending Profiles (Profils SMTP)
+# ---------------------------
+@bp.route('/config-smtp')
+def config_smtp():
+    smtp_profiles = get_sending_profiles()  # Récupérer tous les profils SMTP
+    return render_template('config-smtp.html', smtp_profiles=smtp_profiles)
+
+@bp.route('/config-smtp/<int:profile_id>', methods=['GET'])
+def get_smtp_profile(profile_id):
+    return jsonify(get_sending_profile(profile_id))
+
+@bp.route('/config-smtp', methods=['POST'])
+def new_smtp_submit():
+    data = request.get_json()
+    return jsonify(create_sending_profile(data))
+
+@bp.route('/config-smtp/<int:profile_id>', methods=['PUT'])
+def update_smtp_submit(profile_id):
+    data = request.get_json()
+    return jsonify(update_sending_profile(profile_id, data))
+
+@bp.route('/config-smtp/<int:profile_id>', methods=['DELETE'])
+def delete_smtp(profile_id):
+    return jsonify(delete_sending_profile(profile_id))
