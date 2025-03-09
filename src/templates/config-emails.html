@@ -17,7 +17,11 @@
 
 <table class="table table-striped">
     <thead>
-        <tr><th>Nom</th><th>Sujet</th><th>Actions</th></tr>
+        <tr>
+            <th>Nom</th>
+            <th>Sujet</th>
+            <th>Actions</th>
+        </tr>
     </thead>
     <tbody id="emailTemplateTableBody">
         {% for template in email_templates %}
@@ -35,21 +39,91 @@
 
 <!-- ========== MODAL: CREATE NEW EMAIL TEMPLATE ========== -->
 <div class="modal fade" id="newEmailTemplateModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Créer un Email Template</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <label for="newTemplateName" class="form-label">Nom :</label>
-                <input type="text" id="newTemplateName" class="form-control mb-2" required>
-
-                <label for="newEmailSubject" class="form-label">Sujet :</label>
-                <input type="text" id="newEmailSubject" class="form-control mb-2" required>
-
-                <label for="newEmailText" class="form-label">Contenu :</label>
-                <textarea id="newEmailText" class="form-control" rows="5" required></textarea>
+                <form id="newEmailTemplateForm">
+                    <div class="mb-3">
+                        <label for="newTemplateName" class="form-label">Nom :</label>
+                        <input type="text" id="newTemplateName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Méthode de création :</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="creationMethod" id="manualMethod" value="manual" checked>
+                                <label class="form-check-label" for="manualMethod">Manuel</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="creationMethod" id="aiMethod" value="ai">
+                                <label class="form-check-label" for="aiMethod">Génération par IA</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Champs pour saisie manuelle -->
+                    <div id="manualFields">
+                        <div class="mb-3">
+                            <label for="newEmailSubject" class="form-label">Sujet :</label>
+                            <input type="text" id="newEmailSubject" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newEmailText" class="form-label">Contenu :</label>
+                            <textarea id="newEmailText" class="form-control" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <!-- Champs pour génération par IA -->
+                    <div id="aiFields" style="display:none;">
+                        <div class="mb-3">
+                            <label for="aiScenario" class="form-label">Choisissez un scénario :</label>
+                            <select id="aiScenario" class="form-select">
+                                <option value="">-- Sélectionnez --</option>
+                                <option value="Départ à la retraite">Départ à la retraite</option>
+                                <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement - RIB nécessaire</option>
+                                <option value="Alerte de sécurité - Connexion suspecte">Alerte de sécurité - Connexion suspecte</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aiEntreprise" class="form-label">Nom de l'entreprise :</label>
+                            <input type="text" id="aiEntreprise" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="aiExpediteur" class="form-label">Nom de l'expéditeur :</label>
+                            <input type="text" id="aiExpediteur" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="aiEmailExpediteur" class="form-label">Email expéditeur :</label>
+                            <input type="email" id="aiEmailExpediteur" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" onclick="generateAIEmail()">Générer l'email par IA</button>
+                        </div>
+                        <!-- Spinner de chargement -->
+                        <div id="aiLoading" style="display: none;" class="text-center mt-2">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                        <!-- Résultat de l'IA avec bouton Régénérer -->
+                        <div id="aiResult" style="display:none;">
+                            <h5>Email généré</h5>
+                            <div class="mb-3">
+                                <label for="aiGeneratedSubject" class="form-label">Sujet généré :</label>
+                                <input type="text" id="aiGeneratedSubject" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="aiGeneratedContent" class="form-label">Contenu généré :</label>
+                                <textarea id="aiGeneratedContent" class="form-control" rows="5" required></textarea>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-warning" onclick="generateAIEmail()">Régénérer</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="submitNewEmailTemplate()">Enregistrer</button>
@@ -68,15 +142,18 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editTemplateId">
-                
-                <label for="editTemplateName" class="form-label">Nom :</label>
-                <input type="text" id="editTemplateName" class="form-control mb-2" required>
-
-                <label for="editEmailSubject" class="form-label">Sujet :</label>
-                <input type="text" id="editEmailSubject" class="form-control mb-2" required>
-
-                <label for="editEmailText" class="form-label">Contenu :</label>
-                <textarea id="editEmailText" class="form-control" rows="5" required></textarea>
+                <div class="mb-3">
+                    <label for="editTemplateName" class="form-label">Nom :</label>
+                    <input type="text" id="editTemplateName" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editEmailSubject" class="form-label">Sujet :</label>
+                    <input type="text" id="editEmailSubject" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editEmailText" class="form-label">Contenu :</label>
+                    <textarea id="editEmailText" class="form-control" rows="5" required></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="submitEditedEmailTemplate()">Enregistrer</button>
@@ -87,11 +164,23 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Récupérer les boutons Modifier après chargement de la page
+    // Basculement entre les champs manuels et IA
+    document.getElementsByName("creationMethod").forEach(radio => {
+        radio.addEventListener("change", function() {
+            if (this.value === "ai") {
+                document.getElementById("aiFields").style.display = "block";
+                document.getElementById("manualFields").style.display = "none";
+            } else {
+                document.getElementById("aiFields").style.display = "none";
+                document.getElementById("manualFields").style.display = "block";
+            }
+        });
+    });
+
+    // Modification d'un template
     document.querySelectorAll(".edit-template").forEach(btn => {
         btn.addEventListener("click", function() {
             const templateId = this.getAttribute("data-id");
-
             fetch(`/templates/${templateId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -99,7 +188,6 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert("Erreur lors de la récupération du template.");
                         return;
                     }
-
                     document.getElementById("editTemplateId").value = data.id;
                     document.getElementById("editTemplateName").value = data.name;
                     document.getElementById("editEmailSubject").value = data.subject;
@@ -108,14 +196,90 @@ document.addEventListener("DOMContentLoaded", function() {
                 .catch(err => console.error("Erreur lors du chargement du template :", err));
         });
     });
+
+    // Suppression d'un template
+    document.querySelectorAll(".delete-template").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const templateId = this.getAttribute("data-id");
+            if (!confirm("Voulez-vous vraiment supprimer cet Email Template ?")) return;
+            fetch(`/templates/${templateId}`, {
+                method: "DELETE"
+            })
+            .then(res => res.json())
+            .then(() => location.reload())
+            .catch(err => console.error("Erreur lors de la suppression :", err));
+        });
+    });
 });
 
-// Création d'un nouveau template
+// Fonction pour générer l'email par IA avec affichage de la roue de chargement
+function generateAIEmail() {
+    const scenario = document.getElementById("aiScenario").value;
+    const entreprise = document.getElementById("aiEntreprise").value;
+    const expediteur = document.getElementById("aiExpediteur").value;
+    const email_expediteur = document.getElementById("aiEmailExpediteur").value;
+
+    if (!scenario || !expediteur || !email_expediteur) {
+        alert("Veuillez remplir les champs requis pour la génération par IA (Scénario, Nom de l'expéditeur, Email expéditeur).");
+        return;
+    }
+
+    // Afficher le spinner et masquer le résultat précédent
+    document.getElementById("aiLoading").style.display = "block";
+    document.getElementById("aiResult").style.display = "none";
+
+    fetch("/generate-email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            scenario: scenario,
+            entreprise: entreprise,
+            expediteur: expediteur,
+            email_expediteur: email_expediteur
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("aiLoading").style.display = "none";
+        if (data.error) {
+            alert("Erreur lors de la génération de l'email : " + data.error);
+            return;
+        }
+        // Remplir les champs de l'IA avec l'email généré et afficher le résultat
+        document.getElementById("aiGeneratedSubject").value = data.object;
+        document.getElementById("aiGeneratedContent").value = data.content;
+        document.getElementById("aiResult").style.display = "block";
+    })
+    .catch(err => {
+        document.getElementById("aiLoading").style.display = "none";
+        console.error("Erreur lors de la génération par IA:", err);
+        alert("Erreur lors de la génération de l'email par IA.");
+    });
+}
+
+// Fonction pour soumettre le nouveau template
 function submitNewEmailTemplate() {
+    const name = document.getElementById("newTemplateName").value;
+    let subject, text;
+    if (document.getElementById("aiMethod").checked) {
+        subject = document.getElementById("aiGeneratedSubject").value;
+        text = document.getElementById("aiGeneratedContent").value;
+    } else {
+        subject = document.getElementById("newEmailSubject").value;
+        text = document.getElementById("newEmailText").value;
+    }
+
+    if (!name || !subject || !text) {
+        alert("Veuillez remplir tous les champs requis.");
+        return;
+    }
+
     const data = {
-        name: document.getElementById("newTemplateName").value,
-        subject: document.getElementById("newEmailSubject").value,
-        text: document.getElementById("newEmailText").value
+        name: name,
+        subject: subject,
+        text: text
     };
 
     fetch("/templates", {
@@ -128,7 +292,7 @@ function submitNewEmailTemplate() {
     .catch(err => console.error(err));
 }
 
-// Modification d'un template
+// Fonction pour soumettre la modification d'un template
 function submitEditedEmailTemplate() {
     const templateId = document.getElementById("editTemplateId").value;
     const data = {
@@ -147,22 +311,6 @@ function submitEditedEmailTemplate() {
     .then(() => location.reload())
     .catch(err => console.error(err));
 }
-
-// Suppression d'un template
-document.querySelectorAll(".delete-template").forEach(btn => {
-    btn.addEventListener("click", function() {
-        const templateId = this.getAttribute("data-id");
-
-        if (!confirm("Voulez-vous vraiment supprimer cet Email Template ?")) return;
-
-        fetch(`/templates/${templateId}`, {
-            method: "DELETE"
-        })
-        .then(res => res.json())
-        .then(() => location.reload())
-        .catch(err => console.error("Erreur lors de la suppression :", err));
-    });
-});
 </script>
 
 {% endblock %}
