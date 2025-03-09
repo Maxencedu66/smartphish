@@ -9,13 +9,13 @@
       <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
+      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Modèles d'e-mails</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
+      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Page de destination</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a>
+      <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a>
     </li>
 
 </ul>
@@ -23,71 +23,72 @@
 
 <div id="groups" class="tab-pane fade show active">
 
-    <h2>👥 Groups</h2>
+    <h2>👥 Groupes</h2>
   
     <!-- Button to open "New Group" modal -->
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newGroupModal">
-      ➕ New Group
+      ➕ Nouveau Groupe
     </button>
   
     <!-- Groups Table -->
-    <table id="groupsTable" class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th># of Members</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for group in groups %}
-        <tr>
-          <td>{{ group.name }}</td>
-          <td>{{ group.targets | length }}</td>
-          <td>
-            <!-- Edit Button -->
-            <button class="btn btn-primary btn-sm edit-group" 
-                    data-id="{{ group.id }}"
-                    data-bs-toggle="modal" 
-                    data-bs-target="#editGroupModal">
-              ✏️ Modifier
-            </button>
-  
-            <!-- Delete Button -->
-            <button class="btn btn-danger btn-sm delete-group" data-id="{{ group.id }}">
-              🗑️ Supprimer
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  
-  
+    <div class="table-responsive">
+      <table id="groupsTable" class="table table-hover table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>Nom</th>
+            <th>Total des membres</th>
+            <th class="text-end"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in groups %}
+          <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.targets | length }}</td>
+            <td class="text-end">
+              <!-- Edit Button -->
+              <button class="btn btn-primary btn-sm edit-group" 
+                      data-id="{{ group.id }}"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#editGroupModal">
+                ✏️ Modifier
+              </button>
+    
+              <!-- Delete Button -->
+              <button class="btn btn-danger btn-sm delete-group" data-id="{{ group.id }} ">
+                🗑️ Supprimer
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
     <!-- ========== MODAL: CREATE NEW GROUP ========== -->
     <div class="modal fade" id="newGroupModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Create a New Group</h5>
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">Créer un nouveau groupe</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form id="newGroupForm">
               <div class="mb-3">
-                <label for="newGroupName" class="form-label">Group Name:</label>
+                <label for="newGroupName" class="form-label">Nom du Groupe:</label>
                 <input type="text" id="newGroupName" class="form-control" required>
               </div>
-              <h6>Members</h6>
+              <h6>Membres</h6>
               <div id="newGroupMembers" class="mb-2"></div>
               <button type="button" class="btn btn-secondary" onclick="addMember('newGroupMembers')">
-                ➕ Add Member
+                ➕ Ajouter un membre
               </button>
             </form>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn btn-success" onclick="submitNewGroup()">Save</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button class="btn btn-success" onclick="submitNewGroup()">Sauvegarder</button>
           </div>
         </div>
       </div>
@@ -98,27 +99,27 @@
     <div class="modal fade" id="editGroupModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit Group</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Modifier Groupe</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermé"></button>
           </div>
           <div class="modal-body">
             <form id="editGroupForm">
               <input type="hidden" id="editGroupId" value="">
               <div class="mb-3">
-                <label for="editGroupName" class="form-label">Group Name:</label>
+                <label for="editGroupName" class="form-label">Nom du Groupe:</label>
                 <input type="text" id="editGroupName" class="form-control" required>
               </div>
-              <h6>Members</h6>
+              <h6>Membres</h6>
               <div id="editGroupMembers" class="mb-2"></div>
               <button type="button" class="btn btn-secondary" onclick="addMember('editGroupMembers')">
-                ➕ Add Member
+                ➕ Ajouter un membre
               </button>
             </form>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn btn-primary" onclick="submitEditedGroup()">Save Changes</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button class="btn btn-primary" onclick="submitEditedGroup()">Sauvegarder</button>
           </div>
         </div>
       </div>
@@ -130,7 +131,9 @@
             integrity="sha256-/xUj+sNR6x7ZBHD1Z9ltB+Z+Ov1Zq/fZVhOR5mF7Gkg="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    
     <script>
       // -----------------------------------------------
       //             AJOUTER UN MEMBRE
@@ -141,8 +144,8 @@
         row.classList.add("member-row", "d-flex", "gap-2", "align-items-center", "mb-2");
         row.innerHTML = `
           <input type="email" name="email[]" placeholder="Email" class="form-control" required>
-          <input type="text" name="first_name[]" placeholder="First Name" class="form-control">
-          <input type="text" name="last_name[]" placeholder="Last Name" class="form-control">
+          <input type="text" name="first_name[]" placeholder="Prénom" class="form-control">
+          <input type="text" name="last_name[]" placeholder="Nom" class="form-control">
           <input type="text" name="position[]" placeholder="Position" class="form-control">
           <button type="button" class="btn btn-danger btn-sm remove-member">❌</button>
         `;
@@ -281,21 +284,47 @@
       // -----------------------------------------------
       document.querySelectorAll(".delete-group").forEach(btn => {
         btn.addEventListener("click", function() {
-          if (!confirm("Are you sure you want to delete this group?")) return;
           const groupId = this.getAttribute("data-id");
-  
-          fetch(`/config-groups/${groupId}`, {
-            method: "DELETE"
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.error) {
-              alert("Error: " + data.error);
-            } else {
-              location.reload();
+
+          // Utilisation de SweetAlert2 pour afficher une boîte de confirmation stylée
+          Swal.fire({
+            title: "Supprimer ce groupe ?",
+            text: "Cette action est irréversible. Voulez-vous continuer ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Oui, supprimer",
+            cancelButtonText: "Annuler",
+            reverseButtons: true
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Si l'utilisateur confirme, on envoie la requête de suppression
+              fetch(`/config-groups/${groupId}`, {
+                method: "DELETE"
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.error) {
+                  Swal.fire("Erreur", data.error, "error");
+                } else {
+                  Swal.fire({
+                    title: "Supprimé !",
+                    text: "Le groupe a été supprimé avec succès.",
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false
+                  }).then(() => {
+                    location.reload();
+                  });
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+              });
             }
-          })
-          .catch(err => console.error(err));
+          });
         });
       });
   

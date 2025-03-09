@@ -9,100 +9,102 @@
       <a class="nav-link {% if request.path == '/config-groups' %}active{% endif %}" href="{{ url_for('frontend.config_groups') }}">Groupes</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Email Templates</a>
+      <a class="nav-link {% if request.path == '/config-emails' %}active{% endif %}" href="{{ url_for('frontend.config_emails') }}">Modèles d'e-mails</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a>
+      <a class="nav-link {% if request.path == '/config-landing-pages' %}active{% endif %}" href="{{ url_for('frontend.config_landing_pages') }}">Page de destination</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a>
+        <a class="nav-link {% if request.path == '/config-smtp' %}active{% endif %}" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a>
     </li>
 
 </ul>
   
 
 
-<h2> SMTP Profiles</h2>
+<h2> Profils SMTP</h2>
 
 <!-- Button to open "New Sending Profile" modal -->
 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newSmtpModal">
-    ➕ New Sending Profile
+    ➕ Nouveau profil d'envoi
   </button>
   
 
 <!-- Table des Sending Profiles -->
-<table id="smtpTable" class="table table-striped">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Host</th>
-      <th>From Address</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for profile in smtp_profiles %}
-    <tr>
-      <td>{{ profile.name }}</td>
-      <td>{{ profile.host }}</td>
-      <td>{{ profile.from_address }}</td>
-      <td>
-        <button class="btn btn-primary btn-sm edit-smtp" 
-                data-id="{{ profile.id }}"
-                data-bs-toggle="modal" 
-                data-bs-target="#editSmtpModal">
-          ✏️ Modifier
-        </button>
+<div class="table-responsive">
+  <table id="smtpTable" class="table table-hover table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Nom</th>
+        <th>Hôte</th>
+        <th>De l'adresse</th>
+        <th class="text-end"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for profile in smtp_profiles %}
+      <tr>
+        <td>{{ profile.name }}</td>
+        <td>{{ profile.host }}</td>
+        <td>{{ profile.from_address }}</td>
+        <td class="text-end">
+          <button class="btn btn-primary btn-sm edit-smtp" 
+                  data-id="{{ profile.id }}"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#editSmtpModal">
+            ✏️ Modifier
+          </button>
 
-        <button class="btn btn-danger btn-sm delete-smtp" data-id="{{ profile.id }}">
-          🗑️ Supprimer
-        </button>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+          <button class="btn btn-danger btn-sm delete-smtp" data-id="{{ profile.id }}">
+            🗑️ Supprimer
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <!-- ========== MODAL: CREATE NEW SMTP PROFILE ========== -->
 <div class="modal fade" id="newSmtpModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Create a New SMTP Profile</h5>
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Créer un nouveau profil SMTP</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="newSmtpForm">
           <div class="mb-3">
-            <label for="newSmtpName" class="form-label">Profile Name:</label>
+            <label for="newSmtpName" class="form-label">Nom du Profil:</label>
             <input type="text" id="newSmtpName" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpHost" class="form-label">SMTP Host:</label>
+            <label for="newSmtpHost" class="form-label">Hôte SMTP:</label>
             <input type="text" id="newSmtpHost" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpFromAddress" class="form-label">From Address:</label>
+            <label for="newSmtpFromAddress" class="form-label">De :</label>
             <input type="email" id="newSmtpFromAddress" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpUsername" class="form-label">Username:</label>
+            <label for="newSmtpUsername" class="form-label">Pseudonyme:</label>
             <input type="text" id="newSmtpUsername" class="form-control">
           </div>
           <div class="mb-3">
-            <label for="newSmtpPassword" class="form-label">Password:</label>
+            <label for="newSmtpPassword" class="form-label">Mot de passe:</label>
             <input type="password" id="newSmtpPassword" class="form-control">
           </div>
           <div class="mb-3">
             <label>
-              <input type="checkbox" id="newSmtpIgnoreCert"> Ignore SSL Errors
+              <input type="checkbox" id="newSmtpIgnoreCert"> Ignorer les erreurs SSL
             </label>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-success" onclick="submitNewSmtp()">Save</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn btn-success" onclick="submitNewSmtp()">Sauvegarder</button>
       </div>
     </div>
   </div>
@@ -112,36 +114,36 @@
 <div class="modal fade" id="editSmtpModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit SMTP Profile</h5>
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Modifier Profil SMTP</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="editSmtpForm">
           <input type="hidden" id="editSmtpId">
           <div class="mb-3">
-            <label for="editSmtpName" class="form-label">Profile Name:</label>
+            <label for="editSmtpName" class="form-label">Nom du Profil:</label>
             <input type="text" id="editSmtpName" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="editSmtpHost" class="form-label">SMTP Host:</label>
+            <label for="editSmtpHost" class="form-label">Hôte SMTP:</label>
             <input type="text" id="editSmtpHost" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="editSmtpFromAddress" class="form-label">From Address:</label>
+            <label for="editSmtpFromAddress" class="form-label">De:</label>
             <input type="email" id="editSmtpFromAddress" class="form-control" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" onclick="submitEditedSmtp()">Save Changes</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn btn-primary" onclick="submitEditedSmtp()">Sauvegarder</button>
       </div>
     </div>
   </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   function submitNewSmtp() {
@@ -185,25 +187,50 @@
 
     //    SUPPRESSION D'UN SMTP PROFILE
     document.querySelectorAll(".delete-smtp").forEach(btn => {
-        btn.addEventListener("click", function() {
-        const profileId = this.getAttribute("data-id");
-    
-        if (!confirm("Are you sure you want to delete this sending profile?")) return;
-    
-        fetch(`/config-smtp/${profileId}`, {
+    btn.addEventListener("click", function() {
+      const profileId = this.getAttribute("data-id");
+
+      // Affichage du popup de confirmation avec SweetAlert2
+      Swal.fire({
+        title: "Supprimer ce profil d'envoi ?",
+        text: "Cette action est irréversible. Êtes-vous sûr ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Si l'utilisateur confirme, envoi de la requête DELETE
+          fetch(`/config-smtp/${profileId}`, {
             method: "DELETE"
-        })
-        .then(res => res.json())
-        .then(data => {
+          })
+          .then(res => res.json())
+          .then(data => {
             if (data.error) {
-            alert("Error: " + data.error);
+              Swal.fire("Erreur", "Impossible de supprimer ce profil SMTP.", "error");
             } else {
-            location.reload();  // Recharge la page pour mettre à jour la liste
+              Swal.fire({
+                title: "Supprimé !",
+                text: "Le profil d'envoi a été supprimé avec succès.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                location.reload();
+              });
             }
-        })
-        .catch(err => console.error("Error deleting SMTP profile:", err));
-        });
+          })
+          .catch(err => {
+            console.error("Erreur lors de la suppression du profil SMTP :", err);
+            Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+          });
+        }
+      });
     });
+  });
 
 
     // -----------------------------------------------

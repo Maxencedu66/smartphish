@@ -6,40 +6,42 @@
 
 <ul class="nav nav-tabs">
     <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_groups') }}">Groupes</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_emails') }}">Email Templates</a></li>
-    <li class="nav-item"><a class="nav-link active" href="{{ url_for('frontend.config_landing_pages') }}">Landing Pages</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Sending Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_emails') }}">Modèles d'e-mails</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('frontend.config_landing_pages') }}">Page de destination</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a></li>
 </ul>
 
-<h3>📄 Gestion des Landing Pages</h3>
+<h3>📄 Gestion des Pages de destination</h3>
 
 <!-- Bouton pour créer une nouvelle landing page -->
-<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newLandingPageModal">➕ Nouvelle Landing Page</button>
+<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newLandingPageModal">➕ Nouvelle Page de destination</button>
 
 <!-- Table des landing pages -->
-<table class="table table-striped">
-    <thead>
-        <tr><th>Nom</th><th>Actions</th></tr>
-    </thead>
-    <tbody id="landingPageTableBody">
-        {% for page in landing_pages %}
-        <tr data-id="{{ page.id }}">
-            <td>{{ page.name }}</td>
-            <td>
-                <button class="btn btn-primary btn-sm edit-landing-page" data-id="{{ page.id }}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
-                <button class="btn btn-danger btn-sm delete-landing-page" data-id="{{ page.id }}">🗑️ Supprimer</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr><th>Nom</th><th class="text-end"></th></tr>
+        </thead>
+        <tbody id="landingPageTableBody">
+            {% for page in landing_pages %}
+            <tr data-id="{{ page.id }}">
+                <td>{{ page.name }}</td>
+                <td class="text-end">
+                    <button class="btn btn-primary btn-sm edit-landing-page" data-id="{{ page.id }}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
+                    <button class="btn btn-danger btn-sm delete-landing-page" data-id="{{ page.id }}">🗑️ Supprimer</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- ========== MODAL: CREATE NEW LANDING PAGE ========== -->
 <div class="modal fade" id="newLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Créer une Landing Page</h5>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Créer une Page de Destination</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -60,8 +62,8 @@
 <div class="modal fade" id="editLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Modifier une Landing Page</h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Modifier une Page de destination</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -79,6 +81,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -134,7 +138,7 @@ document.querySelectorAll(".edit-landing-page").forEach(btn => {
                 document.getElementById("editLandingPageName").value = data.name;
                 document.getElementById("editLandingPageHTML").value = data.html;
             })
-            .catch(err => console.error("Erreur lors du chargement de la landing page :", err));
+            .catch(err => console.error("Erreur lors du chargement de la page de destination :", err));
     });
 });
 
@@ -163,18 +167,49 @@ function submitEditedLandingPage() {
 // Suppression d'une landing page
 document.querySelectorAll(".delete-landing-page").forEach(btn => {
     btn.addEventListener("click", function() {
-        const pageId = this.getAttribute("data-id");
+      const pageId = this.getAttribute("data-id");
 
-        if (!confirm("Voulez-vous vraiment supprimer cette Landing Page ?")) return;
-
-        fetch(`/config-landing-pages/${pageId}`, {  // 🔹 Correction ici
+      // Affichage du popup de confirmation avec SweetAlert2
+      Swal.fire({
+        title: "Supprimer cette page de destination ?",
+        text: "Cette action est irréversible. Êtes-vous sûr ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Si l'utilisateur confirme, envoi de la requête DELETE
+          fetch(`/config-landing-pages/${pageId}`, { 
             method: "DELETE"
-        })
-        .then(res => res.json())
-        .then(() => location.reload())
-        .catch(err => console.error("Erreur lors de la suppression :", err));
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.error) {
+              Swal.fire("Erreur", "Impossible de supprimer cette page de destination.", "error");
+            } else {
+              Swal.fire({
+                title: "Supprimée !",
+                text: "La page de destination a été supprimée avec succès.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                location.reload();
+              });
+            }
+          })
+          .catch(err => {
+            console.error("Erreur lors de la suppression de la page de destination :", err);
+            Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+          });
+        }
+      });
     });
-});
+  });
 </script>
 
 {% endblock %}
