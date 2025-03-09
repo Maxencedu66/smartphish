@@ -24,27 +24,39 @@ def get_campaigns():
 
 ### A refaire car pas fonctionnelle
 def create_campaign(data):
-    """Crée une campagne sur GoPhish avec validation des éléments existants."""
-    # IMPORTANT : Ajout du slash final à l'URL pour respecter le endpoint de création
+    """Crée une campagne sur GoPhish en utilisant le payload basé sur les noms,
+    en corrigeant le format de la date si nécessaire."""
     url = f"{Config.GOPHISH_API_URL}/api/campaigns/"
+
+    # Correction du format de la date si besoin :
+    launch_date = data.get("launch_date")
+    # Si la date est au format "YYYY-MM-DDTHH:MM" (16 caractères), on ajoute ":00+00:00"
+    if launch_date and len(launch_date) == 16:
+        launch_date = launch_date + ":00+00:00"
+
+    # Si le smtp est vide, on le met à None
+    smtp_name = data.get("smtp", {}).get("name")
+    if smtp_name == "":
+        smtp_obj = None
+    else:
+        smtp_obj = {"name": smtp_name}
 
     campaign_data = {
         "name": data.get("name", "Default Campaign"),
         "template": {"name": data["template"]["name"]} if "template" in data else None,
         "page": {"name": data["page"]["name"]} if "page" in data else None,
-        "smtp": {"name": data["smtp"]["name"]} if "smtp" in data else None,
+        "smtp": smtp_obj,
         "groups": [{"name": group["name"]} for group in data.get("groups", [])],
         "url": data.get("url", "http://localhost"),
-        "launch_date": data.get("launch_date", None),
-        # On peut aussi accepter send_by_date s’il est fourni dans data, sinon None
+        "launch_date": launch_date,
         "send_by_date": data.get("send_by_date", None)
     }
 
-    print("🔹 Données envoyées à GoPhish :", campaign_data)  # DEBUG
+    print("🔹 Données envoyées à GoPhish :", campaign_data)
 
     response = requests.post(url, json=campaign_data, headers=HEADERS, verify=False)
 
-    print("🔹 Réponse brute de GoPhish :", response.status_code, response.text)  # DEBUG
+    print("🔹 Réponse brute de GoPhish :", response.status_code, response.text)
 
     try:
         result = response.json()
@@ -58,6 +70,7 @@ def create_campaign(data):
             "status_code": response.status_code,
             "content": response.text
         }
+
 
 
 # ---------------------------
