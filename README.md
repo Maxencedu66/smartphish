@@ -92,8 +92,7 @@ smartphish/
 │   │   ├── images/            # Images et logos
 │   │
 │   ├── database/              # Scripts et fichiers liés à la base de données
-│   │   ├── db.sqlite          # Base de données SQLite (si utilisée)
-│   │   ├── models.py          # Définition des modèles de données
+│   │   ├── smartphish.db      # Base de données SQLite
 │   │
 │   ├── config.py              # Configuration de l'application
 │
