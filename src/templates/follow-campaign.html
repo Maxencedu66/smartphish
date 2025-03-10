@@ -13,7 +13,7 @@
                 <th>Nom</th>
                 <th>Date de création</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -29,7 +29,7 @@
                         <span class="badge bg-warning text-dark">In progress</span>
                     {% endif %}
                 </td>
-                <td>
+                <td class="text-end">
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
                     <button class="btn btn-danger" onclick="deleteCampaign({{ campaign.id }})">Supprimer</button>
                     {% if campaign.status == "In progress" %}
@@ -44,26 +44,51 @@
     </table>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   function deleteCampaign(campaignId) {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette campagne ?")) {
-      fetch(`/api/gophish/campaigns/${campaignId}`, {
-        method: 'DELETE'
-      })
-      .then(res => res.json())
-      .then(response => {
-        if (response.success) {
-          alert(response.message);
-          document.getElementById(`campaign-row-${campaignId}`).remove();
-        } else {
-          alert("Erreur lors de la suppression : " + response.error);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Une erreur s'est produite.");
-      });
-    }
+    // Affichage du popup de confirmation
+    Swal.fire({
+      title: "Supprimer cette campagne ?",
+      text: "Cette action est irréversible. Êtes-vous sûr ?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Oui, supprimer",
+      cancelButtonText: "Annuler",
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Si l'utilisateur confirme, envoyer la requête DELETE
+        fetch(`/api/gophish/campaigns/${campaignId}`, {
+          method: "DELETE"
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            // Afficher un message de succès et supprimer la ligne de la table
+            Swal.fire({
+              title: "Supprimée !",
+              text: response.message,
+              icon: "success",
+              timer: 2000,
+              showConfirmButton: false
+            });
+
+            document.getElementById(`campaign-row-${campaignId}`).remove();
+          } else {
+            // En cas d'erreur
+            Swal.fire("Erreur", "Impossible de supprimer cette campagne : " + response.error, "error");
+          }
+        })
+        .catch(err => {
+          console.error("Erreur lors de la suppression :", err);
+          Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+        });
+      }
+    });
   }
 
   function completeCampaign(campaignId) {
