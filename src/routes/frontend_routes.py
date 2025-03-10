@@ -78,12 +78,6 @@ def create_new_campaign():
     return jsonify(create_campaign(data))
 
 
-# Route pour la page de génération de mail
-@bp.route('/gen-mail')
-def gen_mail():
-    return render_template('gen_mail_llm.html')
-
-
 @bp.route('/follow-campaign')
 def follow_campaign():
     campaigns = get_campaigns()  # Récupérer les campagnes GoPhish

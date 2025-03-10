@@ -47,9 +47,12 @@
             <div class="modal-body">
                 <label for="newLandingPageName" class="form-label">Nom :</label>
                 <input type="text" id="newLandingPageName" class="form-control mb-2" required>
-
-                <label for="newLandingPageHTML" class="form-label">HTML :</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="newLandingPageHTML" class="form-label">HTML :</label>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('newLandingPageHTML', 'previewNewPage')" type="button">Vue/Code</button>
+                </div>
                 <textarea id="newLandingPageHTML" class="form-control" rows="5" required></textarea>
+                <div id="previewNewPage" class="border p-3 mt-2" style="display: none;"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="submitNewLandingPage()">Enregistrer</button>
@@ -71,9 +74,12 @@
                 
                 <label for="editLandingPageName" class="form-label">Nom :</label>
                 <input type="text" id="editLandingPageName" class="form-control mb-2" required>
-
-                <label for="editLandingPageHTML" class="form-label">HTML :</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="editLandingPageHTML" class="form-label">HTML :</label>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('editLandingPageHTML', 'previewEditPage')" type="button">Vue/Code</button>
+                </div>
                 <textarea id="editLandingPageHTML" class="form-control" rows="5" required></textarea>
+                <div id="previewEditPage" class="border p-3 mt-2" style="display: none;"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="submitEditedLandingPage()">Enregistrer</button>
@@ -106,8 +112,42 @@ document.addEventListener("DOMContentLoaded", function() {
         });
 });
 
+function togglePreview(textareaId, previewId) {
+    const textarea = document.getElementById(textareaId);
+    const preview = document.getElementById(previewId);
+
+    if (preview.style.display === "none") {
+        preview.innerHTML = textarea.value; // Affiche l'HTML
+        preview.style.display = "block";
+        textarea.style.display = "none";
+    } else {
+        preview.style.display = "none";
+        textarea.style.display = "block";
+    }
+}
+
+
+function validateLandingPageForm(nameId, htmlId) {
+    const name = document.getElementById(nameId).value.trim();
+    const html = document.getElementById(htmlId).value.trim();
+
+    if (!name || !html) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis manquants",
+            text: "Veuillez remplir tous les champs avant de soumettre.",
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
+    }
+    return true;
+}
+
+
 // Création d'une nouvelle landing page
 function submitNewLandingPage() {
+    if (!validateLandingPageForm("newLandingPageName", "newLandingPageHTML")) return;
+
     const data = {
         name: document.getElementById("newLandingPageName").value,
         html: document.getElementById("newLandingPageHTML").value,
@@ -116,15 +156,43 @@ function submitNewLandingPage() {
         redirect_url: "http://example.com"
     };
 
-    fetch("/config-landing-pages", {  // 🔹 Correction ici
+    fetch("/config-landing-pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur lors de la création",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Page créée avec succès !",
+                text: "Votre page de destination a été ajoutée.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error("Erreur:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de la création de la page.",
+            confirmButtonColor: "#d33"
+        });
+    });
 }
+
 
 // Chargement des données pour modification
 document.querySelectorAll(".edit-landing-page").forEach(btn => {
@@ -144,6 +212,8 @@ document.querySelectorAll(".edit-landing-page").forEach(btn => {
 
 // Modification d'une landing page
 function submitEditedLandingPage() {
+    if (!validateLandingPageForm("editLandingPageName", "editLandingPageHTML")) return;
+
     const pageId = document.getElementById("editLandingPageId").value;
     const data = {
         id: parseInt(pageId, 10),
@@ -154,14 +224,41 @@ function submitEditedLandingPage() {
         redirect_url: "http://example.com"
     };
 
-    fetch(`/config-landing-pages/${pageId}`, {  // 🔹 Correction ici
+    fetch(`/config-landing-pages/${pageId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur lors de la mise à jour",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Mise à jour réussie !",
+                text: "Votre page de destination a été mise à jour.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error("Erreur:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de la mise à jour.",
+            confirmButtonColor: "#d33"
+        });
+    });
 }
 
 // Suppression d'une landing page
@@ -169,7 +266,6 @@ document.querySelectorAll(".delete-landing-page").forEach(btn => {
     btn.addEventListener("click", function() {
       const pageId = this.getAttribute("data-id");
 
-      // Affichage du popup de confirmation avec SweetAlert2
       Swal.fire({
         title: "Supprimer cette page de destination ?",
         text: "Cette action est irréversible. Êtes-vous sûr ?",
