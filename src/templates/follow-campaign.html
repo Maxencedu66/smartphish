@@ -24,18 +24,18 @@
                 <td>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</td>
                 <td>
                     {% if campaign.status == "Completed" %}
-                        <span class="badge bg-success">Complétée</span>
+                        <span class="badge bg-success badge-fixed">Complétée</span>
                     {% else %}
-                        <span class="badge bg-warning text-dark">In progress</span>
+                        <span class="badge bg-warning text-dark badge-fixed">En cours</span>
                     {% endif %}
                 </td>
                 <td class="text-end">
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
                     <button class="btn btn-danger" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
                     {% if campaign.status == "In progress" %}
-                        <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
+                        <button class="btn btn-success btn-fixed" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
                     {% else %}
-                        <button class="btn btn-secondary" disabled>Terminé</button>
+                        <button class="btn btn-secondary btn-fixed" disabled>Terminée</button>
                     {% endif %}
                 </td>
             </tr>

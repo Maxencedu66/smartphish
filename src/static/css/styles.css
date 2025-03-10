@@ -192,3 +192,16 @@ main {
     border-radius: 50%;
     animation: fade-blink 2s ease-in-out infinite;
 }
+
+
+/* Style du bouton fixe */
+.btn-fixed {
+    min-width: 100px; /* Ajuste selon tes besoins */
+    text-align: center;
+}
+
+.badge-fixed {
+    min-width: 80px; /* Ajuste la largeur selon tes besoins */
+    display: inline-block;
+    text-align: center;
+}

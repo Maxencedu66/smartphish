@@ -30,7 +30,13 @@
                 <td>{{ campaign.name }}</td>
                 <td>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</td>
                 <td class="{% if campaign.status == 'Completed' %}text-success{% elif campaign.status == 'In progress' %}text-warning{% else %}text-danger{% endif %}">
-                    {{ campaign.status }}
+                    {% if campaign.status == "Completed" %}
+                        Complétée
+                    {% elif campaign.status == "In progress" %}
+                        En cours
+                    {% else %}
+                        {{ campaign.status }}
+                    {% endif %}
                 </td>
                 <td>{{ campaign.results | length }}</td>
                 <td>{{ campaign.results | selectattr('status', 'equalto', 'Opened') | list | length }}</td>
@@ -55,6 +61,7 @@
                         <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
                             <p><strong>Expéditeur :</strong> {{ campaign.template.envelope_sender }}</p>
                             <p><strong>Destinataire :</strong> {{ campaign.smtp.from_address }}</p>
+                            
                             <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
                             <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
                             <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
