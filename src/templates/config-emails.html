@@ -169,8 +169,15 @@
 <script>
 function validateEmailTemplateForm(nameId, subjectId, textId) {
     const name = document.getElementById(nameId).value.trim();
-    const subject = document.getElementById(subjectId).value.trim();
-    const text = document.getElementById(textId).value.trim();
+    
+    let subject, text;
+    if (document.getElementById("aiMethod").checked) {
+        subject = document.getElementById("aiGeneratedSubject").value.trim();
+        text = document.getElementById("aiGeneratedContent").value.trim();
+    } else {
+        subject = document.getElementById(subjectId).value.trim();
+        text = document.getElementById(textId).value.trim();
+    }
 
     if (!name || !subject || !text) {
         Swal.fire({
@@ -183,6 +190,7 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     }
     return true;
 }
+
 
 
 document.addEventListener("DOMContentLoaded", function() {
