@@ -84,7 +84,7 @@
             <input type="text" id="newSmtpHost" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpFromAddress" class="form-label">De :</label>
+            <label for="newSmtpFromAddress" class="form-label">Adresse Mail Source:</label>
             <input type="email" id="newSmtpFromAddress" class="form-control" required>
           </div>
           <div class="mb-3">
@@ -130,7 +130,7 @@
             <input type="text" id="editSmtpHost" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="editSmtpFromAddress" class="form-label">De:</label>
+            <label for="editSmtpFromAddress" class="form-label">Adresse Mail Source:</label>
             <input type="email" id="editSmtpFromAddress" class="form-control" required>
           </div>
         </form>
@@ -146,7 +146,44 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function validateSmtpForm(nameId, hostId, emailId) {
+      const name = document.getElementById(nameId).value.trim();
+      const host = document.getElementById(hostId).value.trim();
+      const email = document.getElementById(emailId).value.trim();
+
+      if (!name || !host || !email) {
+          Swal.fire({
+              icon: "warning",
+              title: "Champs requis !",
+              text: "Veuillez remplir tous les champs obligatoires.",
+              confirmButtonColor: "#f39c12"
+          });
+          return false;
+      }
+
+      if (!isValidEmail(email)) {
+          Swal.fire({
+              icon: "error",
+              title: "Adresse e-mail invalide !",
+              text: `L'adresse "${email}" n'est pas valide. Veuillez saisir une adresse correcte.`,
+              confirmButtonColor: "#d33"
+          });
+          return false;
+      }
+
+      return true;
+  }
+
   function submitNewSmtp() {
+    if (!validateSmtpForm("newSmtpName", "newSmtpHost", "newSmtpFromAddress")) {
+      return;
+    }
+
     const data = {
       name: document.getElementById("newSmtpName").value,
       host: document.getElementById("newSmtpHost").value,
@@ -157,16 +194,47 @@
     };
 
     fetch("/config-smtp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur !",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Profil SMTP ajouté !",
+                text: "Le profil SMTP a été enregistré avec succès.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur inconnue !",
+            text: "Une erreur s'est produite lors de la création du profil SMTP.",
+            confirmButtonColor: "#d33"
+        });
+    });
   }
 
   function submitEditedSmtp() {
+    if (!validateSmtpForm("editSmtpName", "editSmtpHost", "editSmtpFromAddress")) {
+      return;
+    }
+
     const profileId = document.getElementById("editSmtpId").value;
     const data = {
       id: parseInt(profileId, 10),
@@ -176,13 +244,40 @@
     };
 
     fetch(`/config-smtp/${profileId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur !",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Profil SMTP modifié !",
+                text: "Les modifications ont été enregistrées avec succès.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur inconnue !",
+            text: "Une erreur s'est produite lors de la modification du profil SMTP.",
+            confirmButtonColor: "#d33"
+        });
+    });
   }
 
     //    SUPPRESSION D'UN SMTP PROFILE
@@ -190,7 +285,6 @@
     btn.addEventListener("click", function() {
       const profileId = this.getAttribute("data-id");
 
-      // Affichage du popup de confirmation avec SweetAlert2
       Swal.fire({
         title: "Supprimer ce profil d'envoi ?",
         text: "Cette action est irréversible. Êtes-vous sûr ?",

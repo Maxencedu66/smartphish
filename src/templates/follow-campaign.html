@@ -31,9 +31,9 @@
                 </td>
                 <td class="text-end">
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
-                    <button class="btn btn-danger" onclick="deleteCampaign({{ campaign.id }})">Supprimer</button>
+                    <button class="btn btn-danger" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
                     {% if campaign.status == "In progress" %}
-                        <button class="btn btn-success" onclick="completeCampaign({{ campaign.id }})">Terminer</button>
+                        <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
                     {% else %}
                         <button class="btn btn-secondary" disabled>Terminé</button>
                     {% endif %}
@@ -48,7 +48,6 @@
 
 <script>
   function deleteCampaign(campaignId) {
-    // Affichage du popup de confirmation
     Swal.fire({
       title: "Supprimer cette campagne ?",
       text: "Cette action est irréversible. Êtes-vous sûr ?",
@@ -92,26 +91,56 @@
   }
 
   function completeCampaign(campaignId) {
-    if (confirm("Marquer cette campagne comme terminée ?")) {
-      fetch(`/api/gophish/campaigns/${campaignId}/complete`, {
-        method: 'GET', // Comme la doc précise que c'est un GET
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.json())
-      .then(response => {
-        if (response.success) {
-          alert(response.message);
-          // Vous pouvez ici rafraîchir la page ou mettre à jour l'interface pour refléter le nouveau statut
-          location.reload();
-        } else {
-          alert("Erreur lors de la finalisation : " + response.error);
+    Swal.fire({
+        title: "Marquer cette campagne comme terminée ?",
+        text: "Cette action ne pourra pas être annulée.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Oui, terminer",
+        cancelButtonText: "Annuler"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/api/gophish/campaigns/${campaignId}/complete`, {
+                method: 'GET', // Comme précisé dans la doc
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(res => res.json())
+            .then(response => {
+                if (response.success) {
+                    Swal.fire({
+                        title: "Campagne terminée !",
+                        text: response.message,
+                        icon: "success",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        location.reload(); // Rafraîchir la page pour mettre à jour l'affichage
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Erreur !",
+                        text: "Erreur lors de la finalisation : " + response.error,
+                        icon: "error",
+                        confirmButtonColor: "#d33",
+                        confirmButtonText: "OK"
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: "Erreur serveur",
+                    text: "Une erreur s'est produite.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                    confirmButtonText: "OK"
+                });
+            });
         }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Une erreur s'est produite.");
-      });
-    }
-  }
+    });
+}
+
 </script>
 {% endblock %}

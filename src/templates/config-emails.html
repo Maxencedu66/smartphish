@@ -167,6 +167,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+function validateEmailTemplateForm(nameId, subjectId, textId) {
+    const name = document.getElementById(nameId).value.trim();
+    const subject = document.getElementById(subjectId).value.trim();
+    const text = document.getElementById(textId).value.trim();
+
+    if (!name || !subject || !text) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis manquants",
+            text: "Veuillez remplir tous les champs avant de soumettre.",
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
+    }
+    return true;
+}
+
+
 document.addEventListener("DOMContentLoaded", function() {
     // Basculement entre les champs manuels et IA
     document.getElementsByName("creationMethod").forEach(radio => {
@@ -205,8 +223,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".delete-template").forEach(btn => {
         btn.addEventListener("click", function() {
         const templateId = this.getAttribute("data-id");
-
-        // Affichage du popup de confirmation avec SweetAlert2
         Swal.fire({
             title: "Supprimer ce modèle d'e-mails ?",
             text: "Cette action est irréversible. Voulez-vous continuer ?",
@@ -253,12 +269,31 @@ function generateAIEmail() {
     const email_expediteur = document.getElementById("aiEmailExpediteur").value;
 
     if (!scenario || !expediteur || !email_expediteur) {
-        alert("Veuillez remplir les champs requis pour la génération par IA (Scénario, Nom de l'expéditeur, Email expéditeur).");
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis manquants",
+            text: "Veuillez remplir tous les champs pour générer l'email.",
+            confirmButtonColor: "#f39c12"
+        });
         return;
     }
 
+     // Affiche une popup bloquante jusqu'à la fin du chargement
+     Swal.fire({
+        title: "Génération en cours...",
+        text: "Merci de patienter.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading(); // Ajoute un spinner de chargement
+        }
+    });
+
+    
     // Afficher le spinner et masquer le résultat précédent
-    document.getElementById("aiLoading").style.display = "block";
+    // document.getElementById("aiLoading").style.display = "block";
     document.getElementById("aiResult").style.display = "none";
 
     fetch("/generate-email", {
@@ -275,9 +310,15 @@ function generateAIEmail() {
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById("aiLoading").style.display = "none";
+        //document.getElementById("aiLoading").style.display = "none";
+        Swal.close(); // Ferme la popup de chargement
         if (data.error) {
-            alert("Erreur lors de la génération de l'email : " + data.error);
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: "Erreur lors de la génération de l'email : " + data.error,
+                confirmButtonColor: "#d33"
+            });
             return;
         }
         // Remplir les champs de l'IA avec l'email généré et afficher le résultat
@@ -286,9 +327,14 @@ function generateAIEmail() {
         document.getElementById("aiResult").style.display = "block";
     })
     .catch(err => {
-        document.getElementById("aiLoading").style.display = "none";
+        Swal.close();
         console.error("Erreur lors de la génération par IA:", err);
-        alert("Erreur lors de la génération de l'email par IA.");
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de la génération de l'email.",
+            confirmButtonColor: "#d33"
+        });
     });
 }
 
@@ -304,8 +350,7 @@ function submitNewEmailTemplate() {
         text = document.getElementById("newEmailText").value;
     }
 
-    if (!name || !subject || !text) {
-        alert("Veuillez remplir tous les champs requis.");
+    if (!validateEmailTemplateForm("newTemplateName", "newEmailSubject", "newEmailText")) {
         return;
     }
 
@@ -321,8 +366,34 @@ function submitNewEmailTemplate() {
         body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur lors de l'ajout",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Modèle ajouté !",
+                text: "Le modèle d'e-mail a été enregistré avec succès.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload(); // Recharge la page après confirmation
+            });
+        }
+    })
+    .catch(err => {
+        console.error("Erreur:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de la création du modèle.",
+            confirmButtonColor: "#d33"
+        });
+    });
 }
 
 // Fonction pour soumettre la modification d'un template
@@ -335,14 +406,45 @@ function submitEditedEmailTemplate() {
         text: document.getElementById("editEmailText").value
     };
 
+    if (!validateEmailTemplateForm("editTemplateName", "editEmailSubject", "editEmailText")) {
+        return;
+    }
+
     fetch(`/templates/${templateId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(res => res.json())
-    .then(() => location.reload())
-    .catch(err => console.error(err));
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Modèle mis à jour !",
+                text: "Les modifications ont été enregistrées avec succès.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error("Erreur:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de la mise à jour.",
+            confirmButtonColor: "#d33"
+        });
+    });
 }
 </script>
 
