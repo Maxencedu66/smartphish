@@ -206,3 +206,28 @@ main {
     display: inline-block;
     text-align: center;
 }
+
+/* Style du tableau - Eviter débordement */
+.table-details {
+    table-layout: fixed;
+    width: 100%;
+    word-wrap: break-word;
+}
+
+.th-details, .td-details {
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ajoute des "..." si le texte est trop long */
+    white-space: nowrap;
+}
+
+.card-details {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.pre-details {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 100%;
+    overflow-x: auto;
+}

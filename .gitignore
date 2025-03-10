@@ -171,3 +171,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Bootstrap 
+node_modules/
+package-lock.json
+package.json

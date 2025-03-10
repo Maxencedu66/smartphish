@@ -93,8 +93,19 @@ def details_campaign(campaign_id):
 
     if not selected_campaign:
         return "Campagne non trouvée", 404
+
+    # Recherch Nom du Groupe
+    groups = get_groups()
     
-    return render_template("details-campaign.html", campaign=selected_campaign)
+    campaign_emails = {result["email"] for result in selected_campaign["results"]}
+
+    group_name = "Inconnu"
+    for group in groups:
+        group_emails = {target["email"] for target in group["targets"]}
+        if campaign_emails.issubset(group_emails): 
+            group_name = group["name"]
+            break
+    return render_template("details-campaign.html", campaign=selected_campaign, group_name=group_name)
 
 @bp.route('/analysis-correction')
 def analysis_correction():
