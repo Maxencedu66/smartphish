@@ -1,1 +1,0 @@
-# Permet d'importer les routes de l'application facilement
