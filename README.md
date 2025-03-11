@@ -10,9 +10,12 @@ SmartPhish est une solution innovante qui utilise l'intelligence artificielle po
 
 Avant de lancer l'application, assurez-vous d'avoir installé les éléments suivants :
 - **Python 3.8+** installé sur votre machine
-- **Docker** (optionnel, recommandé pour GoPhish)
+- **Docker**
 - **Ollama** installé pour l’exécution locale du modèle de langage
-- **Git** (pour cloner le projet)
+```bash
+    curl -fsSL https://ollama.com/install.sh | sh
+```
+- **Git** pour cloner le projet, si vous ne l'avez pas en ZIP
 
 ---
 
@@ -29,10 +32,9 @@ Avant de lancer l'application, assurez-vous d'avoir installé les éléments sui
 ```bash
     pip install -r requirements.txt
    ```
-4. Installer et exécuter Ollama avec Mistral.
+4. Installer Mistral en local (4go).
 ```bash
-    curl -fsSL https://ollama.com/install.sh | sh
-    ollama run mistral #A retirer une fois automatiser dnas le code
+    ollama run mistral 
    ```
 5. Lancer l’application.
 ```bash
@@ -132,7 +134,19 @@ Si vous utilisez Docker, vérifiez que le conteneur est bien lancé. Sinon, assu
 
 ## 📜 Licence
 
-Ce projet est sous licence **MIT** – voir le fichier [LICENSE](LICENSE) pour plus de détails.
+### 🔹 Licence de GoPhish
+Le logiciel **GoPhish** est sous licence **MIT**, ce qui signifie qu'il peut être utilisé, modifié et distribué librement, y compris pour des **usages commerciaux**. Son code source étant open-source, nous avons pu l'intégrer à **SmartPhish** sans restriction.
+
+Source : [GoPhish GitHub](https://github.com/gophish/gophish)
+
+### 🔹 Licence du modèle **Mistral** (Modèle léger)
+Le modèle **Mistral 7B** est publié sous **licence Apache 2.0**, une licence permissive qui autorise l'utilisation, la modification et la distribution du modèle, y compris à des fins commerciales. Cela nous permet d'exécuter **Mistral 7B** localement via **Ollama** sans contraintes de licence.
+
+Source : [Mistral AI](https://mistral.ai/news/announcing-mistral-7b/)
+
+---
+
+En intégrant ces technologies, nous nous assurons que **SmartPhish** respecte pleinement les droits d'utilisation des outils et modèles utilisés.
 
 ---
 
