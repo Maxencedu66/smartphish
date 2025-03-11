@@ -1,1 +1,0 @@
-# Modèles de données (PostgreSQL)

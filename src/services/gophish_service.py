@@ -132,7 +132,6 @@ def complete_campaign(campaign_id):
     
     if response.status_code == 200:
         try:
-            # Dans certains cas, le corps de réponse peut être vide ou contenir "null"
             data = response.json() if response.text.strip() != "" else None
             return {"success": True, "message": "Campaign completed successfully!", "data": data}
         except requests.exceptions.JSONDecodeError:
@@ -153,12 +152,12 @@ def complete_campaign(campaign_id):
 def get_groups():
     """Récupère la liste de tous les groupes GoPhish"""
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/groups/", headers=HEADERS, verify=False)
-    return response.json()  # ou gestion d'erreur
+    return response.json() 
 
 def get_groupsid(group_id):
     """Récupère un groupe GoPhish par son ID"""
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/groups/{group_id}", headers=HEADERS, verify=False)
-    return response.json()  # ou gestion d'erreur
+    return response.json() 
 
 
 def create_group(data):
@@ -215,7 +214,7 @@ def get_templates():
     url = f"{Config.GOPHISH_API_URL}/api/templates"
     response = requests.get(url, headers=HEADERS, verify=False)
     try:
-        return response.json()  # renvoie un tableau de templates
+        return response.json()  
     except requests.exceptions.JSONDecodeError:
         return {
             "error": "Réponse invalide de GoPhish",
@@ -232,7 +231,6 @@ def create_template(data):
     url = f"{Config.GOPHISH_API_URL}/api/templates/"
     response = requests.post(url, json=data, headers=HEADERS, verify=False)
     try:
-        # L'API renvoie le template créé
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return {

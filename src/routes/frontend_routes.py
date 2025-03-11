@@ -8,9 +8,6 @@ import json
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
 
-#@bp.route('/dashboard')
-#def dashboard():
-#    return render_template('dashboard.html')
 
 @bp.route('/generate-email', methods=['POST'])
 def generate_email():
@@ -45,15 +42,6 @@ def index():
 def configuration():
     return render_template('configuration.html')
 
-#@bp.route('/config-groups')
-#def config_groups():
-#    return render_template('config-groups.html')
-
-
-#@bp.route('/config-landing-pages')
-#def config_landing_pages():
-#    return render_template('config-landing-pages.html')
-
 
 # Route pour la page de création de campagne
 
@@ -80,7 +68,7 @@ def create_new_campaign():
 
 @bp.route('/follow-campaign')
 def follow_campaign():
-    campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
+    campaigns = get_campaigns() 
     
     return render_template('follow-campaign.html', campaigns=campaigns)
 
@@ -134,9 +122,10 @@ def maj_status():
 # ---------------------------
 # Routes pour les groupes
 # ---------------------------
+
 @bp.route('/config-groups')
 def config_groups():
-    groups_data = get_groups()  # Renvoie un tableau de groupes
+    groups_data = get_groups() 
     return render_template('config-groups.html', groups=groups_data)
 
 @bp.route('/config-groups/<int:group_id>', methods=['GET'])
@@ -163,7 +152,7 @@ def newgroup_submit():
     if not name:
         return jsonify({"error": "Le champ 'name' est requis"}), 400
     
-    # Appel GoPhish
+    
     response = create_group({"name": name, "targets": targets})
 
     if 'error' in response:
@@ -180,7 +169,7 @@ def update_group_frontend(group_id):
     if not data:
         return jsonify({"error": "Aucune donnée reçue"}), 400
 
-    # GoPhish exige "id": group_id dans le JSON complet.
+    
     if "id" not in data:
         data["id"] = group_id
 
@@ -244,7 +233,7 @@ def create_template_frontend():
 
     response = create_template(payload)
     if "error" in response:
-        return jsonify(response), 400  # ou autre code
+        return jsonify(response), 400 
     return jsonify(response), 201
 
 @bp.route('/templates/<int:template_id>', methods=['GET'])
@@ -294,7 +283,7 @@ def delete_template_frontend(template_id):
 
 @bp.route('/config-smtp')
 def config_smtp():
-    smtp_profiles = get_sending_profiles()  # Récupérer tous les profils SMTP
+    smtp_profiles = get_sending_profiles()  
     return render_template('config-smtp.html', smtp_profiles=smtp_profiles)
 
 @bp.route('/config-smtp/<int:profile_id>', methods=['GET'])

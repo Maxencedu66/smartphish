@@ -2,7 +2,6 @@ import ollama
 from ollama import ListResponse, ProcessResponse
 from pydantic import BaseModel
 
-# Define the schema for the response
 class EmailInfo(BaseModel):
   objet_mail: str
   contenu_mail: str
