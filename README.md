@@ -9,34 +9,51 @@ SmartPhish est une solution innovante qui utilise l'intelligence artificielle po
 ### 📌 Prérequis
 
 Avant de lancer l'application, assurez-vous d'avoir installé les éléments suivants :
-- **Python 3.8+** installé sur votre machine
-- **Docker**
-- **Ollama** installé pour l’exécution locale du modèle de langage
-```bash
+
+- **Python 3.8+** installé sur votre machine  
+- **Docker**  
+- **Ollama** installé pour l’exécution locale du modèle de langage :  
+
+  - **Linux** :  
+    ```bash
     curl -fsSL https://ollama.com/install.sh | sh
-```
-- **Git** pour cloner le projet, si vous ne l'avez pas en ZIP
+    ```
+  - **Windows** : [Télécharger Ollama](https://ollama.com/download/windows)  
+  - **Mac** : [Télécharger Ollama](https://ollama.com/download/mac)  
+    - Ou avec Homebrew :  
+      ```bash
+      brew install --cask ollama
+      ```
+
+- **Git** pour cloner le projet (sinon, téléchargez-le en ZIP)
 
 ---
 
 ### 🔧 Étapes d'installation
 
-1. Cloner le projet et accéder au répertoire.
-2. Créer et activer un environnement virtuel.
+1. **Cloner le projet et accéder au répertoire** :
+   ```bash
+   git clone https://github.com/Maxencedu66/smartphish.git
+   cd smartphish
+   ```
+
+2. Créer et activer un environnement virtuel :
 ```bash
     python -m venv venv
     source venv/bin/activate   # Sur macOS/Linux
     venv\Scripts\activate      # Sur Windows
    ```
-3. Installer les dépendances du projet.
+3. Installer les dépendances du projet :
 ```bash
     pip install -r requirements.txt
    ```
-4. Installer Mistral en local (4go).
+4. Installer Mistral en local (4Go requis) :
 ```bash
-    ollama run mistral 
+    ollama pull mistral 
    ```
-5. Lancer l’application.
+5. Sur macOS et Windows, assurez-vous que Docker Desktop est bien lancé afin d'activer le moteur Docker.
+
+6. Lancer l’application.
 ```bash
     python app.py
    ```
@@ -111,19 +128,16 @@ smartphish/
 ## 🛠 Dépannage
 
 ### Problème de connexion avec Ollama ?
-Assurez-vous que **Ollama** est bien actif avant de démarrer l’application.
+Assurez-vous que **Ollama** est bien actif avant de démarrer l’application et que vous avez bien téléchargé le modèle Mistral.
 
-### Erreur de dépendances Python ?
-Essayez de mettre à jour pip et de réinstaller les dépendances.
-
-### Problème avec GoPhish ?
-Si vous utilisez Docker, vérifiez que le conteneur est bien lancé. Sinon, assurez-vous que **GoPhish** est bien configuré et accessible.
+### Problème avec le lancement ?
+Pensez bien à démarrer docker avant de lancer l'application et lors de la fermeture de SmartPhish, faire Ctrl + C dans le terminal pour arrêter proprement le docker et SmartPhish.
 
 ---
 
 ## 🏆 Contributeurs
 
-- **Maxence Bouchadel** (Chef de projet)
+- **Maxence Bouchadel** (Chef de projet, Backend, IA)
 - **Thomas Jeanjacquot** (Secrétaire, API & Backend)
 - **Maël Cainjo Regeard** (Intégration IA)
 - **Dylan Fournier** (Frontend et liaison backend)
