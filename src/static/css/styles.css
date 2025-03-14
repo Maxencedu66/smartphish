@@ -231,3 +231,87 @@ main {
     max-width: 100%;
     overflow-x: auto;
 }
+
+
+/* Details Campagne */
+
+.circle-stat {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.blue { background-color: #3498db; }
+.green { background-color: #2ecc71; }
+.yellow { background-color: #f1c40f; }
+.orange { background-color: #e67e22; }
+.red { background-color: #e74c3c; }
+
+.fixed-card {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+}
+
+.fixed-card h6 {
+    height: 25px; /* Hauteur fixe pour tous les titres */
+    line-height: 25px; /* Alignement vertical du texte */
+    font-size: 14px; /* Taille uniforme */
+}
+
+.fixed-card p {
+    height: 30px; /* Assure une hauteur fixe aux valeurs */
+    line-height: 30px;
+    font-weight: bold;
+}
+
+.campaign-text {
+    max-width: 200px; /* Largeur maximale */
+    white-space: nowrap; /* Empêche le retour à la ligne */
+    overflow: hidden; /* Cache le texte dépassant */
+    text-overflow: ellipsis; /* Ajoute les "..." pour les longs textes */
+}
+
+.fixed-card-email {
+    min-width: 250px; /* Largeur minimale pour éviter que la card soit trop petite */
+    max-width: 300px; /* Largeur maximale pour éviter qu'elle s'étire trop */
+    text-align: center; /* Centrer le texte */
+}
+
+.section {
+    padding: 20px;
+    background-color: #c4cbd2;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-highlight {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    min-width: 200px; /* Fixe la largeur pour éviter la variation */
+    text-align: center;
+}
+
+.completed {
+    background-color: #28a745; /* Vert */
+    color: white;
+}
+
+.in-progress {
+    background-color: #ff9800; /* Orange */
+    color: white;
+}

@@ -4,168 +4,206 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h2>📜 Détails de la campagne : {{ campaign.name }}</h2>
+    <div class="d-flex align-items-center">
+        <h2 class="me-2">📜 Détails de la campagne -</h2>
+        <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
+            {% if campaign.status == "Completed" %}
+                Complétée
+            {% else %}
+                En cours
+            {% endif %}
+        </span>
+    </div>
+    
+    
+    <!-- Informations Générales -->
+    <div class="row mt-4 text-center">
+        <div class="col-md-6">
+            <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
+                <h6 class="text-uppercase font-weight-bold">📌 Nom de la campagne</h6>
+                <p class="campaign-text text-primary">{{ campaign.name }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
+                <h6 class="text-uppercase font-weight-bold">📅 Date de création</h6>
+                <p>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
+            </div>
+        </div>
+    </div>
+    
 
-    <div style="height: 10px;"></div>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered w-100 table-details">
-                
-                <!-- Tableau Récapitulatif, Statistiques-->
-
-                <thead>
-                    <tr>
-                        <th class="th-details">Nom</th>
-                        <th class="th-details">Date de création</th>
-                        <th class="th-details">Statut</th>
-                        <th class="th-details">Nombre d'emails envoyés</th>
-                        <th class="th-details">Emails ouverts</th>
-                        <th class="th-details">Liens cliqués</th>
-                        <th class="th-details">Données soumises</th>
-                        <th class="th-details">Emails signalés</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="td-details">{{ campaign.name }}</td>
-                        <td class="td-details">{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</td>
-                        <td class="td-details {% if campaign.status == 'Completed' %}text-success{% elif campaign.status == 'In progress' %}text-warning{% else %}text-danger{% endif %}">
-                            {% if campaign.status == "Completed" %}
-                                Complétée
-                            {% elif campaign.status == "In progress" %}
-                                En cours
-                            {% else %}
-                                {{ campaign.status }}
-                            {% endif %}
-                        </td>
-                        <td class="td-details">{{ campaign.results | length }}</td>
-                        <td class="td-details">{{ campaign.results | selectattr('status', 'equalto', 'Opened') | list | length }}</td>
-                        <td class="td-details">{{ campaign.results | selectattr('status', 'equalto', 'Clicked') | list | length }}</td>
-                        <td class="td-details">{{ campaign.results | selectattr('status', 'equalto', 'Submitted') | list | length }}</td>
-                        <td class="td-details">{{ campaign.results | selectattr('reported', 'equalto', true) | list | length }}</td>
-                    </tr>
-
-                    <!-- Autre Détails -->
-
-                    <tr>
-                        <td class="td-details" colspan="8">
-                            <div style="height: 10px;"></div>
-
-                            <!-- Détails de la campagne-->
-
-                            <!-- Apercu Mail -->
-                            
-                            <h4>Aperçu du mail envoyé</h4>
-                            <div class="card mt-3 card-details">
-                                <div class="card-header bg-primary text-white">📩 Email envoyé</div>
-                                <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
-                                    <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
-                                    <p><strong>Destinataire :</strong> {{ group_name }}</p>
-                                    <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
-                                    <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
-                                    <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
-                                    <hr>
-                                    <p><strong>Contenu du mail :</strong></p>
-                                    <pre class="border p-2 bg-white pre-details">{{ campaign.template.text }}</pre>
-                                    <hr>
-                                    <!--
-                                    <p><strong>Contenu HTML :</strong></p>
-                                    <iframe srcdoc="{{ campaign.template.html | safe }}" style="max-width: 100%; width: 100%; height: 300px; border: none; overflow-x: hidden;"></iframe>
-                                    -->
-                                </div>
-                            </div>
-                            
-                        
-                            <!-- Résultats envois -->
-
-                            <div style="height: 50px;"></div>
-                            <h4>Résultats des envois</h4>
-                            <table class="table table-sm table-details">
-                                <thead>
-                                    <tr>
-                                        <th class="th-details">Email</th>
-                                        <th class="th-details">Prénom</th>
-                                        <th class="th-details">Nom</th>
-                                        <th class="th-details">IP</th>
-                                        <th class="th-details">Date d'envoi</th>
-                                        <th class="th-details">Dernière modification</th>
-                                        <th class="th-details">Statut</th>
-                                        <th class="th-details">Signalé</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for result in campaign.results %}
-                                    <tr>
-                                        <td class="td-details">{{ result.email }}</td>
-                                        <td class="td-details">{{ result.first_name }}</td>
-                                        <td class="td-details">{{ result.last_name }}</td>
-                                        <td class="td-details">{{ result.ip }}</td>
-                                        <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }} </td>
-                                        <td class="td-details">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
-                                        <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
-                                            {{ result.status }}
-                                        </td>
-                                        <td class="td-details">{{ "✅" if result.reported else "❌" }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            <div style="height: 50px;"></div>
-
-                            <h4>Informations SMTP</h4>
-                            <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
-                            <p><strong>Hôte :</strong> {{ campaign.smtp.host }}</p>
-                            <p><strong>Nom :</strong> {{ campaign.smtp.name }}</p>
-                            <p><strong>Date de modification :</strong> {{ campaign.smtp.modified_date[:10] }} {{ campaign.smtp.modified_date[11:16] }}</p>
-                            <div style="height: 50px;"></div>
-
-                            <h4>URL malveillant utilisé</h4>
-                            <strong>Nom Page HTML URL :</strong> {{ campaign.page.name }} (Modifiée le: {{ campaign.page.modified_date[:10] }} {{campaign.page.modified_date[11:16] }})<br>
-                            <div class="card mt-3 card-details">
-                                <div class="card-header bg-dark text-white">Aperçu du contenu HTML</div>
-                                <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
-                                    <button class="btn btn-secondary mb-2" onclick="toggleView()">Vue/Code</button>
-                                    
-                                    <div id="htmlView" style="border: 1px solid #ccc; padding: 10px; display: block;">
-                                        <iframe id="htmlPreview" style="max-width: 100%; width: 100%; height: 300px; border: none;"></iframe>
-                                    </div>
-                                    
-                                    <pre id="codeView" class="pre-details" style="display: none; padding: 10px; border-radius: 5px; white-space: pre-wrap; overflow: auto; border: 1px solid #ddd;">
-                                        {{ campaign.page.html}}
-                                    </pre>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- 📤 Card principale pour le nombre total d'emails envoyés -->
+    <div class="container mt-4 d-flex justify-content-center">
+        <div class="card shadow p-3 fixed-card-email">
+            <h6 class="text-uppercase font-weight-bold text-center">📤 Emails envoyés</h6>
+            <h3 class="text-primary text-center">{{ campaign.results | length }}</h3>
+        </div>
     </div>
 
-    <a href="{{ url_for('frontend.follow_campaign') }}" class="btn btn-secondary mt-3">Retour aux campagnes</a>
+    <!-- Affichage des Statistiques -->
+    <div class="row mt-4 text-center">
+        {% set total_sent = campaign.results | length %}
+        {% set opened = campaign.results | selectattr('status', 'equalto', 'Opened') | list | length %}
+        {% set clicked = campaign.results | selectattr('status', 'equalto', 'Clicked') | list | length %}
+        {% set submitted = campaign.results | selectattr('status', 'equalto', 'Submitted') | list | length %}
+        {% set reported = campaign.results | selectattr('reported', 'equalto', true) | list | length %}
+
+        {% set email_stats = {
+            'Emails ouverts': opened,
+            'Liens cliqués': clicked,
+            'Données soumises': submitted,
+            'Emails signalés': reported
+        } %}
+
+        {% for label, value in email_stats.items() %}
+            {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
+            {% set color_class = 'blue' %}
+            {% if percentage > 20 %}
+                {% set color_class = 'green' %}
+            {% endif %}
+            {% if percentage > 40 %}
+                {% set color_class = 'yellow' %}
+            {% endif %}
+            {% if percentage > 60 %}
+                {% set color_class = 'orange' %}
+            {% endif %}
+            {% if percentage > 80 %}
+                {% set color_class = 'red' %}
+            {% endif %}
+            
+            <div class="col-md-3">
+                <div class="circle-stat {{ color_class }}">
+                    <h3 class="circle-number">{{ value }}</h3>
+                </div>
+                <h5>{{ label }}</h5>
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
+
+<hr class="my-4">
+    <!-- Apercu Mail -->
+    <div class="container section">
+        <h4>Aperçu du mail envoyé</h4>
+        <div class="card mt-3 card-details">
+            <div class="card-header bg-primary text-white">📩 Email envoyé</div>
+            <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
+                <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
+                <p><strong>Destinataire :</strong> {{ group_name }}</p>
+                <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
+                <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
+                <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
+                <hr>
+                <p><strong>Contenu du mail :</strong></p>
+                <pre class="border p-2 bg-white pre-details">{{ campaign.template.text }}</pre>
+                <hr>
+                <!--
+                <p><strong>Contenu HTML :</strong></p>
+                <iframe srcdoc="{{ campaign.template.html | safe }}" style="max-width: 100%; width: 100%; height: 300px; border: none; overflow-x: hidden;"></iframe>
+                -->
+            </div>
+        </div>
+    </div>
+            
+    <hr class="my-4">                    
+    <!-- Résultats envois -->
+    <div>
+        <h4>Résultats des envois</h4>
+        <div class="table-responsive">
+        <table class="table table-sm table-details">
+            <thead>
+                <tr>
+                    <th class="th-details">Email</th>
+                    <th class="th-details">Prénom</th>
+                    <th class="th-details">Nom</th>
+                    <th class="th-details">IP</th>
+                    <th class="th-details">Date d'envoi</th>
+                    <th class="th-details">Dernière modification</th>
+                    <th class="th-details">Statut</th>
+                    <th class="th-details">Signalé</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in campaign.results %}
+                <tr>
+                    <td class="td-details">{{ result.email }}</td>
+                    <td class="td-details">{{ result.first_name }}</td>
+                    <td class="td-details">{{ result.last_name }}</td>
+                    <td class="td-details">{{ result.ip }}</td>
+                    <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }} </td>
+                    <td class="td-details">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
+                    <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
+                        {{ result.status }}
+                    </td>
+                    <td class="td-details">{{ "✅" if result.reported else "❌" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <hr class="my-4">
+    <!-- Informations SMTP -->
+    <div>
+        <h4>Informations SMTP</h4>
+        <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
+        <p><strong>Hôte :</strong> {{ campaign.smtp.host }}</p>
+        <p><strong>Nom :</strong> {{ campaign.smtp.name }}</p>
+        <p><strong>Date de modification :</strong> {{ campaign.smtp.modified_date[:10] }} {{ campaign.smtp.modified_date[11:16] }}</p>
+    </div>
+
+    <hr class="my-4">
+    <!-- URL malveillant -->
+    <div>
+        <h4>URL malveillant utilisé</h4>
+        <strong>Nom Page HTML URL :</strong> {{ campaign.page.name }} (Modifiée le: {{ campaign.page.modified_date[:10] }} {{campaign.page.modified_date[11:16] }})<br>
+        <div class="card mt-3 card-details">
+            <div class="card-header bg-dark text-white">Aperçu du contenu HTML</div>
+            <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
+                <button class="btn btn-secondary mb-2" onclick="toggleView()">Vue/Code</button>
+                
+                <div id="htmlView" style="border: 1px solid #ccc; padding: 10px; display: block;">
+                    <iframe id="htmlPreview" style="max-width: 100%; width: 100%; height: 300px; border: none;"></iframe>
+                </div>
+                
+                <pre id="codeView" class="pre-details" style="display: none; padding: 10px; border-radius: 5px; white-space: pre-wrap; overflow: auto; border: 1px solid #ddd;">
+                    {{ campaign.page.html}}
+                </pre>
+            </div>
+        </div>
+    </div>
+<a href="{{ url_for('frontend.follow_campaign') }}" class="btn btn-secondary mt-3">Retour aux campagnes</a>
+
+</div>
+
+
 
 <script>
     function loadHTMLPreview() {
-        var iframe = document.getElementById("htmlPreview");
-        var doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(`{{ campaign.page.html | safe}}`);
-        doc.close();
-    }
+    var iframe = document.getElementById("htmlPreview");
+    var doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`{{ campaign.page.html | safe}}`);
+    doc.close();
+}
+
+function toggleView() {
+    var htmlView = document.getElementById("htmlView");
+    var codeView = document.getElementById("codeView");
     
-    function toggleView() {
-        var htmlView = document.getElementById("htmlView");
-        var codeView = document.getElementById("codeView");
-        
-        if (htmlView.style.display === "none") {
-            htmlView.style.display = "block";
-            codeView.style.display = "none";
-        } else {
-            htmlView.style.display = "none";
-            codeView.style.display = "block";
-        }
+    if (htmlView.style.display === "none") {
+        htmlView.style.display = "block";
+        codeView.style.display = "none";
+    } else {
+        htmlView.style.display = "none";
+        codeView.style.display = "block";
     }
-    
-    window.onload = loadHTMLPreview;
+}
+
+window.onload = loadHTMLPreview;
 </script>
 
 {% endblock %}
