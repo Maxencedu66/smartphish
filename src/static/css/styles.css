@@ -235,6 +235,7 @@ main {
 
 /* Details Campagne */
 
+/* Statistiques en cercle */
 .circle-stat {
     width: 100px;
     height: 100px;
@@ -245,15 +246,34 @@ main {
     margin: auto;
     font-size: 20px;
     font-weight: bold;
-    color: white;
+    color: black;
+    background-color: white; /* L'intérieur du cercle reste blanc */
+    border: 4px solid #ccc; /* Bordure grise par défaut */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
 }
 
-.blue { background-color: #3498db; }
-.green { background-color: #2ecc71; }
-.yellow { background-color: #f1c40f; }
-.orange { background-color: #e67e22; }
-.red { background-color: #e74c3c; }
+/* Bordures colorées selon le pourcentage */
+.border-blue { border-color: #3498db !important; }
+.border-green { border-color: #2ecc71 !important; }
+.border-yellow { border-color: #f1c40f !important; }
+.border-orange { border-color: #e67e22 !important; }
+.border-red { border-color: #e74c3c !important; }
 
+.circle-stat:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .circle-stat {
+        width: 80px;
+        height: 80px;
+        font-size: 16px;
+    }
+}
+
+/* Carte fixe */
 .fixed-card {
     height: 120px;
     display: flex;
@@ -283,6 +303,7 @@ main {
     text-overflow: ellipsis; /* Ajoute les "..." pour les longs textes */
 }
 
+/* Carte fixe pour les emails */
 .fixed-card-email {
     min-width: 250px; /* Largeur minimale pour éviter que la card soit trop petite */
     max-width: 300px; /* Largeur maximale pour éviter qu'elle s'étire trop */
@@ -315,3 +336,39 @@ main {
     background-color: #ff9800; /* Orange */
     color: white;
 }
+
+/* Style des boutons */
+/* Style général des boutons de l'accordéon */
+.accordion-button {
+    background-color: #007bff !important; /* Couleur bleue */
+    color: white !important; /* Texte en blanc */
+    font-weight: bold;
+    padding: 12px 20px;
+    transition: background-color 0.3s ease-in-out, transform 0.2s;
+    border: none;
+    box-shadow: none;
+    border-radius: 8px !important; /* Arrondi tous les bords */
+}
+
+/* Effet au survol */
+.accordion-button:hover {
+    background-color: #0056b3 !important; /* Bleu plus foncé */
+    transform: scale(1.01); /* Légère mise en avant */
+}
+
+/* Empêcher Bootstrap d'enlever le border-radius lorsqu'il est ouvert */
+.accordion-button:not(.collapsed) {
+    background-color: #004099 !important; /* Encore plus foncé */
+    color: white !important;
+    border-radius: 8px !important;
+}
+
+/* Empêcher la suppression des coins arrondis par Bootstrap */
+.accordion-item {
+    border-radius: 8px !important;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: none;
+    box-shadow: none;
+}
+

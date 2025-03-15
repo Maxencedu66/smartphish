@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="container-fluid">
+<div class="vh-100">
     <div class="d-flex align-items-center">
         <h2 class="me-2">📜 Détails de la campagne -</h2>
         <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
@@ -32,7 +33,7 @@
         </div>
     </div>
     
-
+    <hr class="my-4">
     <!-- 📤 Card principale pour le nombre total d'emails envoyés -->
     <div class="container mt-4 d-flex justify-content-center">
         <div class="card shadow p-3 fixed-card-email">
@@ -48,134 +49,164 @@
         {% set clicked = campaign.results | selectattr('status', 'equalto', 'Clicked') | list | length %}
         {% set submitted = campaign.results | selectattr('status', 'equalto', 'Submitted') | list | length %}
         {% set reported = campaign.results | selectattr('reported', 'equalto', true) | list | length %}
-
+    
         {% set email_stats = {
             'Emails ouverts': opened,
             'Liens cliqués': clicked,
             'Données soumises': submitted,
             'Emails signalés': reported
         } %}
-
+    
         {% for label, value in email_stats.items() %}
             {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
-            {% set color_class = 'blue' %}
-            {% if percentage > 20 %}
-                {% set color_class = 'green' %}
-            {% endif %}
-            {% if percentage > 40 %}
-                {% set color_class = 'yellow' %}
-            {% endif %}
-            {% if percentage > 60 %}
-                {% set color_class = 'orange' %}
-            {% endif %}
-            {% if percentage > 80 %}
-                {% set color_class = 'red' %}
-            {% endif %}
-            
-            <div class="col-md-3">
+            {% set color_class = 'border-blue' %}
+            {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
+            {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
+            {% if percentage > 60 %} {% set color_class = 'border-orange' %} {% endif %}
+            {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
+    
+            <div class="col-6 col-md-3 d-flex flex-column align-items-center">
                 <div class="circle-stat {{ color_class }}">
                     <h3 class="circle-number">{{ value }}</h3>
                 </div>
-                <h5>{{ label }}</h5>
+                <h5 class="mt-2">{{ label }}</h5>
             </div>
         {% endfor %}
     </div>
 </div>
+</div>
 
-
-<hr class="my-4">
-    <!-- Apercu Mail -->
-    <div class="container section">
-        <h4>Aperçu du mail envoyé</h4>
-        <div class="card mt-3 card-details">
-            <div class="card-header bg-primary text-white">📩 Email envoyé</div>
-            <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
-                <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
-                <p><strong>Destinataire :</strong> {{ group_name }}</p>
-                <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
-                <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
-                <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
-                <hr>
-                <p><strong>Contenu du mail :</strong></p>
-                <pre class="border p-2 bg-white pre-details">{{ campaign.template.text }}</pre>
-                <hr>
-                <!--
-                <p><strong>Contenu HTML :</strong></p>
-                <iframe srcdoc="{{ campaign.template.html | safe }}" style="max-width: 100%; width: 100%; height: 300px; border: none; overflow-x: hidden;"></iframe>
-                -->
-            </div>
-        </div>
-    </div>
-            
-    <hr class="my-4">                    
-    <!-- Résultats envois -->
-    <div>
-        <h4>Résultats des envois</h4>
-        <div class="table-responsive">
-        <table class="table table-sm table-details">
-            <thead>
-                <tr>
-                    <th class="th-details">Email</th>
-                    <th class="th-details">Prénom</th>
-                    <th class="th-details">Nom</th>
-                    <th class="th-details">IP</th>
-                    <th class="th-details">Date d'envoi</th>
-                    <th class="th-details">Dernière modification</th>
-                    <th class="th-details">Statut</th>
-                    <th class="th-details">Signalé</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in campaign.results %}
-                <tr>
-                    <td class="td-details">{{ result.email }}</td>
-                    <td class="td-details">{{ result.first_name }}</td>
-                    <td class="td-details">{{ result.last_name }}</td>
-                    <td class="td-details">{{ result.ip }}</td>
-                    <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }} </td>
-                    <td class="td-details">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
-                    <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
-                        {{ result.status }}
-                    </td>
-                    <td class="td-details">{{ "✅" if result.reported else "❌" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        </div>
-    </div>
-
-    <hr class="my-4">
-    <!-- Informations SMTP -->
-    <div>
-        <h4>Informations SMTP</h4>
-        <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
-        <p><strong>Hôte :</strong> {{ campaign.smtp.host }}</p>
-        <p><strong>Nom :</strong> {{ campaign.smtp.name }}</p>
-        <p><strong>Date de modification :</strong> {{ campaign.smtp.modified_date[:10] }} {{ campaign.smtp.modified_date[11:16] }}</p>
-    </div>
-
-    <hr class="my-4">
-    <!-- URL malveillant -->
-    <div>
-        <h4>URL malveillant utilisé</h4>
-        <strong>Nom Page HTML URL :</strong> {{ campaign.page.name }} (Modifiée le: {{ campaign.page.modified_date[:10] }} {{campaign.page.modified_date[11:16] }})<br>
-        <div class="card mt-3 card-details">
-            <div class="card-header bg-dark text-white">Aperçu du contenu HTML</div>
-            <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
-                <button class="btn btn-secondary mb-2" onclick="toggleView()">Vue/Code</button>
-                
-                <div id="htmlView" style="border: 1px solid #ccc; padding: 10px; display: block;">
-                    <iframe id="htmlPreview" style="max-width: 100%; width: 100%; height: 300px; border: none;"></iframe>
+<div class="accordion" id="detailsAccordion">
+    <!-- Apercu Mail --> 
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingMail">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMail" aria-expanded="false" aria-controls="collapseMail">
+                Aperçu du mail envoyé
+            </button>
+        </h2>
+        <div id="collapseMail" class="accordion-collapse collapse" aria-labelledby="headingMail">
+            <div class="accordion-body">
+                <div class="card mt-3 card-details">
+                    <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
+                        <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
+                        <p><strong>Destinataire :</strong> {{ group_name }}</p>
+                        <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
+                        <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
+                        <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
+                        <hr>
+                        <p><strong>Contenu du mail :</strong></p>
+                        <pre class="border p-2 bg-white pre-details">{{ campaign.template.text }}</pre>
+                        <hr>
+                        <!--
+                        <p><strong>Contenu HTML :</strong></p>
+                        <iframe srcdoc="{{ campaign.template.html | safe }}" style="max-width: 100%; width: 100%; height: 300px; border: none; overflow-x: hidden;"></iframe>
+                        -->
+                    </div>
                 </div>
-                
-                <pre id="codeView" class="pre-details" style="display: none; padding: 10px; border-radius: 5px; white-space: pre-wrap; overflow: auto; border: 1px solid #ddd;">
-                    {{ campaign.page.html}}
-                </pre>
+            </div>
+        </div>       
+    </div>
+
+    <!-- Résultats envois -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingResults">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResults" aria-expanded="false" aria-controls="collapseResults">
+                Résultats des envois
+            </button>
+        </h2>
+        <div id="collapseResults" class="accordion-collapse collapse" aria-labelledby="headingResults">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    
+                    <!-- Tableau des résultats -->
+                    <table class="table table-sm table-details">
+                        <thead>
+                            <tr>
+                                <th class="th-details">Email</th>
+                                <th class="th-details">Prénom</th>
+                                <th class="th-details">Nom</th>
+                                <th class="th-details">IP</th>
+                                <th class="th-details">Date d'envoi</th>
+                                <th class="th-details">Dernière modification</th>
+                                <th class="th-details">Statut</th>
+                                <th class="th-details">Signalé</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in campaign.results %}
+                            <tr>
+                                <td class="td-details">{{ result.email }}</td>
+                                <td class="td-details">{{ result.first_name }}</td>
+                                <td class="td-details">{{ result.last_name }}</td>
+                                <td class="td-details">{{ result.ip }}</td>
+                                <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }} </td>
+                                <td class="td-details ">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
+                                <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
+                                    {{ result.status }}
+                                </td>
+                                <td class="td-details">{{ "✅" if result.reported else "❌" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-<a href="{{ url_for('frontend.follow_campaign') }}" class="btn btn-secondary mt-3">Retour aux campagnes</a>
+
+    <!-- Informations SMTP -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingSMTP">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSMTP">
+                Informations SMTP
+            </button>
+        </h2>
+        <div id="collapseSMTP" class="accordion-collapse collapse">
+            <div class="accordion-body">
+                <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
+                <p><strong>Hôte :</strong> {{ campaign.smtp.host }}</p>
+                <p><strong>Nom :</strong> {{ campaign.smtp.name }}</p>
+                <p><strong>Date de modification :</strong> {{ campaign.smtp.modified_date[:10] }} {{ campaign.smtp.modified_date[11:16] }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL malveillant -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingURL">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseURL">
+                URL malveillant
+            </button>
+        </h2>
+        <div id="collapseURL" class="accordion-collapse collapse">
+            <div class="accordion-body">
+                <div>
+                    <p><strong>URL :</strong> {{ campaign.page.name }}</p>
+                    <p><strong>Date de modification :</strong> {{ campaign.page.modified_date[:10] }} {{ campaign.page.modified_date[11:16] }}</p>
+                </div>
+                <div class="card mt-3 card-details">
+                    <div class="card-header bg-dark text-white">Aperçu du contenu HTML</div>
+                    <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
+                        <button class="btn btn-secondary mb-2" onclick="toggleView()">Vue/Code</button>
+                        
+                        <div id="htmlView" style="border: 1px solid #ccc; padding: 10px; display: block;">
+                            <iframe id="htmlPreview" style="max-width: 100%; width: 100%; height: 300px; border: none;"></iframe>
+                        </div>
+                        
+                        <pre id="codeView" class="pre-details" style="display: none; padding: 10px; border-radius: 5px; white-space: pre-wrap; overflow: auto; border: 1px solid #ddd;">
+                            {{ campaign.page.html}}
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="text-center justify-center">
+    <a href="{{ url_for('frontend.follow_campaign') }}" class="btn btn-warning mt-3">Retour aux campagnes</a>
+</div>
 
 </div>
 
