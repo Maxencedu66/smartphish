@@ -230,6 +230,7 @@ main {
     word-wrap: break-word;
     max-width: 100%;
     overflow-x: auto;
+    height: 200px;
 }
 
 

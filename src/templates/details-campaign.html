@@ -95,8 +95,7 @@
                         <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>
                         <hr>
                         <p><strong>Contenu du mail :</strong></p>
-                        <pre class="border p-2 bg-white pre-details">{{ campaign.template.text }}</pre>
-                        <hr>
+                        <pre class="border p-2 bg-white pre-details overflow-auto">{{ campaign.template.text }}</pre>
                         <!--
                         <p><strong>Contenu HTML :</strong></p>
                         <iframe srcdoc="{{ campaign.template.html | safe }}" style="max-width: 100%; width: 100%; height: 300px; border: none; overflow-x: hidden;"></iframe>
@@ -175,29 +174,46 @@
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingURL">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseURL">
-                URL malveillant
+                Page de destination
             </button>
         </h2>
         <div id="collapseURL" class="accordion-collapse collapse">
             <div class="accordion-body">
                 <div>
-                    <p><strong>URL :</strong> {{ campaign.page.name }}</p>
+                    <p><strong>Nom Page Destination :</strong> {{ campaign.page.name }}</p>
                     <p><strong>Date de modification :</strong> {{ campaign.page.modified_date[:10] }} {{ campaign.page.modified_date[11:16] }}</p>
                 </div>
-                <div class="card mt-3 card-details">
-                    <div class="card-header bg-dark text-white">Aperçu du contenu HTML</div>
-                    <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
-                        <button class="btn btn-secondary mb-2" onclick="toggleView()">Vue/Code</button>
-                        
-                        <div id="htmlView" style="border: 1px solid #ccc; padding: 10px; display: block;">
-                            <iframe id="htmlPreview" style="max-width: 100%; width: 100%; height: 300px; border: none;"></iframe>
+                <div class="card mt-3 shadow-lg">
+                    <div class="card-body bg-light p-3 border">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold">
+                                <span class="badge bg-dark px-3 py-2">Aperçu du contenu</span>
+                            </h5>
+                            
+                                                        
+                            <!-- Toggle Switch -->
+                            <div class="d-flex align-items-center">
+                                <span class="fw-semibold text-muted me-3">Vue</span> <!-- Ajuste l'espacement à droite -->
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="toggleView" onchange="toggleView()">
+                                </div>
+                                <span class="fw-semibold text-muted ms-2">Code</span> <!-- Ajuste l'espacement à gauche -->
+                            </div>
+                            
+                            
                         </div>
-                        
-                        <pre id="codeView" class="pre-details" style="display: none; padding: 10px; border-radius: 5px; white-space: pre-wrap; overflow: auto; border: 1px solid #ddd;">
-                            {{ campaign.page.html}}
-                        </pre>
+                
+                        <!-- Cadre FIXE pour l'affichage -->
+                        <div class="border p-2 bg-white overflow-auto" style="height: 200px;">
+                            <!-- Aperçu HTML -->
+                            <iframe id="htmlPreview" class="w-100 h-100 border-0"></iframe>
+                
+                            <!-- Code Source -->
+                            <pre id="codeView" class="text-wrap d-none">{{ campaign.page.html }}</pre>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -214,27 +230,28 @@
 
 <script>
     function loadHTMLPreview() {
-    var iframe = document.getElementById("htmlPreview");
-    var doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`{{ campaign.page.html | safe}}`);
-    doc.close();
-}
-
-function toggleView() {
-    var htmlView = document.getElementById("htmlView");
-    var codeView = document.getElementById("codeView");
-    
-    if (htmlView.style.display === "none") {
-        htmlView.style.display = "block";
-        codeView.style.display = "none";
-    } else {
-        htmlView.style.display = "none";
-        codeView.style.display = "block";
+        var iframe = document.getElementById("htmlPreview");
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`{{ campaign.page.html | safe}}`);
+        doc.close();
     }
-}
 
-window.onload = loadHTMLPreview;
+    function toggleView() {
+        var toggle = document.getElementById("toggleView").checked;
+        var htmlPreview = document.getElementById("htmlPreview");
+        var codeView = document.getElementById("codeView");
+
+        if (toggle) {
+            htmlPreview.classList.add("d-none");
+            codeView.classList.remove("d-none");
+        } else {
+            htmlPreview.classList.remove("d-none");
+            codeView.classList.add("d-none");
+        }
+    }
+
+    window.onload = loadHTMLPreview;
 </script>
 
 {% endblock %}
