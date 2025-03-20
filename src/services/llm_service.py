@@ -51,21 +51,25 @@ def generate_prompt(user_data):
         """,
 
         "Invitation à un événement exclusif": f"""
-        Rédige un email **dynamique et engageant** pour des employés, invitant à un événement professionnel restreint. 
+        Rédige un email **dynamique et engageant** tout en restant formel pour des employés, invitant à un événement professionnel restreint. 
         L'email doit **être convaincant** et inciter l'employé à répondre au mail avec ses **coordonnées personnelles**.
         Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
 
         - **But** : Récupérer des informations personnelles (nom, téléphone, RIB) sous couvert d'une invitation à un événement exclusif.
-        - **Ton** : Enthousiaste et exclusif.
+        - **Ton** : Enthousiaste et exclusif mais professionel et formel.
         - **Signature** : {user_data['expéditeur']}.
+        - **Destinataire** : Inconnu.
         - **Langue** : Français.
 
         Exemple : 
         ---
-        🎉 {user_data['entreprise']} organise un événement exclusif pour ses collaborateurs ! 
+        🎉 L'entreprise '{user_data['entreprise']}' organise un événement exclusif pour ses collaborateurs ! 
         Nombre de places limité, **inscrivez-vous vite** en répondant à ce mail avec vos noms, numéro de téléphone et RIB. 
         Ne manquez pas cette opportunité unique !
         ---
+        
+        Rappel : **Ne pas mettre de champs à remplir**. NE PAS METTRE DE choses avec des crochets [Nom], [Téléphone], etc sinon je me tire une balle et je suis sérieux OK ?
+        Si tu ne sais pas une information, n'en parle pas.
         """,
 
         "Mise à jour de sécurité urgente": f"""
@@ -80,7 +84,7 @@ def generate_prompt(user_data):
 
         Exemple : 
         ---
-        Bonjour, 
+        Bonjour cher collaborateur, 
         Dans le cadre de l'amélioration de la sécurité informatique de {user_data['entreprise']}, une **mise à jour de vos accès** est nécessaire.  
         **Merci de répondre à ce mail avec vos identifiants** pour procéder à la mise à jour.
         ---
@@ -92,6 +96,7 @@ def generate_prompt(user_data):
 def generate_phishing_email(user_data):
     """Génère un email de phishing à l'aide de Mistral via Ollama."""
     prompt = generate_prompt(user_data)
+    # print(prompt)
 
     valid = False
     while not valid:
@@ -101,7 +106,11 @@ def generate_phishing_email(user_data):
         # Strip the email content
         lines = response_obj.contenu_mail.split("\n")
         response_obj.contenu_mail = "\n".join([line.strip() for line in lines])
-        valid = '[' not in response_obj.contenu_mail
+        valid = '[' not in response_obj.contenu_mail and len(lines) > 1 and 'Dear ' not in response_obj.contenu_mail
+        
+        if not valid:
+            print("Email not valid, retrying...")
+            # print(response_obj.contenu_mail)
     
     return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail}
 

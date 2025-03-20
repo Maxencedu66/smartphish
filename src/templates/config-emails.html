@@ -298,6 +298,14 @@ function generateAIEmail() {
         }
     });
 
+    // Change the text after 5 seconds
+    let timeout = setTimeout(() => {
+        Swal.update({
+            text: "Plus que quelques secondes..."
+        });
+        Swal.showLoading();
+    }, 8000);
+
     
     // Afficher le spinner et masquer le résultat précédent
     // document.getElementById("aiLoading").style.display = "block";
@@ -318,6 +326,7 @@ function generateAIEmail() {
     .then(response => response.json())
     .then(data => {
         //document.getElementById("aiLoading").style.display = "none";
+        clearTimeout(timeout);
         Swal.close(); // Ferme la popup de chargement
         if (data.error) {
             Swal.fire({
