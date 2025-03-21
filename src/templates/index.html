@@ -12,12 +12,15 @@
     <header>
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="logo">
         <h1 class="title">SmartPhish</h1>
-        <!--
+        
         <div class="header-buttons">
+            <button onclick="logout()">Déconnexion</button>
+            <!--
             <button id="btnSettings">Settings</button>
             <button id="btnAccount">Account</button>
+            -->
         </div>
-    -->
+
     </header>
 
     <aside>
@@ -41,6 +44,18 @@
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src=""></script>
+    <script> 
+        function logout() {
+            fetch("/logout", {
+                method: "GET",
+                credentials: "same-origin"
+            })
+            .then(() => {
+                console.log("Déconnexion réussie !");
+                window.location.href = "/login"; 
+            })
+            .catch(error => console.error("Erreur de déconnexion :", error));
+        }
+    </script>
 </body>
 </html>

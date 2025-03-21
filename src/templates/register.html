@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un compte | SmartPhish</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="img-fluid mb-3" style="max-width: 150px;">
+                    <h2 class="mb-4">Créer un compte</h2>
+                </div>
+
+                <div class="card shadow p-4">
+                    <h4 class="text-center mb-3">Inscription</h4>
+                    
+                    <!-- Message d'erreur -->
+                    <div id="error-message" class="alert alert-danger d-none"></div>
+
+                    <form onsubmit="event.preventDefault(); register();">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" id="username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" id="password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm-password" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" id="confirm-password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Déjà un compte ? <a href="/login" class="btn btn-link">Se connecter</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+ 
+<script>
+    function register() {
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let confirmPassword = document.getElementById("confirm-password").value;
+        let errorMessage = document.getElementById("error-message");
+
+        fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password, confirm_password: confirmPassword }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "Inscription réussie") {
+                console.log("Inscription réussie !");
+                localStorage.setItem("username", username); 
+                window.location.href = "/login";  
+            } else {
+                errorMessage.textContent = data.error;
+                errorMessage.classList.remove("d-none");
+            }
+        })
+        .catch(error => {
+            console.error("Erreur réseau :", error);
+            errorMessage.textContent = "Une erreur est survenue. Veuillez réessayer.";
+            errorMessage.classList.remove("d-none");
+        });
+    }
+
+</script>

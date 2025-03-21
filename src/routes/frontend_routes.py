@@ -1,11 +1,54 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 
-from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for
+from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session
 from src.services.llm_service import *
 from src.services.gophish_service import *
 import json
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
+
+# Middleware pour vérifier l'authentification
+@bp.before_request
+def check_auth():
+    allowed_routes = ["frontend.login_page", "auth.login", "frontend.register_page", "auth.register"]
+
+    if "user" not in session and request.endpoint not in allowed_routes:
+        return redirect(url_for("frontend.login_page"))
+
+@bp.route("/login")
+def login_page():
+    return render_template("login.html")
+
+@bp.route("/register")
+def register_page():
+    return render_template("register.html")
+
+@bp.route("/logout")
+def logout():
+    session.pop("user", None)  # Supprime l'utilisateur de la session
+    return redirect(url_for("frontend.login_page"))
+
+
+@bp.route('/generate-email', methods=['POST'])
+def generate_email():
+    """ Appelle LLM.py pour générer un email de phishing et le retourne en JSON. """
+    data = request.json
+    scenario = data.get("scenario")
+    entreprise = data.get("entreprise", "")
+    expediteur = data.get("expediteur", "")
+    email_expediteur = data.get("email_expediteur", "")
+
+    user_data = {
+        "scénario": scenario,
+        "entreprise": entreprise,
+        "expéditeur": expediteur,
+        "email_expediteur": email_expediteur
+    }
+
+    generated_email = generate_phishing_email(user_data)
+
+    return jsonify({"object": generated_email['object'], "content": generated_email['content']})
+
 
 # Routes pour afficher les pages HTML
 

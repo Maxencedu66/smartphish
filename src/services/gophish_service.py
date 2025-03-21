@@ -1,6 +1,7 @@
 # Gestion de GoPhish via l'API de Smartphish
 
 import requests
+import bcrypt
 from src.config import Config
 
 

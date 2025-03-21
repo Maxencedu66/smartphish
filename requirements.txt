@@ -1,3 +1,4 @@
-Flask
-ollama
-requests
+Flask==3.1.0
+ollama==0.4.7
+requests==2.32.3
+Flask-Session==0.8.0

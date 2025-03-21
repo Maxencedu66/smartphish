@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | SmartPhish</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="img-fluid mb-3" style="max-width: 150px;">
+                    <h2 class="mb-4">SmartPhish</h2>
+                </div>
+
+                <div class="card shadow p-4">
+                    <h4 class="text-center mb-3">Connexion</h4>
+                    
+                    <!-- Message d'erreur -->
+                    <div id="error-message" class="alert alert-danger d-none"></div>
+
+                    <form onsubmit="event.preventDefault(); login();">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" id="username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" id="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                    </form>
+                </div>
+                <div class="text-center mt-3">
+                    <p>Pas encore de compte ? <a href="/register" class="btn btn-link">Créer un compte</a></p>
+                </div>                
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+
+
+<script>
+    function login() {
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let errorMessage = document.getElementById("error-message");
+
+        fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "Connexion réussie") {
+                console.log("Connexion réussie !");
+                localStorage.setItem("username", username);  
+                window.location.href = "/"; 
+            } else {
+                errorMessage.textContent = "Identifiants incorrects.";
+                errorMessage.classList.remove("d-none");  
+            }
+        })
+        .catch(error => {
+            console.error("Erreur réseau :", error);
+            errorMessage.textContent = "Une erreur est survenue. Veuillez réessayer.";
+            errorMessage.classList.remove("d-none");
+        });
+    }
+
+</script>
