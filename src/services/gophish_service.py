@@ -1,6 +1,7 @@
 # Gestion de GoPhish via l'API
 
 import requests
+import bcrypt
 from src.config import Config
 
 

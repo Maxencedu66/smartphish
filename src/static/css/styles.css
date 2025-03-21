@@ -43,10 +43,10 @@ header {
 }
 
 .header-buttons {
-    display: flex; /* Active flexbox */
+    display: flex;
     align-items: center;
-    margin-right: 8px; /* Ajoute une marge à droite */
-    gap: 30px; /* Ajuste l’espace entre les boutons */
+    margin-right: 8px; 
+    gap: 30px; 
 }
 .header-buttons button {
     padding: 8px 15px;
@@ -100,7 +100,6 @@ aside li:hover {
 }
 
 .menu-link.active {
-    /* Change highlight color */
     background-color: #354961;
 }
 
@@ -139,7 +138,7 @@ main {
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: left; /* Aligne le texte à gauche */
+    text-align: left;
 }
 
 .home-section h2 {
@@ -171,7 +170,6 @@ main {
     100% { transform: rotate(360deg); }
 }
 
-/* Style du cercle rouge clignotant */
 @keyframes fade-blink {
 
     0%,
@@ -197,12 +195,12 @@ main {
 
 /* Style du bouton fixe */
 .btn-fixed {
-    min-width: 100px; /* Ajuste selon tes besoins */
+    min-width: 100px;
     text-align: center;
 }
 
 .badge-fixed {
-    min-width: 80px; /* Ajuste la largeur selon tes besoins */
+    min-width: 80px;
     display: inline-block;
     text-align: center;
 }
@@ -216,7 +214,7 @@ main {
 
 .th-details, .td-details {
     overflow: hidden;
-    text-overflow: ellipsis; /* Ajoute des "..." si le texte est trop long */
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -248,8 +246,8 @@ main {
     font-size: 20px;
     font-weight: bold;
     color: black;
-    background-color: white; /* L'intérieur du cercle reste blanc */
-    border: 4px solid #ccc; /* Bordure grise par défaut */
+    background-color: white;
+    border: 4px solid #ccc;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease-in-out;
 }
@@ -286,29 +284,29 @@ main {
 }
 
 .fixed-card h6 {
-    height: 25px; /* Hauteur fixe pour tous les titres */
-    line-height: 25px; /* Alignement vertical du texte */
-    font-size: 14px; /* Taille uniforme */
+    height: 25px;
+    line-height: 25px; 
+    font-size: 14px;
 }
 
 .fixed-card p {
-    height: 30px; /* Assure une hauteur fixe aux valeurs */
+    height: 30px; 
     line-height: 30px;
     font-weight: bold;
 }
 
 .campaign-text {
-    max-width: 200px; /* Largeur maximale */
-    white-space: nowrap; /* Empêche le retour à la ligne */
-    overflow: hidden; /* Cache le texte dépassant */
-    text-overflow: ellipsis; /* Ajoute les "..." pour les longs textes */
+    max-width: 200px; 
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis;
 }
 
 /* Carte fixe pour les emails */
 .fixed-card-email {
-    min-width: 250px; /* Largeur minimale pour éviter que la card soit trop petite */
-    max-width: 300px; /* Largeur maximale pour éviter qu'elle s'étire trop */
-    text-align: center; /* Centrer le texte */
+    min-width: 250px; 
+    max-width: 300px; 
+    text-align: center; 
 }
 
 .section {
@@ -324,42 +322,42 @@ main {
     padding: 3px 10px;
     border-radius: 5px;
     display: inline-block;
-    min-width: 200px; /* Fixe la largeur pour éviter la variation */
+    min-width: 200px; 
     text-align: center;
 }
 
 .completed {
-    background-color: #28a745; /* Vert */
+    background-color: #28a745; 
     color: white;
 }
 
 .in-progress {
-    background-color: #ff9800; /* Orange */
+    background-color: #ff9800;
     color: white;
 }
 
 /* Style des boutons */
 /* Style général des boutons de l'accordéon */
 .accordion-button {
-    background-color: #007bff !important; /* Couleur bleue */
-    color: white !important; /* Texte en blanc */
+    background-color: #007bff !important; 
+    color: white !important;
     font-weight: bold;
     padding: 12px 20px;
     transition: background-color 0.3s ease-in-out, transform 0.2s;
     border: none;
     box-shadow: none;
-    border-radius: 8px !important; /* Arrondi tous les bords */
+    border-radius: 8px !important; 
 }
 
 /* Effet au survol */
 .accordion-button:hover {
-    background-color: #0056b3 !important; /* Bleu plus foncé */
-    transform: scale(1.01); /* Légère mise en avant */
+    background-color: #0056b3 !important; 
+    transform: scale(1.01); 
 }
 
 /* Empêcher Bootstrap d'enlever le border-radius lorsqu'il est ouvert */
 .accordion-button:not(.collapsed) {
-    background-color: #004099 !important; /* Encore plus foncé */
+    background-color: #004099 !important; 
     color: white !important;
     border-radius: 8px !important;
 }

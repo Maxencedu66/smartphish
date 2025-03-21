@@ -5,8 +5,6 @@ from src.services.gophish_service import *
 
 gophish_bp = Blueprint('gophish', __name__)
 
-
-
 #------------------------------
 # Routes pour la gestion des campagnes
 # ------------------------------

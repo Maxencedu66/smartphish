@@ -103,7 +103,7 @@
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/api/gophish/campaigns/${campaignId}/complete`, {
-                method: 'GET', // Comme précisé dans la doc
+                method: 'GET',
                 headers: { "Content-Type": "application/json" }
             })
             .then(res => res.json())
@@ -116,7 +116,7 @@
                         confirmButtonColor: "#28a745",
                         confirmButtonText: "OK"
                     }).then(() => {
-                        location.reload(); // Rafraîchir la page pour mettre à jour l'affichage
+                        location.reload(); 
                     });
                 } else {
                     Swal.fire({

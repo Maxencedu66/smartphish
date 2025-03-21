@@ -226,7 +226,6 @@
           <button type="button" class="btn btn-danger btn-sm remove-member">❌</button>
         `;
         container.appendChild(row);
-        // Bouton pour supprimer cette ligne
         row.querySelector(".remove-member").addEventListener("click", function() {
           this.parentElement.remove();
         });
@@ -453,10 +452,6 @@
           });
         });
       });
-  
-      // (Optionnel) Ajouter automatiquement une ligne "member" 
-      // quand on ouvre le modal "New Group", par exemple :
-      // addMember('newGroupMembers');
     </script>
   </div>
 

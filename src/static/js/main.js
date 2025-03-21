@@ -65,12 +65,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Vérifie si l'utilisateur a cliqué sur "Nouvelle Campagne"
             if (contentId === "nouvelle_campagne") {
-                window.location.href = "/nouvelle_campagne"; // Redirige vers la page
+                window.location.href = "/nouvelle_campagne";
             }
 
             // Vérifie si l'utilisateur a cliqué sur "Home"
             if (contentId === "home") {
-                window.location.href = "/"; // Redirige vers la page d'accueil
+                window.location.href = "/";
             }
         });
     });
@@ -131,4 +131,15 @@ function resetForm() {
 
 function lancement() {
     alert("Email validé et prêt à être envoyé.");
+}
+
+
+function logout() {
+    localStorage.removeItem("username");  // Supprime l'utilisateur stocké
+    fetch("/logout", { method: "GET", credentials: "same-origin" })
+    .then(() => {
+        console.log("Déconnexion réussie !");
+        window.location.href = "/login";  // Redirige vers la page de connexion
+    })
+    .catch(error => console.error("Erreur de déconnexion :", error));
 }
