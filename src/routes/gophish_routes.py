@@ -1,4 +1,4 @@
-# Routes pour interagir avec GoPhish
+# Routes pour interagir avec GoPhish directement depuis l'API de SmartPhish, permet d'utiliser l'api avec CURL sans affichage du frontend.
 
 from flask import Blueprint, request, jsonify
 from src.services.gophish_service import *

@@ -1,4 +1,4 @@
-# Gestion de GoPhish via l'API
+# Gestion de GoPhish via l'API de Smartphish
 
 import requests
 from src.config import Config
@@ -14,7 +14,7 @@ HEADERS = {
 # ---------------------------
 
 def get_campaigns():
-    """Récupère la liste des campagnes GoPhish en HTTPS"""
+    """Récupère la liste des campagnes en HTTPS"""
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/campaigns", headers=HEADERS, verify=False)
 
     try:
@@ -24,8 +24,7 @@ def get_campaigns():
 
 
 def create_campaign(data):
-    """Crée une campagne sur GoPhish en utilisant le payload basé sur les noms,
-    en corrigeant le format de la date si nécessaire."""
+    """Crée une campagne """
     url = f"{Config.GOPHISH_API_URL}/api/campaigns/"
 
     # Correction du format de la date si besoin :
@@ -52,11 +51,9 @@ def create_campaign(data):
         "send_by_date": data.get("send_by_date", None)
     }
 
-    print("🔹 Données envoyées à GoPhish :", campaign_data)
-
+    #print(" Données envoyées à GoPhish :", campaign_data)
     response = requests.post(url, json=campaign_data, headers=HEADERS, verify=False)
-
-    print("🔹 Réponse brute de GoPhish :", response.status_code, response.text)
+    #print(" Réponse brute de GoPhish :", response.status_code, response.text)
 
     try:
         result = response.json()
@@ -83,7 +80,7 @@ def get_campaign(campaign_id):
 
 
 def get_campaign_events(campaign_id):
-    """Récupère la timeline (les événements) d'une campagne."""
+    """Récupère les événements d'une campagne."""
     url = f"{Config.GOPHISH_API_URL}/api/campaigns/{campaign_id}/timeline"
     response = requests.get(url, headers=HEADERS, verify=False)
     try:
@@ -176,7 +173,6 @@ def create_group(data):
 def update_group(group_id, data):
     """
     Met à jour un groupe existant sur Gophish.
-    Selon la doc, data doit inclure : { "id": group_id, "name": "...", "targets": [...] }
     """
     url = f"{Config.GOPHISH_API_URL}/api/groups/{group_id}"
     response = requests.put(url, json=data, headers=HEADERS, verify=False)
@@ -190,7 +186,7 @@ def update_group(group_id, data):
         }
 
 def delete_group(group_id):
-    """Supprime un groupe existant sur Gophish"""
+    """Supprime un groupe existant """
     url = f"{Config.GOPHISH_API_URL}/api/groups/{group_id}"
     response = requests.delete(url, headers=HEADERS, verify=False)
     try:
@@ -208,8 +204,7 @@ def delete_group(group_id):
 
 def get_templates():
     """
-    Récupère la liste des templates GoPhish
-    via GET /api/templates
+    Récupère la liste des templates
     """
     url = f"{Config.GOPHISH_API_URL}/api/templates"
     response = requests.get(url, headers=HEADERS, verify=False)
@@ -226,7 +221,6 @@ def get_templates():
 def create_template(data):
     """
     Crée un nouveau template GoPhish
-    via POST /api/templates/
     """
     url = f"{Config.GOPHISH_API_URL}/api/templates/"
     response = requests.post(url, json=data, headers=HEADERS, verify=False)
@@ -256,7 +250,7 @@ def get_template(template_id):
 
 def update_template(template_id, data):
     """
-    Modifie un template existant via PUT /api/templates/<id>.
+    Modifie un template existant.
     Vous devez fournir tout le JSON du template (id, name, subject, text/html).
     """
     url = f"{Config.GOPHISH_API_URL}/api/templates/{template_id}"
@@ -272,7 +266,7 @@ def update_template(template_id, data):
 
 def delete_template(template_id):
     """
-    Supprime un template via DELETE /api/templates/<id>
+    Supprime un template à partir de son ID.
     """
     url = f"{Config.GOPHISH_API_URL}/api/templates/{template_id}"
     response = requests.delete(url, headers=HEADERS, verify=False)
@@ -292,7 +286,7 @@ def delete_template(template_id):
 # ---------------------------
 
 def get_sending_profiles():
-    """Récupère la liste de tous les sending profiles (profils SMTP) de GoPhish"""
+    """Récupère la liste de tous les sending profiles (profils SMTP)"""
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/smtp/", headers=HEADERS, verify=False)
     try:
         return response.json()

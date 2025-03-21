@@ -7,34 +7,11 @@ import json
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
-
-
-@bp.route('/generate-email', methods=['POST'])
-def generate_email():
-    """ Appelle LLM.py pour générer un email de phishing et le retourne en JSON. """
-    data = request.json
-    scenario = data.get("scenario")
-    entreprise = data.get("entreprise", "")
-    expediteur = data.get("expediteur", "")
-    email_expediteur = data.get("email_expediteur", "")
-
-    user_data = {
-        "scénario": scenario,
-        "entreprise": entreprise,
-        "expéditeur": expediteur,
-        "email_expediteur": email_expediteur
-    }
-
-    generated_email = generate_phishing_email(user_data)
-
-    return jsonify({"object": generated_email['object'], "content": generated_email['content']})
-
-
 # Routes pour afficher les pages HTML
 
 @bp.route('/')
 def index():
-    campaigns = get_campaigns()  # Récupérer les campagnes GoPhish
+    campaigns = get_campaigns()  # Récupérer les campagnes de la BD
     campaigns = [c for c in campaigns if c["status"] == "In progress"]
     return render_template('home.html', active_campaigns_length=len(campaigns))
 
@@ -43,7 +20,10 @@ def configuration():
     return render_template('configuration.html')
 
 
-# Route pour la page de création de campagne
+
+# ---------------------------
+# Routes pour la page de création de campagne
+# --------------------------- 
 
 @bp.route('/new-campaign', methods=['GET'])
 def new_campaign_page():
@@ -75,18 +55,13 @@ def follow_campaign():
 @bp.route("/details_campaign/<int:campaign_id>")
 def details_campaign(campaign_id):
     campaigns = get_campaigns()
-
     # Recherche de la campagne avec l'ID reçu
     selected_campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
-
     if not selected_campaign:
         return "Campagne non trouvée", 404
-
     # Recherch Nom du Groupe
     groups = get_groups()
-    
     campaign_emails = {result["email"] for result in selected_campaign["results"]}
-
     group_name = "Inconnu"
     for group in groups:
         group_emails = {target["email"] for target in group["targets"]}
@@ -94,6 +69,33 @@ def details_campaign(campaign_id):
             group_name = group["name"]
             break
     return render_template("details-campaign.html", campaign=selected_campaign, group_name=group_name)
+
+
+
+# ---------------------------
+# Routes pour la partie LLM
+# --------------------------- 
+
+@bp.route('/generate-email', methods=['POST'])
+def generate_email():
+    """ Appelle LLM.py pour générer un email de phishing et le retourne en JSON. """
+    data = request.json
+    scenario = data.get("scenario")
+    entreprise = data.get("entreprise", "")
+    expediteur = data.get("expediteur", "")
+    email_expediteur = data.get("email_expediteur", "")
+
+    user_data = {
+        "scénario": scenario,
+        "entreprise": entreprise,
+        "expéditeur": expediteur,
+        "email_expediteur": email_expediteur
+    }
+
+    generated_email = generate_phishing_email(user_data)
+
+    return jsonify({"object": generated_email['object'], "content": generated_email['content']})
+
 
 @bp.route('/analysis-correction')
 def analysis_correction():
@@ -119,9 +121,9 @@ def maj_status():
 
 
 
-# ---------------------------
+# ------------------------------------------------------
 # Routes pour les groupes
-# ---------------------------
+# ------------------------------------------------------
 
 @bp.route('/config-groups')
 def config_groups():
@@ -194,12 +196,10 @@ def delete_group_frontend(group_id):
 # Routes pour les templates de mail
 # ---------------------------
 
-
 @bp.route('/config-emails', methods=['GET'])
 def config_emails():
     """
-    Récupère la liste des email templates depuis GoPhish,
-    puis rend la page config-emails.html avec ces données.
+    Récupère la liste des email templates depuis la BD, puis rend la page config-emails.html avec ces données.
     """
     from src.services.gophish_service import get_templates
     email_templates = get_templates()
@@ -303,6 +303,8 @@ def update_smtp_submit(profile_id):
 @bp.route('/config-smtp/<int:profile_id>', methods=['DELETE'])
 def delete_smtp(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+
 
 # ---------------------------
 # Routes pour les Landing Pages
