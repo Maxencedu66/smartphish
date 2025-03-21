@@ -1,6 +1,8 @@
 import ollama
 from ollama import ListResponse, ProcessResponse
 from pydantic import BaseModel
+from src.routes.auth_routes import get_db_connection
+from datetime import datetime
 
 class EmailInfo(BaseModel):
   objet_mail: str
@@ -143,3 +145,39 @@ def get_ollama_status():
                 break
     
     return info_dicts
+
+
+
+def generate_and_save_report_to_db(campaign_data, scenario):
+    prompt = f"""
+Tu es un expert en cybersécurité. Rédige un rapport professionnel de sensibilisation structuré selon les sections suivantes :
+
+1. Introduction : Résume les objectifs de la campagne de phishing.
+2. Résultats : Présente les statistiques suivantes :
+   - Nom de la campagne : {campaign_data['name']}
+   - Date : {campaign_data['created_date']}
+   - Scénario utilisé : {scenario}
+   - Nombre de destinataires : {len(campaign_data['results'])}
+   - Emails ouverts : {sum(1 for r in campaign_data['results'] if r['status'] == 'Opened')}
+   - Clics sur les liens : {sum(1 for r in campaign_data['results'] if r['status'] == 'Clicked')}
+   - Données soumises : {sum(1 for r in campaign_data['results'] if r['status'] == 'Submitted Data')}
+3. Analyse des erreurs humaines : Explique les comportements à risque observés.
+4. Recommandations : Donne 3 conseils concrets pour éviter ce type d'erreur.
+5. Conclusion : Message de sensibilisation pour inciter à la vigilance.
+
+Formate ce rapport pour qu’il soit lisible ligne par ligne (sans balise HTML ni LaTeX) en respectant les titres de sections en majuscule ou démarqués.
+
+Langue : Français uniquement.
+Rend cela lisible que ce soit pour les dates, l'heure de création du rapport etc... On ne doit pas deviner que c'est une IA qui a écrit le rapport.
+"""
+
+    response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
+    texte = response.message.content.strip()
+
+    conn = get_db_connection()
+    conn.execute("INSERT INTO reports (campaign_id, content, created_at) VALUES (?, ?, ?)",
+                 (campaign_data["id"], texte, datetime.utcnow().isoformat()))
+    conn.commit()
+    conn.close()
+
+    return texte

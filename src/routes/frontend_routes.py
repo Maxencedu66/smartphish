@@ -1,9 +1,17 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
-
-from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session
+import os
+from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session, send_file
 from src.services.llm_service import *
 from src.services.gophish_service import *
+from src.services.report_service import *
 import json
+from io import BytesIO
+from fpdf import FPDF
+import subprocess
+import tempfile
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -140,6 +148,36 @@ def llm_settings():
 def maj_status():
     return render_template('maj-status.html')
 
+
+
+@bp.route('/generate-report/<int:campaign_id>', methods=['GET'])
+def generate_report(campaign_id):
+    force = request.args.get("force", "false").lower() == "true"
+
+    conn = get_db_connection()
+    existing = conn.execute("SELECT content FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
+    conn.close()
+
+    if existing and not force:
+        return jsonify({"already_exists": True, "url": f"/download-report/{campaign_id}"})
+
+    campaigns = get_campaigns()
+    campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
+    if not campaign or campaign["status"] != "Completed":
+        return jsonify({"error": "Campagne invalide ou non terminée"}), 400
+
+    scenario = campaign.get("template", {}).get("name", "inconnu")
+
+    try:
+        from src.services.llm_service import generate_and_save_report_to_db
+        generate_and_save_report_to_db(campaign, scenario)
+        return jsonify({"success": True, "url": f"/download-report/{campaign_id}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/download-report/<int:campaign_id>', methods=['GET'])
+def download_report(campaign_id):
+    return download_report_styled(campaign_id)
 
 
 # ------------------------------------------------------
@@ -378,3 +416,5 @@ def delete_landing_page_frontend(landing_page_id):
     """
     response = delete_landing_page(landing_page_id)
     return jsonify(response)
+
+

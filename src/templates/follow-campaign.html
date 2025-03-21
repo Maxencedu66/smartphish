@@ -13,7 +13,7 @@
                 <th>Nom</th>
                 <th>Date de création</th>
                 <th>Status</th>
-                <th class="text-end"></th>
+                <th class="text-end">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -29,13 +29,20 @@
                         <span class="badge bg-warning text-dark badge-fixed">En cours</span>
                     {% endif %}
                 </td>
-                <td class="text-end">
+                <td class="text-end d-flex gap-2 justify-content-end flex-wrap align-items-center">
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
                     <button class="btn btn-danger" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
+
                     {% if campaign.status == "In progress" %}
-                        <button class="btn btn-success btn-fixed" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
+                        <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
                     {% else %}
-                        <button class="btn btn-secondary btn-fixed" disabled>Terminée</button>
+                        <div class="d-flex align-items-center gap-1">
+                            <button id="report-btn-{{ campaign.id }}" class="btn btn-info" onclick="handleReport({{ campaign.id }}, this)">🔄 Vérification...</button>
+                            <button class="btn btn-light border" onclick="regenerateReport({{ campaign.id }})" title="Régénérer le rapport">
+                                🔁
+                            </button>
+                            
+                        </div>
                     {% endif %}
                 </td>
             </tr>
@@ -47,53 +54,40 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  function deleteCampaign(campaignId) {
+function deleteCampaign(campaignId) {
     Swal.fire({
-      title: "Supprimer cette campagne ?",
-      text: "Cette action est irréversible. Êtes-vous sûr ?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#6c757d",
-      confirmButtonText: "Oui, supprimer",
-      cancelButtonText: "Annuler",
-      reverseButtons: true
+        title: "Supprimer cette campagne ?",
+        text: "Cette action est irréversible.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
     }).then((result) => {
-      if (result.isConfirmed) {
-        // Si l'utilisateur confirme, envoyer la requête DELETE
-        fetch(`/api/gophish/campaigns/${campaignId}`, {
-          method: "DELETE"
-        })
-        .then(res => res.json())
-        .then(response => {
-          if (response.success) {
-            // Afficher un message de succès et supprimer la ligne de la table
-            Swal.fire({
-              title: "Supprimée !",
-              text: response.message,
-              icon: "success",
-              timer: 2000,
-              showConfirmButton: false
+        if (result.isConfirmed) {
+            fetch(`/api/gophish/campaigns/${campaignId}`, { method: "DELETE" })
+            .then(res => res.json())
+            .then(response => {
+                if (response.success) {
+                    Swal.fire("Supprimée", response.message, "success");
+                    document.getElementById(`campaign-row-${campaignId}`).remove();
+                } else {
+                    Swal.fire("Erreur", response.error || "Suppression échouée", "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Erreur", "Erreur serveur", "error");
             });
-
-            document.getElementById(`campaign-row-${campaignId}`).remove();
-          } else {
-            // En cas d'erreur
-            Swal.fire("Erreur", "Impossible de supprimer cette campagne : " + response.error, "error");
-          }
-        })
-        .catch(err => {
-          console.error("Erreur lors de la suppression :", err);
-          Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
-        });
-      }
+        }
     });
-  }
+}
 
-  function completeCampaign(campaignId) {
+function completeCampaign(campaignId) {
     Swal.fire({
-        title: "Marquer cette campagne comme terminée ?",
-        text: "Cette action ne pourra pas être annulée.",
+        title: "Terminer cette campagne ?",
+        text: "Cette action est irréversible.",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#28a745",
@@ -102,45 +96,105 @@
         cancelButtonText: "Annuler"
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/api/gophish/campaigns/${campaignId}/complete`, {
-                method: 'GET',
-                headers: { "Content-Type": "application/json" }
-            })
+            fetch(`/api/gophish/campaigns/${campaignId}/complete`, { method: 'GET' })
             .then(res => res.json())
             .then(response => {
                 if (response.success) {
-                    Swal.fire({
-                        title: "Campagne terminée !",
-                        text: response.message,
-                        icon: "success",
-                        confirmButtonColor: "#28a745",
-                        confirmButtonText: "OK"
-                    }).then(() => {
-                        location.reload(); 
-                    });
+                    Swal.fire("Campagne terminée", "", "success").then(() => location.reload());
                 } else {
-                    Swal.fire({
-                        title: "Erreur !",
-                        text: "Erreur lors de la finalisation : " + response.error,
-                        icon: "error",
-                        confirmButtonColor: "#d33",
-                        confirmButtonText: "OK"
-                    });
+                    Swal.fire("Erreur", response.error || "Échec", "error");
                 }
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire({
-                    title: "Erreur serveur",
-                    text: "Une erreur s'est produite.",
-                    icon: "error",
-                    confirmButtonColor: "#d33",
-                    confirmButtonText: "OK"
-                });
+                Swal.fire("Erreur", "Erreur serveur", "error");
             });
         }
     });
 }
 
+function handleReport(campaignId, btnElement) {
+    Swal.fire({
+        title: "Vérification du rapport...",
+        text: "Merci de patienter.",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    fetch(`/generate-report/${campaignId}`)
+    .then(res => res.json())
+    .then(data => {
+        Swal.close();
+
+        if (data.error) {
+            Swal.fire("Erreur", data.error, "error");
+            return;
+        }
+
+        if (data.success || data.already_exists) {
+            updateDownloadButton(campaignId);
+            Swal.fire("Rapport prêt !", "Vous pouvez le télécharger.", "success");
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire("Erreur", "Impossible de générer le rapport", "error");
+    });
+}
+
+function regenerateReport(campaignId) {
+    Swal.fire({
+        title: "Régénération du rapport...",
+        text: "Un nouveau rapport IA sera généré.",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    fetch(`/generate-report/${campaignId}?force=true`)
+    .then(res => res.json())
+    .then(data => {
+        Swal.close();
+        if (data.error) {
+            Swal.fire("Erreur", data.error, "error");
+            return;
+        }
+
+        updateDownloadButton(campaignId);
+        Swal.fire("Nouveau rapport généré", "Téléchargement disponible.", "success");
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire("Erreur", "Impossible de régénérer le rapport", "error");
+    });
+}
+
+function updateDownloadButton(campaignId) {
+    const btn = document.getElementById(`report-btn-${campaignId}`);
+    btn.innerText = "📥 Télécharger le rapport";
+    btn.classList.remove("btn-info");
+    btn.classList.add("btn-success");
+    btn.onclick = () => {
+        window.open(`/download-report/${campaignId}`, "_blank");
+    };
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[id^='report-btn-']").forEach(btn => {
+        const id = btn.id.split("-")[2];
+        fetch(`/generate-report/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.already_exists || data.success) {
+                    updateDownloadButton(id);
+                } else {
+                    btn.innerText = "🧠 Générer le rapport";
+                }
+            });
+    });
+});
 </script>
 {% endblock %}
