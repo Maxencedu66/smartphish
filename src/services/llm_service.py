@@ -147,7 +147,6 @@ def get_ollama_status():
     return info_dicts
 
 
-
 def generate_and_save_report_to_db(campaign_data, scenario):
     prompt = f"""
 Tu es un expert en cybersécurité. Rédige un rapport professionnel de sensibilisation structuré selon les sections suivantes :
@@ -165,7 +164,7 @@ Tu es un expert en cybersécurité. Rédige un rapport professionnel de sensibil
 4. Recommandations : Donne 3 conseils concrets pour éviter ce type d'erreur.
 5. Conclusion : Message de sensibilisation pour inciter à la vigilance.
 
-Formate ce rapport pour qu’il soit lisible ligne par ligne (sans balise HTML ni LaTeX) en respectant les titres de sections en majuscule ou démarqués.
+Formate ce rapport pour qu’il soit lisible ligne par ligne (sans balise HTML ni LaTeX ni markdown) en respectant les titres de sections en majuscule ou démarqués.
 
 Langue : Français uniquement.
 Rend cela lisible que ce soit pour les dates, l'heure de création du rapport etc... On ne doit pas deviner que c'est une IA qui a écrit le rapport.
@@ -175,8 +174,25 @@ Rend cela lisible que ce soit pour les dates, l'heure de création du rapport et
     texte = response.message.content.strip()
 
     conn = get_db_connection()
-    conn.execute("INSERT INTO reports (campaign_id, content, created_at) VALUES (?, ?, ?)",
-                 (campaign_data["id"], texte, datetime.utcnow().isoformat()))
+    campaign_id = campaign_data["id"]
+    timestamp = datetime.utcnow().isoformat()
+
+    # Vérifie si un rapport existe déjà
+    existing = conn.execute("SELECT id FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
+
+    if existing:
+        # 🔁 Met à jour l'entrée existante
+        conn.execute(
+            "UPDATE reports SET content = ?, updated_at = ? WHERE campaign_id = ?",
+            (texte, timestamp, campaign_id)
+        )
+    else:
+        # ➕ Sinon insère une nouvelle entrée
+        conn.execute(
+            "INSERT INTO reports (campaign_id, content, created_at) VALUES (?, ?, ?)",
+            (campaign_id, texte, timestamp)
+        )
+
     conn.commit()
     conn.close()
 

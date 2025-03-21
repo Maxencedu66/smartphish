@@ -148,7 +148,9 @@ def llm_settings():
 def maj_status():
     return render_template('maj-status.html')
 
-
+# ------------------------------------------------------
+# Routes pour les rapports de campagne
+# ------------------------------------------------------
 
 @bp.route('/generate-report/<int:campaign_id>', methods=['GET'])
 def generate_report(campaign_id):
@@ -174,6 +176,15 @@ def generate_report(campaign_id):
         return jsonify({"success": True, "url": f"/download-report/{campaign_id}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/report-exists/<int:campaign_id>')
+def report_exists(campaign_id):
+    conn = get_db_connection()
+    existing = conn.execute("SELECT id FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
+    conn.close()
+
+    return jsonify({"exists": bool(existing)})
+
 
 @bp.route('/download-report/<int:campaign_id>', methods=['GET'])
 def download_report(campaign_id):
