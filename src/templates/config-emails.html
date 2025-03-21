@@ -84,8 +84,9 @@
                             <select id="aiScenario" class="form-select">
                                 <option value="">-- Sélectionnez --</option>
                                 <option value="Départ à la retraite">Départ à la retraite</option>
-                                <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement - RIB nécessaire</option>
-                                <option value="Alerte de sécurité - Connexion suspecte">Alerte de sécurité - Connexion suspecte</option>
+                                <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement</option>
+                                <option value="Invitation à un événement exclusif">Invitation à un événement exclusif</option>
+                                <option value="Mise à jour de sécurité urgente">Mise à jour de sécurité urgente</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -118,7 +119,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="aiGeneratedContent" class="form-label">Contenu généré :</label>
-                                <textarea id="aiGeneratedContent" class="form-control" rows="5" required></textarea>
+                                <textarea id="aiGeneratedContent" class="form-control" required></textarea>
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-warning" onclick="generateAIEmail()">Régénérer</button>
@@ -297,6 +298,14 @@ function generateAIEmail() {
         }
     });
 
+    // Change the text after 5 seconds
+    let timeout = setTimeout(() => {
+        Swal.update({
+            text: "Plus que quelques secondes..."
+        });
+        Swal.showLoading();
+    }, 8000);
+
     
     // Afficher le spinner et masquer le résultat précédent
     // document.getElementById("aiLoading").style.display = "block";
@@ -317,6 +326,7 @@ function generateAIEmail() {
     .then(response => response.json())
     .then(data => {
         //document.getElementById("aiLoading").style.display = "none";
+        clearTimeout(timeout);
         Swal.close(); // Ferme la popup de chargement
         if (data.error) {
             Swal.fire({
@@ -331,6 +341,13 @@ function generateAIEmail() {
         document.getElementById("aiGeneratedSubject").value = data.object;
         document.getElementById("aiGeneratedContent").value = data.content;
         document.getElementById("aiResult").style.display = "block";
+
+        // Ajuste la hauteur du textarea pour le contenu généré
+        const textarea = document.getElementById("aiGeneratedContent");
+        textarea.style.height = "1px";
+        textarea.style.height = (4 + textarea.scrollHeight) + "px";
+        // Fait défiler la page pour afficher le contenu généré 
+        document.getElementById("aiResult").scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
     .catch(err => {
         Swal.close();
