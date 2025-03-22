@@ -164,22 +164,23 @@ Tu es un expert en cybersécurité. Rédige un rapport professionnel de sensibil
 4. Recommandations : Donne 3 conseils concrets pour éviter ce type d'erreur.
 5. Conclusion : Message de sensibilisation pour inciter à la vigilance.
 
-Formate ce rapport pour qu’il soit lisible ligne par ligne (sans balise HTML ni LaTeX ni markdown) en respectant les titres de sections en majuscule ou démarqués.
-
+Formate ce rapport pour qu’il soit lisible ligne par ligne  en respectant les titres de sections en majuscule ou démarqués.
+On ne veut pas de  balise HTML 
+On ne veut pas de markdown ni de formatage à l'aide de **gras** ou _italique_.
 Langue : Français uniquement.
 Rend cela lisible que ce soit pour les dates, l'heure de création du rapport etc... On ne doit pas deviner que c'est une IA qui a écrit le rapport.
 """
 
     response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
     texte = response.message.content.strip()
-
+    print(texte)
     conn = get_db_connection()
     campaign_id = campaign_data["id"]
     timestamp = datetime.utcnow().isoformat()
 
     # Vérifie si un rapport existe déjà
     existing = conn.execute("SELECT id FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-
+    
     if existing:
         # 🔁 Met à jour l'entrée existante
         conn.execute(

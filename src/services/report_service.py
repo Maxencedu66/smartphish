@@ -1,19 +1,27 @@
 from flask import send_file
 from io import BytesIO
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph, Frame, Spacer, BaseDocTemplate, PageTemplate
-from reportlab.lib.units import inch
-from src.routes.auth_routes import get_db_connection
+from datetime import datetime
+from docx import Document
+from docx.shared import Pt, RGBColor, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from dateutil.parser import parse as parse_date
 import os
+import re
+import locale
+
+from src.routes.auth_routes import get_db_connection
+from src.config import Config
+from gophish import Gophish
+from src.lib.goreport import Goreport
 
 
 def download_report_styled(campaign_id):
+    print("📄 Téléchargement du rapport DOCX stylisé pour la campagne", campaign_id)
+
+    # Connexion à la base
     conn = get_db_connection()
     row = conn.execute("SELECT content FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
+    campaign = conn.execute("SELECT name, created_date FROM campaigns WHERE id = ?", (campaign_id,)).fetchone()
     conn.close()
 
     if not row:
@@ -21,89 +29,142 @@ def download_report_styled(campaign_id):
 
     content = row["content"]
     lines = content.split("\n")
+    campaign_name = campaign["name"] if campaign else f"Campagne {campaign_id}"
 
-    # Préparer le PDF
-    buffer = BytesIO()
-    width, height = A4
-    margin = 50
+    # 🔤 Format de date lisible
+    try:
+        locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
+    except locale.Error:
+        try:
+            locale.setlocale(locale.LC_TIME, "fr_FR")
+        except locale.Error:
+            print("⚠️ Locale FR non disponible, fallback anglais")
 
-    # Styles
-    styles = getSampleStyleSheet()
+    if campaign and campaign["created_date"]:
+        date_obj = parse_date(campaign["created_date"])
+    else:
+        date_obj = datetime.utcnow()
 
-    normal_style = ParagraphStyle(
-        name="Normal",
-        parent=styles["Normal"],
-        fontName="Helvetica",
-        fontSize=11,
-        leading=16,
-        spaceBefore=4
-    )
+    campaign_date = date_obj.strftime("%-d %B %Y")  # Exemple : 8 mars 2025
 
-    section_title_style = ParagraphStyle(
-        name="SectionTitle",
-        parent=styles["Heading2"],
-        fontName="Helvetica-Bold",
-        fontSize=14,
-        leading=20,
-        textColor=colors.darkblue,
-        spaceBefore=12,
-        spaceAfter=6,
-    )
+    # 📊 Données GoPhish
+    goreport = Goreport(report_format="word", config_file=None, google=False, verbose=False)
+    goreport.api = Gophish(Config.GOPHISH_API_KEY, host=Config.GOPHISH_API_URL, verify=False)
+    goreport.campaign = goreport.api.campaigns.get(campaign_id=campaign_id)
+    goreport.collect_all_campaign_info(combine_reports=False)
+    goreport.process_timeline_events(combine_reports=False)
+    goreport.process_results(combine_reports=False)
 
-    # Construction du contenu
-    story = []
+    # 📄 Création document Word
+    doc = Document()
+    style = doc.styles["Normal"]
+    font = style.font
+    font.name = "Calibri"
+    font.size = Pt(11)
 
-    # Ajout du logo et du titre sur chaque page
-    def header_footer(canvas, doc):
-        # Logo
-        logo_path = "./src/static/img/logo.png"
-        if os.path.exists(logo_path):
-            logo = ImageReader(logo_path)
-            canvas.drawImage(logo, margin, height - 70, width=80, preserveAspectRatio=True, mask='auto')
+    section = doc.sections[0]
+    header = section.header
+    header_para = header.paragraphs[0]
+    logo_path = "./src/static/img/logo.png"
+    if os.path.exists(logo_path):
+        run = header_para.add_run()
+        run.add_picture(logo_path, width=Inches(0.7))
+        header_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-        # Titre centré
-        canvas.setFont("Helvetica-Bold", 16)
-        canvas.drawCentredString(width / 2, height - 50, "📄 Rapport de Campagne - SmartPhish")
+    title_para = doc.add_paragraph()
+    title_run = title_para.add_run(f"Campagne SmartPhish – {campaign_name}\nDate : {campaign_date}")
+    title_run.font.size = Pt(14)
+    title_run.bold = True
+    title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # Ligne de séparation
-        canvas.setStrokeColor(colors.grey)
-        canvas.setLineWidth(1)
-        canvas.line(margin, height - 80, width - margin, height - 80)
+    doc.add_paragraph("")  # espacement
 
-        # Pied de page
-        canvas.setFont("Helvetica", 9)
-        canvas.setFillColor(colors.grey)
-        canvas.drawRightString(width - margin, 20, f"Page {doc.page}")
+    def add_section_title(text):
+        p = doc.add_paragraph()
+        run = p.add_run(text.upper())
+        run.bold = True
+        run.font.size = Pt(13)
+        run.font.color.rgb = RGBColor(0x00, 0x47, 0x8F)
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-    # Traitement des lignes
+    # ✨ Partie IA
     for line in lines:
         line = line.strip()
+        line = re.sub(r"\*+", "", line)
         if not line:
-            story.append(Spacer(1, 10))
+            doc.add_paragraph("")
             continue
-        if line.lower().startswith("résultats") or \
-           line.lower().startswith("analyse") or \
-           line.lower().startswith("recommandations") or \
-           line.lower().startswith("conclusion") or \
-           line.lower().startswith("introduction"):
-            story.append(Paragraph(line, section_title_style))
+        if re.match(r"^\d+\.", line) or line.lower().startswith(
+            ("introduction", "résultats", "analyse", "recommandations", "conclusion")
+        ):
+            add_section_title(line)
         else:
-            story.append(Paragraph(line, normal_style))
+            doc.add_paragraph(line)
 
-    # Document
-    doc = BaseDocTemplate(buffer, pagesize=A4,
-                          leftMargin=margin, rightMargin=margin,
-                          topMargin=120, bottomMargin=40)
+    # 📊 Stats de campagne
+    doc.add_paragraph("")
+    
+    # 🧠 Comportement des utilisateurs
+    doc.add_paragraph("")
+    add_section_title("DETAILS COMPORTEMENTS UTILISATEURS")
 
-    frame = Frame(doc.leftMargin, doc.bottomMargin,
-                  doc.width, doc.height, id='normal')
 
-    doc.addPageTemplates([PageTemplate(id='SmartPhish', frames=frame, onPage=header_footer)])
+    # Création du tableau
+    table = doc.add_table(rows=1, cols=7)
+    table.style = "Table Grid"
 
-    # Génère le PDF
-    doc.build(story)
+    # Ligne d’en-tête
+    hdr_cells = table.rows[0].cells
+    headers = ["Email Address", "Open", "Click", "Data", "Report", "OS", "Browser"]
+    for i, text in enumerate(headers):
+        hdr_cells[i].text = text
+        run = hdr_cells[i].paragraphs[0].runs[0]
+        run.bold = True
+        run.font.size = Pt(10)
+        hdr_cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # Lignes des utilisateurs
+    for target in goreport.campaign_results_summary:
+        row_cells = table.add_row().cells
+        email = target["email"]
+        opened = "✘"
+        clicked = "✘"
+        submitted = "✘"
+        reported = "✘"
+        os_info = "N/A"
+        browser_info = "N/A"
+
+        if target["opened"]:
+            opened = "✔"
+        if target["clicked"]:
+            clicked = "✔"
+        if target["submitted"]:
+            submitted = "✔"
+        if target["reported"]:
+            reported = "✔"
+
+        # Cherche user-agent si clics
+        if target["email"] in goreport.targets_clicked:
+            for event in goreport.timeline:
+                if event.message == "Clicked Link" and event.email == target["email"]:
+                    from user_agents import parse
+                    ua = parse(event.details["browser"]["user-agent"])
+                    browser_info = f"{ua.browser.family} {ua.browser.version_string}"
+                    os_info = f"{ua.os.family} {ua.os.version_string}"
+
+        values = [email, opened, clicked, submitted, reported, os_info, browser_info]
+        for i, val in enumerate(values):
+            row_cells[i].text = val
+            row_cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+    # 📥 Génération du fichier
+    buffer = BytesIO()
+    doc.save(buffer)
     buffer.seek(0)
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M")
+    filename = f"rapport_campagne_{campaign_id}_{timestamp}.docx"
 
     return send_file(buffer, as_attachment=True,
-                     download_name=f"rapport_campagne_{campaign_id}.pdf",
-                     mimetype="application/pdf")
+                     download_name=filename,
+                     mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
