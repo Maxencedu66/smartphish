@@ -8,11 +8,8 @@
 
 Landing page: 
    - Gérer la capture des données de la landing page
-   - Corriger bug affichage de la page google.com avec les balise base
-   - Néttoyer la page si on la quitte, car elleconserve les infos de la petite fenetre
-   - adapter la tialle de la fenetre avec le code html.
+   - (didou) adapter la taille de la fenetre avec le code html et l'affichage en général.
    - Gérer l'URL de redirection
-   - Gérer l'importation d'une page à partir de son URL
    - Dans la page de création de campagne, ajouter la possibilité de choisir une landing page existante ou de ne pas en chosir
 
 URL de phishing :

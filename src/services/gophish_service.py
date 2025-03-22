@@ -333,14 +333,6 @@ def delete_sending_profile(profile_id):
 #  Fonctions pour les Landing Pages
 # ---------------------------
 
-import requests
-from src.config import Config
-
-HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {Config.GOPHISH_API_KEY}"
-}
-
 def get_landing_pages():
     """Récupère la liste des Landing Pages de GoPhish"""
     url = f"{Config.GOPHISH_API_URL}/api/pages/"
