@@ -6,6 +6,7 @@
     <title>Connexion | SmartPhish</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100">
 
@@ -21,7 +22,7 @@
                     <h4 class="text-center mb-3">Connexion</h4>
                     
                     <!-- Message d'erreur -->
-                    <div id="error-message" class="alert alert-danger d-none"></div>
+                    <!-- <div id="error-message" class="alert alert-danger d-none"></div> -->
 
                     <form onsubmit="event.preventDefault(); login();">
                         <div class="mb-3">
@@ -54,6 +55,47 @@
         let password = document.getElementById("password").value;
         let errorMessage = document.getElementById("error-message");
 
+        // Vérification Regex 
+        let usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
+
+        if (!username || !password) {
+            Swal.fire({
+                icon: "info",
+                title: "Champs requis",
+                text: "Veuillez remplir tous les champs.",
+                backdrop: false, 
+                position: "center"
+            });
+            return;
+        }
+
+        if (!usernameRegex.test(username)) {
+            Swal.fire({
+                icon: "info",
+                title: "Pseudonyme invalide",
+                html: `
+                    <ul style="text-align: left; font-size: 16px;">
+                        <li>✅ Entre <strong>3 et 20 caractères</strong></li>
+                        <li>✅ Contient uniquement <strong>des lettres</strong>, <strong>des chiffres</strong> ou le caractère <strong>underscore (_)</strong></li>
+                    </ul>
+                `,
+                confirmButtonText: "OK",
+                backdrop: false,
+                position: "center"
+            });
+            return;
+        }
+
+        // if (!passwordRegex.test(password)) {
+        //     Swal.fire({
+        //         icon: "error",
+        //         title: "Mot de passe invalide",
+        //         text: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+        //     });
+        //     return;
+        // }
+
         fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -62,18 +104,37 @@
         .then(response => response.json())
         .then(data => {
             if (data.message === "Connexion réussie") {
-                console.log("Connexion réussie !");
-                localStorage.setItem("username", username);  
-                window.location.href = "/"; 
+                Swal.fire({
+                    icon: "success",
+                    title: "Connexion réussie",
+                    text: "Redirection en cours...",
+                    timer: 1500,
+                    showConfirmButton: false,
+                    backdrop: false, 
+                    position: "center"
+                }).then(() => {
+                    localStorage.setItem("username", username);
+                    window.location.href = "/";
+                });
             } else {
-                errorMessage.textContent = "Identifiants incorrects.";
-                errorMessage.classList.remove("d-none");  
+                Swal.fire({
+                    icon: "error",
+                    title: "Échec de la connexion",
+                    text: "Identifiants incorrects.",
+                    backdrop: false, 
+                    position: "center"
+                });
             }
         })
         .catch(error => {
             console.error("Erreur réseau :", error);
-            errorMessage.textContent = "Une erreur est survenue. Veuillez réessayer.";
-            errorMessage.classList.remove("d-none");
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: "Une erreur est survenue. Veuillez réessayer.",
+                backdrop: false, 
+                position: "center"
+            });
         });
     }
 

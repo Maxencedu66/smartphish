@@ -143,3 +143,9 @@ function logout() {
     })
     .catch(error => console.error("Erreur de déconnexion :", error));
 }
+
+
+function isValidEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}

@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 </head>
-</head>
 <body>
     <header>
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="logo">
@@ -44,6 +43,7 @@
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
         function logout() {
             fetch("/logout", {
@@ -51,7 +51,6 @@
                 credentials: "same-origin"
             })
             .then(() => {
-                console.log("Déconnexion réussie !");
                 window.location.href = "/login"; 
             })
             .catch(error => console.error("Erreur de déconnexion :", error));
