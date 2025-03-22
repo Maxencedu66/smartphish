@@ -30,5 +30,10 @@ ca n'a pas de sens notre système de compte qui permet d'accéder à toute la BD
    - (optionnel) Faire un système de gestion de droits d'accès pour les utilisateurs, avec un système de rôles (admin, user, etc) et de permissions (lecture, écriture, etc)
 
 
+Affichage et suivi des campagne:
+   - Le suivi des camapgne ne fonctionne pas, pour la camapgne test perso mail 3, tu devrais avoir un lien cliqué normalement
+   - Il faut afficher le suivi des events tu peux voir su gophish le détail des event par rapport à une personne de la campagne, normalement pour moi ca a changé
+
 IA et Landing page:
    - Il faudrait pouvoir réussir à fiare générer les landing page par L'IA, c'est un truc plus compliqué à faire sans connaissance pour les utilisateur, donc plus utiles meme que la génération du mail. En plus on pourrait bien faire notre prompt pour qu'il sache quoi mettre dedans.
+   -
