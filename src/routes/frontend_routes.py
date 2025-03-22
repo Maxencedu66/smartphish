@@ -12,6 +12,7 @@ import tempfile
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from src.services.gophish_service import get_templates
+from src.services.report_service import *
 
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
@@ -152,43 +153,36 @@ def maj_status():
 # ------------------------------------------------------
 # Routes pour les rapports de campagne
 # ------------------------------------------------------
-
 @bp.route('/generate-report/<int:campaign_id>', methods=['GET'])
 def generate_report(campaign_id):
     force = request.args.get("force", "false").lower() == "true"
-
-    conn = get_db_connection()
-    existing = conn.execute("SELECT content FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-    conn.close()
-
-    if existing and not force:
-        return jsonify({"already_exists": True, "url": f"/download-report/{campaign_id}"})
 
     campaigns = get_campaigns()
     campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
     if not campaign or campaign["status"] != "Completed":
         return jsonify({"error": "Campagne invalide ou non terminée"}), 400
 
-    scenario = campaign.get("template", {}).get("name", "inconnu")
-
     try:
-        from src.services.llm_service import generate_and_save_report_to_db
-        generate_and_save_report_to_db(campaign, scenario)
-        return jsonify({"success": True, "url": f"/download-report/{campaign_id}"})
+        path = generate_docx_with_goreport(campaign_id, force=force)
+        if not path:
+            return jsonify({"error": "Erreur génération fichier"}), 500
+        return jsonify({
+            "success": True,
+            "url": f"/download-report/{campaign_id}"
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/report-exists/<int:campaign_id>')
 def report_exists(campaign_id):
-    conn = get_db_connection()
-    existing = conn.execute("SELECT id FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-    conn.close()
 
-    return jsonify({"exists": bool(existing)})
+    latest_report = get_latest_goreport_docx(campaign_id)
+    return jsonify({"exists": bool(latest_report)})
 
 
 @bp.route('/download-report/<int:campaign_id>', methods=['GET'])
 def download_report(campaign_id):
+
     return download_report_styled(campaign_id)
 
 

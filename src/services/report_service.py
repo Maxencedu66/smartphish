@@ -1,170 +1,116 @@
-from flask import send_file
-from io import BytesIO
-from datetime import datetime
-from docx import Document
-from docx.shared import Pt, RGBColor, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from dateutil.parser import parse as parse_date
+import subprocess
 import os
 import re
-import locale
-
-from src.routes.auth_routes import get_db_connection
+from flask import send_file
+from datetime import datetime
+from pathlib import Path
+from docx import Document
+from docx.shared import Pt
+from io import BytesIO
+import ollama
 from src.config import Config
 from gophish import Gophish
 from src.lib.goreport import Goreport
+from src.services.llm_service import generate_ai_analysis
 
+def get_latest_goreport_docx(campaign_id):
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    candidates = sorted(Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"), key=os.path.getmtime, reverse=True)
+    return candidates[0] if candidates else None
+
+def generate_docx_with_goreport(campaign_id, force=False):
+    print(f"🚀 Génération GoReport pour la campagne {campaign_id}")
+
+    # Dossier de stockage des rapports
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    reports_path = Path(reports_dir)
+    pattern = f"rapport_campagne_{campaign_id}_*.docx"
+
+    # Si force est True, supprimer les anciens rapports pour cette campagne
+    if force:
+        for f in reports_path.glob(pattern):
+            try:
+                os.remove(f)
+                print(f"🗑 Suppression de l'ancien rapport : {f}")
+            except Exception as e:
+                print("Erreur lors de la suppression :", e)
+
+    # Lancement de GoReport pour générer le rapport de base
+    result = subprocess.run(
+        ["python3", "GoReport.py", "--id", str(campaign_id), "--format", "word"],
+        cwd=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "services")),
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        print("❌ GoReport Error:", result.stderr)
+        raise RuntimeError("Erreur GoReport : " + result.stderr)
+
+    print("✅ GoReport exécuté avec succès")
+
+    # Récupérer le dernier fichier généré
+    latest_file = None
+    for f in sorted(reports_path.glob(pattern), key=os.path.getmtime, reverse=True):
+        latest_file = f
+        break
+
+    if not latest_file:
+        raise FileNotFoundError("Aucun fichier DOCX généré par GoReport")
+
+    print(f"📄 Rapport trouvé : {latest_file}")
+
+    # Génération du texte d'analyse via l'IA
+    ai_text = generate_ai_analysis(campaign_id)
+    # Ouvrir le document généré pour y ajouter le rapport d'analyse
+    document = Document(str(latest_file))
+    document.add_page_break()
+    document.add_heading("Analyse de la campagne", level=1)
+    # Découper le texte généré en sections
+    sections = split_ai_text_into_sections(ai_text)
+    for title, content in sections:
+        document.add_heading(title, level=2)
+        p = document.add_paragraph(content)
+        p.style.font.size = Pt(11)
+    
+    # Sauvegarder le document final
+    document.save(str(latest_file))
+    
+    # Retourner le fichier final
+    return send_file(
+        str(latest_file),
+        as_attachment=True,
+        download_name=latest_file.name,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+def split_ai_text_into_sections(text):
+    """
+    Découpe le texte généré par l'IA en sections en utilisant un pattern sur les titres (ex : "1. Analyse des résultats généraux:")
+    """
+    pattern = re.compile(r'(\d+\.\s*[^:]+:)')
+    parts = pattern.split(text)
+    sections = []
+    # Si le premier élément est vide, on commence à l'index 1
+    start = 1 if parts and parts[0].strip() == "" else 0
+    for i in range(start, len(parts) - 1, 2):
+        heading = parts[i].strip()
+        content = parts[i+1].strip()
+        sections.append((heading, content))
+    # Si le découpage ne fonctionne pas (texte non structuré), on renvoie le texte complet sous un seul titre
+    if not sections:
+        sections.append(("Analyse complète", text))
+    return sections
 
 def download_report_styled(campaign_id):
-    print("📄 Téléchargement du rapport DOCX stylisé pour la campagne", campaign_id)
-
-    # Connexion à la base
-    conn = get_db_connection()
-    row = conn.execute("SELECT content FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-    campaign = conn.execute("SELECT name, created_date FROM campaigns WHERE id = ?", (campaign_id,)).fetchone()
-    conn.close()
-
-    if not row:
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    candidates = sorted(Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"), key=os.path.getmtime, reverse=True)
+    latest_file = candidates[0] if candidates else None
+    if not latest_file:
         return "Rapport introuvable", 404
-
-    content = row["content"]
-    lines = content.split("\n")
-    campaign_name = campaign["name"] if campaign else f"Campagne {campaign_id}"
-
-    # 🔤 Format de date lisible
-    try:
-        locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
-    except locale.Error:
-        try:
-            locale.setlocale(locale.LC_TIME, "fr_FR")
-        except locale.Error:
-            print("⚠️ Locale FR non disponible, fallback anglais")
-
-    if campaign and campaign["created_date"]:
-        date_obj = parse_date(campaign["created_date"])
-    else:
-        date_obj = datetime.utcnow()
-
-    campaign_date = date_obj.strftime("%-d %B %Y")  # Exemple : 8 mars 2025
-
-    # 📊 Données GoPhish
-    goreport = Goreport(report_format="word", config_file=None, google=False, verbose=False)
-    goreport.api = Gophish(Config.GOPHISH_API_KEY, host=Config.GOPHISH_API_URL, verify=False)
-    goreport.campaign = goreport.api.campaigns.get(campaign_id=campaign_id)
-    goreport.collect_all_campaign_info(combine_reports=False)
-    goreport.process_timeline_events(combine_reports=False)
-    goreport.process_results(combine_reports=False)
-
-    # 📄 Création document Word
-    doc = Document()
-    style = doc.styles["Normal"]
-    font = style.font
-    font.name = "Calibri"
-    font.size = Pt(11)
-
-    section = doc.sections[0]
-    header = section.header
-    header_para = header.paragraphs[0]
-    logo_path = "./src/static/img/logo.png"
-    if os.path.exists(logo_path):
-        run = header_para.add_run()
-        run.add_picture(logo_path, width=Inches(0.7))
-        header_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    title_para = doc.add_paragraph()
-    title_run = title_para.add_run(f"Campagne SmartPhish – {campaign_name}\nDate : {campaign_date}")
-    title_run.font.size = Pt(14)
-    title_run.bold = True
-    title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-    doc.add_paragraph("")  # espacement
-
-    def add_section_title(text):
-        p = doc.add_paragraph()
-        run = p.add_run(text.upper())
-        run.bold = True
-        run.font.size = Pt(13)
-        run.font.color.rgb = RGBColor(0x00, 0x47, 0x8F)
-        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    # ✨ Partie IA
-    for line in lines:
-        line = line.strip()
-        line = re.sub(r"\*+", "", line)
-        if not line:
-            doc.add_paragraph("")
-            continue
-        if re.match(r"^\d+\.", line) or line.lower().startswith(
-            ("introduction", "résultats", "analyse", "recommandations", "conclusion")
-        ):
-            add_section_title(line)
-        else:
-            doc.add_paragraph(line)
-
-    # 📊 Stats de campagne
-    doc.add_paragraph("")
-    
-    # 🧠 Comportement des utilisateurs
-    doc.add_paragraph("")
-    add_section_title("DETAILS COMPORTEMENTS UTILISATEURS")
-
-
-    # Création du tableau
-    table = doc.add_table(rows=1, cols=7)
-    table.style = "Table Grid"
-
-    # Ligne d’en-tête
-    hdr_cells = table.rows[0].cells
-    headers = ["Email Address", "Open", "Click", "Data", "Report", "OS", "Browser"]
-    for i, text in enumerate(headers):
-        hdr_cells[i].text = text
-        run = hdr_cells[i].paragraphs[0].runs[0]
-        run.bold = True
-        run.font.size = Pt(10)
-        hdr_cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-    # Lignes des utilisateurs
-    for target in goreport.campaign_results_summary:
-        row_cells = table.add_row().cells
-        email = target["email"]
-        opened = "✘"
-        clicked = "✘"
-        submitted = "✘"
-        reported = "✘"
-        os_info = "N/A"
-        browser_info = "N/A"
-
-        if target["opened"]:
-            opened = "✔"
-        if target["clicked"]:
-            clicked = "✔"
-        if target["submitted"]:
-            submitted = "✔"
-        if target["reported"]:
-            reported = "✔"
-
-        # Cherche user-agent si clics
-        if target["email"] in goreport.targets_clicked:
-            for event in goreport.timeline:
-                if event.message == "Clicked Link" and event.email == target["email"]:
-                    from user_agents import parse
-                    ua = parse(event.details["browser"]["user-agent"])
-                    browser_info = f"{ua.browser.family} {ua.browser.version_string}"
-                    os_info = f"{ua.os.family} {ua.os.version_string}"
-
-        values = [email, opened, clicked, submitted, reported, os_info, browser_info]
-        for i, val in enumerate(values):
-            row_cells[i].text = val
-            row_cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-
-    # 📥 Génération du fichier
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M")
-    filename = f"rapport_campagne_{campaign_id}_{timestamp}.docx"
-
-    return send_file(buffer, as_attachment=True,
-                     download_name=filename,
-                     mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    return send_file(
+        str(latest_file),
+        as_attachment=True,
+        download_name=latest_file.name,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
