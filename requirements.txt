@@ -3,3 +3,5 @@ ollama
 requests
 Flask-Session
 bcrypt
+fpdf
+reportlab

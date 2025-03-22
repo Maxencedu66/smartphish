@@ -189,11 +189,16 @@ function validateLandingPageForm(nameId, htmlId) {
     const name = document.getElementById(nameId).value.trim();
     const html = document.getElementById(htmlId).value.trim();
 
-    if (!name || !html) {
+    // Indiquer le nom des champs requis
+    const fields = [];
+    if (!name) fields.push("Nom Page de destination");
+    if (!html) fields.push("Contenu HTML");
+
+    if (fields.length > 0) {
         Swal.fire({
             icon: "warning",
             title: "Champs requis manquants",
-            text: "Veuillez remplir tous les champs avant de soumettre.",
+            html: `<ul style="text-align: left;">${fields.map(f => `<li>${f}</li>`).join('')}</ul>`,
             confirmButtonColor: "#f39c12"
         });
         return false;

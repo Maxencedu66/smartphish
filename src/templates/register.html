@@ -21,7 +21,7 @@
                     <h4 class="text-center mb-3">Inscription</h4>
                     
                     <!-- Message d'erreur -->
-                    <div id="error-message" class="alert alert-danger d-none"></div>
+                    <!-- <div id="error-message" class="alert alert-danger d-none"></div> -->
 
                     <form onsubmit="event.preventDefault(); register();">
                         <div class="mb-3">
@@ -52,12 +52,76 @@
 </body>
 </html>
  
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function register() {
         let username = document.getElementById("username").value;
         let password = document.getElementById("password").value;
         let confirmPassword = document.getElementById("confirm-password").value;
         let errorMessage = document.getElementById("error-message");
+
+        // Vérification Regex 
+        let usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
+
+        if (!username || !password || !confirmPassword) {
+            Swal.fire({
+                icon: "info",
+                title: "Champs requis",
+                text: "Tous les champs sont requis.",
+                backdrop: false,
+                position: "center"
+            });
+            return;
+        }
+
+        if (!usernameRegex.test(username)) {
+            Swal.fire({
+                icon: "info",
+                title: "Pseudonyme invalide",
+                html: `
+                    <ul style="text-align: left; font-size: 16px;">
+                        <li>✅ Entre <strong>3 et 20 caractères</strong></li>
+                        <li>✅ Contient uniquement <strong>des lettres</strong>, <strong>des chiffres</strong> ou le caractère <strong>underscore (_)</strong></li>
+                    </ul>
+                `,
+                confirmButtonText: "OK",
+                backdrop: false,
+                position: "center"
+            });
+            return;
+        }
+
+        if (!passwordRegex.test(password)) {
+            Swal.fire({
+                icon: "info",
+                title: "Mot de passe requis",
+                html: `
+                    <ul style="text-align: left; font-size: 16px;">
+                        <li>✅ Au moins <strong>8 caractères</strong></li>
+                        <li>✅ Au moins <strong>une lettre minuscule</strong></li>
+                        <li>✅ Au moins <strong>une lettre majuscule</strong></li>
+                        <li>✅ Au moins <strong>un chiffre</strong></li>
+                        <li>✅ Au moins <strong>un caractère spécial</strong> (!@#$%^&*)</li>
+                    </ul>
+                `,
+                confirmButtonText: "OK",
+                backdrop: false,
+                position: "center"
+            });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Swal.fire({
+                icon: "info",
+                title: "Mots de passe différents",
+                text: "Les mots de passe ne correspondent pas.",
+                backdrop: false,
+                position: "center"
+            });
+            return;
+        }
 
         fetch("/api/auth/register", {
             method: "POST",
@@ -67,18 +131,36 @@
         .then(response => response.json())
         .then(data => {
             if (data.message === "Inscription réussie") {
-                console.log("Inscription réussie !");
-                localStorage.setItem("username", username); 
-                window.location.href = "/login";  
+                Swal.fire({
+                    icon: "success",
+                    title: "Inscription réussie",
+                    text: "Redirection en cours...",
+                    timer: 1500,
+                    showConfirmButton: false,
+                    backdrop: false,
+                    position: "center"
+                }).then(() => {
+                    localStorage.setItem("username", username); 
+                    window.location.href = "/login";  
+                });
             } else {
-                errorMessage.textContent = data.error;
-                errorMessage.classList.remove("d-none");
+                Swal.fire({
+                    icon: "error",
+                    title: "Échec de l'inscription",
+                    text: "Ce pseudonyme est déjà utilisé.",
+                    backdrop: false,
+                    position: "center"
+                });
             }
         })
         .catch(error => {
-            console.error("Erreur réseau :", error);
-            errorMessage.textContent = "Une erreur est survenue. Veuillez réessayer.";
-            errorMessage.classList.remove("d-none");
+            Swal.fire({
+                icon: "error",
+                title: "Erreur réseau",
+                text: "Une erreur s'est produite. Veuillez réessayer.",
+                backdrop: false,
+                position: "center"
+            });
         });
     }
 

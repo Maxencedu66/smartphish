@@ -170,27 +170,49 @@
 <script>
 function validateEmailTemplateForm(nameId, subjectId, textId) {
     const name = document.getElementById(nameId).value.trim();
-    
-    let subject, text;
-    if (document.getElementById("aiMethod").checked) {
-        subject = document.getElementById("aiGeneratedSubject").value.trim();
-        text = document.getElementById("aiGeneratedContent").value.trim();
-    } else {
-        subject = document.getElementById(subjectId).value.trim();
-        text = document.getElementById(textId).value.trim();
-    }
+    const missingFields = [];
 
-    if (!name || !subject || !text) {
+    let subject, text;
+    
+    const scenario = document.getElementById("aiScenario").value.trim();
+    const company  = document.getElementById("aiEntreprise").value.trim();
+    const sender   = document.getElementById("aiExpediteur").value.trim();
+    const email    = document.getElementById("aiEmailExpediteur").value.trim();
+    subject = document.getElementById("aiGeneratedSubject").value.trim();
+    text    = document.getElementById("aiGeneratedContent").value.trim();
+
+    if (!name)     missingFields.push("Nom du modèle");
+    if (!scenario) missingFields.push("Scénario");
+    if (!company)  missingFields.push("Nom de l'entreprise");
+    if (!sender)   missingFields.push("Nom de l'expéditeur");
+    if (!email)    missingFields.push("Email de l'expéditeur");
+    if (!subject)  missingFields.push("Sujet généré");
+    if (!text)     missingFields.push("Contenu généré");
+
+
+    if (missingFields.length > 0) {
         Swal.fire({
             icon: "warning",
             title: "Champs requis manquants",
-            text: "Veuillez remplir tous les champs avant de soumettre.",
+            html: `<ul style="text-align: left;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
             confirmButtonColor: "#f39c12"
         });
         return false;
     }
+
+    if (!isValidEmail(email)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Email de l'expéditeur invalide",
+            text: "Veuillez saisir une adresse email valide pour l'expéditeur.",
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
+    }
+
     return true;
 }
+
 
 document.addEventListener("DOMContentLoaded", function() {
     // Basculement entre les champs manuels et IA
@@ -275,14 +297,35 @@ function generateAIEmail() {
     const expediteur = document.getElementById("aiExpediteur").value;
     const email_expediteur = document.getElementById("aiEmailExpediteur").value;
 
-    if (!scenario || !expediteur || !email_expediteur) {
+    const missingFields = [];
+    if (!scenario)           missingFields.push("Scénario");
+    if (!entreprise)         missingFields.push("Nom de l'entreprise");
+    if (!expediteur)         missingFields.push("Nom de l'expéditeur");
+    if (!email_expediteur)   missingFields.push("Email de l'expéditeur");
+    
+    if (missingFields.length > 0) {
         Swal.fire({
             icon: "warning",
             title: "Champs requis manquants",
-            text: "Veuillez remplir tous les champs pour générer l'email.",
+            html: `
+                <p>Veuillez remplir les champs suivants :</p>
+                <ul style="text-align: left;">
+                    ${missingFields.map(f => `<li>${f}</li>`).join("")}
+                </ul>
+            `,
             confirmButtonColor: "#f39c12"
         });
         return;
+    }
+
+    if (!isValidEmail(email_expediteur)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Email de l'expéditeur invalide",
+            text: "Veuillez saisir une adresse email valide pour l'expéditeur.",
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
     }
 
      // Affiche une popup bloquante jusqu'à la fin du chargement
@@ -294,7 +337,7 @@ function generateAIEmail() {
         allowEnterKey: false,
         showConfirmButton: false,
         didOpen: () => {
-            Swal.showLoading(); // Ajoute un spinner de chargement
+            Swal.showLoading();
         }
     });
 
@@ -419,6 +462,31 @@ function submitNewEmailTemplate() {
     });
 }
 
+// Validité du formulaire EDIT
+function validateEditEmailTemplateForm() {
+    const name = document.getElementById("editTemplateName").value.trim();
+    const subject = document.getElementById("editEmailSubject").value.trim();
+    const text = document.getElementById("editEmailText").value.trim();
+    const missingFields = [];
+
+    if (!name) missingFields.push("Nom du modèle");
+    if (!subject) missingFields.push("Sujet");
+    if (!text) missingFields.push("Contenu");
+
+    if (missingFields.length > 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis manquants",
+            html: `<ul style="text-align: left;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
+    }
+
+    return true;
+}
+
+
 // Fonction pour soumettre la modification d'un template
 function submitEditedEmailTemplate() {
     const templateId = document.getElementById("editTemplateId").value;
@@ -429,7 +497,7 @@ function submitEditedEmailTemplate() {
         text: document.getElementById("editEmailText").value
     };
 
-    if (!validateEmailTemplateForm("editTemplateName", "editEmailSubject", "editEmailText")) {
+    if (!validateEditEmailTemplateForm()) {
         return;
     }
 

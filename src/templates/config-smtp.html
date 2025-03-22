@@ -146,38 +146,38 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
   function validateSmtpForm(nameId, hostId, emailId) {
       const name = document.getElementById(nameId).value.trim();
       const host = document.getElementById(hostId).value.trim();
       const email = document.getElementById(emailId).value.trim();
 
-      if (!name || !host || !email) {
-          Swal.fire({
-              icon: "warning",
-              title: "Champs requis !",
-              text: "Veuillez remplir tous les champs obligatoires.",
-              confirmButtonColor: "#f39c12"
-          });
-          return false;
+      const fields = [];
+      if (!name) fields.push("Nom du profil");
+      if (!host) fields.push("Hôte SMTP");
+      if (!email) fields.push("Adresse e-mail source");
+
+      if (fields.length > 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis !",
+            html: `<ul style="text-align: left;">${fields.map(f => `<li>${f}</li>`).join('')}</ul>`,
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
       }
 
       if (!isValidEmail(email)) {
           Swal.fire({
-              icon: "error",
+              icon: "warning",
               title: "Adresse e-mail invalide !",
-              text: `L'adresse "${email}" n'est pas valide. Veuillez saisir une adresse correcte.`,
+              text: `L'adresse "${email}" n'est pas valide.`,
               confirmButtonColor: "#d33"
           });
           return false;
       }
 
-      return true;
-  }
+        return true;
+    }
 
   function submitNewSmtp() {
     if (!validateSmtpForm("newSmtpName", "newSmtpHost", "newSmtpFromAddress")) {

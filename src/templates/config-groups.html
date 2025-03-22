@@ -135,11 +135,6 @@
 
     
     <script>
-      function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-      }
-
       function validateGroupForm(formId, membersContainerId) {
           const name = document.getElementById(formId).value.trim();
           const memberRows = document.querySelectorAll(`#${membersContainerId} .member-row`);
@@ -172,53 +167,94 @@
 
               if (!email) {
                   Swal.fire({
-                      icon: "error",
+                      icon: "warning",
                       title: "Champ requis !",
                       text: `Veuillez entrer une adresse e-mail pour le membre ${i + 1}.`,
-                      confirmButtonColor: "#d33"
+                      confirmButtonColor: "#f39c12"
                   });
                   return false;
               }
               if (!isValidEmail(email)) {
                   Swal.fire({
-                      icon: "error",
+                      icon: "warning",
                       title: "Adresse e-mail invalide !",
                       text: `L'adresse "${email}" du membre ${i + 1} n'est pas valide. Veuillez saisir une adresse correcte.`,
-                      confirmButtonColor: "#d33"
+                      confirmButtonColor: "#f39c12"
                   });
                   return false;
               }
               if (!firstName) {
                   Swal.fire({
-                      icon: "error",
+                      icon: "warning",
                       title: "Champ requis !",
                       text: `Veuillez entrer un prénom pour le membre ${i + 1}.`,
-                      confirmButtonColor: "#d33"
+                      confirmButtonColor: "#f39c12"
                   });
                   return false;
               }
               if (!lastName) {
                   Swal.fire({
-                      icon: "error",
+                      icon: "warning",
                       title: "Champ requis !",
                       text: `Veuillez entrer un nom pour le membre ${i + 1}.`,
-                      confirmButtonColor: "#d33"
+                      confirmButtonColor: "#f39c12"
                   });
                   return false;
               }
           }
 
+          // Vérifier si deux membres n'ont pas la même adresse e-mail
+        if (!verifyIfTwoMailAreIdentic(membersContainerId)) {
+              return false;
+        }
           return true;
       }
 
       // -----------------------------------------------
       //             AJOUTER UN MEMBRE
       // -----------------------------------------------
+      function updateMemberNumbers(container) {
+        const rows = container.querySelectorAll(".member-row");
+        memberCount = 0;
+        rows.forEach((row) => {
+          memberCount++;
+          const numberSpan = row.querySelector("span");
+          if (numberSpan) {
+            numberSpan.textContent = `${memberCount}.`;
+          }
+        });
+      }
+
+      function verifyIfTwoMailAreIdentic(containerId) {
+        const memberRows = document.querySelectorAll(`#${containerId} .member-row`);
+        const emails = [];
+
+        for (let i = 0; i < memberRows.length; i++) {
+            const email = memberRows[i].querySelector("[name='email[]']").value.trim();
+            if (emails.includes(email)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Doublon détecté !",
+                    // Indiquer le numéro des membres concernés : Les memebres 1 et 3 ont la même adresse e-mail.
+                    text: `Les membres ${emails.indexOf(email) + 1} et ${i + 1} ont la même adresse e-mail. Veuillez saisir des adresses e-mail uniques.`,
+                    confirmButtonColor: "#d33"
+                });
+                return false;
+            }
+            emails.push(email);
+        }
+        return true;
+      }
+
+      
       function addMember(containerId) {
         const container = document.getElementById(containerId);
+        memberCount = container.querySelectorAll(".member-row").length + 1;
+
         const row = document.createElement("div");
         row.classList.add("member-row", "d-flex", "gap-2", "align-items-center", "mb-2");
         row.innerHTML = `
+          <span class="fw-bold" style="width: 20px;">${memberCount}.</span>
           <input type="email" name="email[]" placeholder="Email" class="form-control" required>
           <input type="text" name="first_name[]" placeholder="Prénom" class="form-control">
           <input type="text" name="last_name[]" placeholder="Nom" class="form-control">
@@ -228,9 +264,11 @@
         container.appendChild(row);
         row.querySelector(".remove-member").addEventListener("click", function() {
           this.parentElement.remove();
+          updateMemberNumbers(container);
         });
       }
-  
+      
+
       // -----------------------------------------------
       //             CRÉATION NOUVEAU GROUPE
       // -----------------------------------------------
@@ -306,7 +344,13 @@
             .then(response => response.json())
             .then(data => {
               if (data.error) {
-                alert("Error fetching group data: " + data.error);
+                console.error(data.error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Erreur !",
+                  text: "Une erreur est survenue lors du chargement du groupe.",
+                  confirmButtonColor: "#d33"
+                });
                 return;
               }
               // Placer l'ID dans un champ caché
@@ -319,8 +363,10 @@
                 data.targets.forEach(t => {
                   const container = document.getElementById("editGroupMembers");
                   const row = document.createElement("div");
+                  memberCount = container.querySelectorAll(".member-row").length + 1;
                   row.classList.add("member-row", "d-flex", "gap-2", "align-items-center", "mb-2");
                   row.innerHTML = `
+                    <span class="fw-bold" style="width: 20px;">${memberCount}.</span>
                     <input type="email" name="email[]" class="form-control" value="${t.email}" required>
                     <input type="text" name="first_name[]" class="form-control" value="${t.first_name || ''}">
                     <input type="text" name="last_name[]" class="form-control" value="${t.last_name || ''}">
@@ -331,11 +377,23 @@
                   // Bouton remove
                   row.querySelector(".remove-member").addEventListener("click", function() {
                     this.parentElement.remove();
+                    updateMemberNumbers(container);
                   });
+
+                  if (!verifyIfTwoMailAreIdentic("editGroupMembers")) {
+                      return false;
+                  }
                 });
               }
             })
-            .catch(err => console.error(err));
+            .catch(err => 
+              Swal.fire({
+                icon: "error",
+                title: "Erreur inconnue !",
+                text: "Une erreur est survenue lors du chargement du groupe.",
+                confirmButtonColor: "#d33"
+              })
+            );
         });
       });
   
@@ -350,6 +408,10 @@
 
         if (!validateGroupForm("editGroupName", "editGroupMembers")) {
               return;
+        }
+
+        if (!verifyIfTwoMailAreIdentic("editGroupMembers")) {
+            return;
         }
 
         memberRows.forEach(row => {
@@ -431,7 +493,12 @@
               .then(res => res.json())
               .then(data => {
                 if (data.error) {
-                  Swal.fire("Erreur", data.error, "error");
+                  Swal.fire({
+                    title: "Erreur !",
+                    text: data.error,
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                  });
                 } else {
                   Swal.fire({
                     title: "Supprimé !",
@@ -445,8 +512,12 @@
                 }
               })
               .catch(err => {
-                console.error(err);
-                Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+                Swal.fire({
+                  title: "Erreur inconnue !",
+                  text: "Une erreur est survenue lors de la suppression du groupe.",
+                  icon: "error",
+                  confirmButtonColor: "#d33"
+                });
               });
             }
           });
