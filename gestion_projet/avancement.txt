@@ -13,9 +13,9 @@ Landing page:
    - Dans la page de création de campagne, ajouter la possibilité de choisir une landing page existante ou de ne pas en chosir
 
 URL de phishing :
-   - Voir à quoi ca sert
+   - Permet de renseigner l'url de phishing pour la landing page, voir comment elle foncitonne, si on peut la modifier pour chaque campagne
    - Retirer l'obligation de s'en servir dans la création de campagne.
-   - la rendre fonctionnelle
+   - la rendre fonctionnelle autre qu'en local
 
 
 
