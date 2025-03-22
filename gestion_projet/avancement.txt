@@ -6,6 +6,20 @@
 2. **Créer les API pour gérer les éléments nécessaires aux campagnes :**  
    - `Landing pages`
 
+Landing page: 
+   - Gérer la capture des données de la landing page
+   - Corriger bug affichage de la page google.com avec les balise base
+   - Néttoyer la page si on la quitte, car elleconserve les infos de la petite fenetre
+   - adapter la tialle de la fenetre avec le code html.
+   - Gérer l'URL de redirection
+   - Gérer l'importation d'une page à partir de son URL
+   - Dans la page de création de campagne, ajouter la possibilité de choisir une landing page existante ou de ne pas en chosir
+
+URL de phishing :
+   - Voir à quoi ca sert
+   - Retirer l'obligation de s'en servir dans la création de campagne.
+   - la rendre fonctionnelle
+
 
 
 
@@ -17,3 +31,7 @@ la possibilité de créer un nouvel utilisateur sans avoir déjà un compte (uni
 ca n'a pas de sens notre système de compte qui permet d'accéder à toute la BD juste en se créeant un nouveau compte)
    - DOnc faire une page "Générer un nouveau compte" qui sera accessible uniquement par les utilisateurs déjà enregistré, et qui permettra de créer un nouveau compte pour un nouvel utilisateur, en lui générant un mot de passe aléatoire temporaire, et en lui envoyant un mail avec ce mot de passe temporaire, et en lui demandant de se connecter avec ce mot de passe temporaire pour ensuite le changer
    - (optionnel) Faire un système de gestion de droits d'accès pour les utilisateurs, avec un système de rôles (admin, user, etc) et de permissions (lecture, écriture, etc)
+
+
+IA et Landing page:
+   - Il faudrait pouvoir réussir à fiare générer les landing page par L'IA, c'est un truc plus compliqué à faire sans connaissance pour les utilisateur, donc plus utiles meme que la génération du mail. En plus on pourrait bien faire notre prompt pour qu'il sache quoi mettre dedans.

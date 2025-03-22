@@ -148,3 +148,13 @@ def update_landing_page_route(landing_page_id):
 def delete_landing_page_route(landing_page_id):
     """Supprime une Landing Page."""
     return jsonify(delete_landing_page(landing_page_id))
+
+@gophish_bp.route('/import_site', methods=['POST'])
+def import_site_route():
+    """
+    Importe un site en récupérant le HTML via l'endpoint d'import de GoPhish.
+    Le body doit contenir les champs 'url', 'include_resources', etc.
+    """
+    data = request.json
+    response = import_site(data)  
+    return jsonify(response)

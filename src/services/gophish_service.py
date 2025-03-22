@@ -385,3 +385,12 @@ def delete_landing_page(landing_page_id):
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+    
+def import_site(data):
+    """Importe un site et retourne son HTML via l'API GoPhish"""
+    url = f"{Config.GOPHISH_API_URL}/api/import/site"
+    response = requests.post(url, json=data, headers=HEADERS, verify=False)
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}

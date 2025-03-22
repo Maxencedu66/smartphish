@@ -378,3 +378,9 @@ def delete_landing_page_frontend(landing_page_id):
     """
     response = delete_landing_page(landing_page_id)
     return jsonify(response)
+
+@bp.route('/import_site', methods=['POST'])
+def import_site_frontend():
+    data = request.get_json()
+    response = import_site(data) 
+    return jsonify(response)
