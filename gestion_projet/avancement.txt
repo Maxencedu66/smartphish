@@ -7,7 +7,6 @@
    - `Landing pages`
 
 Landing page: 
-   - Gérer la capture des données de la landing page
    - (didou) adapter la taille de la fenetre avec le code html et l'affichage en général.
    - Gérer l'URL de redirection
    - Dans la page de création de campagne, ajouter la possibilité de choisir une landing page existante ou de ne pas en chosir
@@ -35,5 +34,6 @@ Affichage et suivi des campagne:
    - Il faut afficher le suivi des events tu peux voir su gophish le détail des event par rapport à une personne de la campagne, normalement pour moi ca a changé
 
 IA et Landing page:
+   - (didou) adapter la taille de la fenetre avec le code html et l'affichage en général.
    - Il faudrait pouvoir réussir à fiare générer les landing page par L'IA, c'est un truc plus compliqué à faire sans connaissance pour les utilisateur, donc plus utiles meme que la génération du mail. En plus on pourrait bien faire notre prompt pour qu'il sache quoi mettre dedans.
    -
