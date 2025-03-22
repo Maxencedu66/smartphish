@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from src.services.gophish_service import get_templates
 
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
@@ -271,13 +272,11 @@ def config_emails():
     """
     Récupère la liste des email templates depuis la BD, puis rend la page config-emails.html avec ces données.
     """
-    from src.services.gophish_service import get_templates
     email_templates = get_templates()
     return render_template('config-emails.html', email_templates=email_templates)
 
 @bp.route('/templates', methods=['POST'])
 def create_template_frontend():
-    from src.services.gophish_service import create_template
     data = request.get_json()
     if not data:
         return jsonify({"error": "Aucune donnée reçue"}), 400
@@ -311,7 +310,6 @@ def get_template_frontend(template_id):
     """
     Récupère UN template en JSON pour remplir la modale d’édition (front).
     """
-    from src.services.gophish_service import get_template
     data = get_template(template_id)
     return jsonify(data)
 
@@ -320,8 +318,6 @@ def update_template_frontend(template_id):
     """
     Reçoit le JSON pour modifier le template via GoPhish.
     """
-    from src.services.gophish_service import update_template
-
     data = request.get_json()
     if not data:
         return jsonify({"error": "Aucune donnée reçue"}), 400
@@ -341,7 +337,6 @@ def delete_template_frontend(template_id):
     """
     Supprime un template via GoPhish.
     """
-    from src.services.gophish_service import delete_template
     response = delete_template(template_id)
     return jsonify(response)
 
