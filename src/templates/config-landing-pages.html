@@ -147,7 +147,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // Charger les landing pages via l'API
@@ -249,18 +248,15 @@ function togglePreview(textareaId, iframeId) {
 function validateLandingPageForm(nameId, htmlId) {
     const name = document.getElementById(nameId).value.trim();
     const html = document.getElementById(htmlId).value.trim();
-    const missing = [];
-    if (!name) missing.push("Nom de la page");
-    if (!html) missing.push("Contenu HTML");
-    if (missing.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champs requis manquants",
-            html: `<ul style="text-align: left;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
-            confirmButtonColor: "#f39c12"
-        });
-        return false;
-    }
+
+    // Indiquer le nom des champs requis
+    const isValidRequiredFields = validateRequiredFields([
+        [name, "Nom Page de destination"],
+        [html, "Contenu HTML"]
+    ]);
+
+    if (!isValidRequiredFields) return;
+
     return true;
 }
 
@@ -348,15 +344,12 @@ function importSite() {
     const url = document.getElementById("importSiteURL").value.trim();
     const includeResources = document.getElementById("includeResources").checked;
 
-    if (!url) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champ requis manquant",
-            text: "Veuillez fournir l'URL du site.",
-            confirmButtonColor: "#f39c12"
-        });
-        return;
-    }
+    const isValidRequiredFields = validateRequiredFields([
+        [url, "URL du site"],
+        [html, "Contenu HTML"]
+    ]);
+    if (!isValidRequiredFields) return;
+
 
     const data = {
         url: url,
