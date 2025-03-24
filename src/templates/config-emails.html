@@ -72,9 +72,29 @@
                             <label for="newEmailSubject" class="form-label">Sujet :</label>
                             <input type="text" id="newEmailSubject" class="form-control" required>
                         </div>
+
                         <div class="mb-3">
+                            <label class="form-label">Format :</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="emailFormat" id="textFormat" value="text" checked>
+                                <label class="form-check-label" for="textFormat">Texte</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="emailFormat" id="htmlFormat" value="html">
+                                <label class="form-check-label" for="htmlFormat">HTML</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" id="textEditor">
                             <label for="newEmailText" class="form-label">Contenu :</label>
                             <textarea id="newEmailText" class="form-control" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3" id="htmlEditor" style="display:none;">
+                            <label for="newEmailHtml" class="form-label">Contenu HTML :</label>
+                            <div id="quillEditor" style="height: 250px;"></div>
+                            <input type="hidden" id="newEmailHtml">
+
                         </div>
                     </div>
                     <!-- Champs pour génération par IA -->
@@ -153,10 +173,32 @@
                     <label for="editEmailSubject" class="form-label">Sujet :</label>
                     <input type="text" id="editEmailSubject" class="form-control" required>
                 </div>
+
                 <div class="mb-3">
-                    <label for="editEmailText" class="form-label">Contenu :</label>
-                    <textarea id="editEmailText" class="form-control" rows="5" required></textarea>
+                    <label class="form-label">Format :</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="editEmailFormat" id="editTextFormat" value="text" checked>
+                        <label class="form-check-label" for="editTextFormat">Texte</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="editEmailFormat" id="editHtmlFormat" value="html">
+                        <label class="form-check-label" for="editHtmlFormat">HTML</label>
+                    </div>
                 </div>
+                
+
+                <!-- Texte brut -->
+                <div class="mb-3" id="editTextEditor">
+                    <label for="editEmailText" class="form-label">Contenu :</label>
+                    <textarea id="editEmailText" class="form-control" rows="5"></textarea>
+                </div>
+
+                <!-- HTML avec Quill -->
+                <div class="mb-3" id="editHtmlEditor" style="display: none;">
+                    <label for="editEmailHtml" class="form-label">Contenu HTML :</label>
+                    <div id="editQuillEditor" style="height: 250px;"></div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="submitEditedEmailTemplate()">Enregistrer</button>
@@ -165,31 +207,42 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Quill CDN -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 <script>
+
 function validateEmailTemplateForm(nameId, subjectId, textId) {
     const selectedMethod = document.querySelector('input[name="creationMethod"]:checked').value;
+    let text, plaintext;
 
     if (selectedMethod === "manual") {
         const name = document.getElementById(nameId).value.trim();
         const subject = document.getElementById(subjectId).value.trim();
-        const text = document.getElementById(textId).value.trim();
+        
+        if (document.getElementById("htmlFormat").checked) {
+            text = quill.root.innerHTML.trim();
+            plaintext = quill.getText().trim();
+        } else if (document.getElementById("textFormat").checked) {
+            plaintext = document.getElementById(textId).value.trim();
+        }
+
         const isValidRequiredFields = validateRequiredFields([
             [name, "Nom du modèle"],
             [subject, "Sujet Email"],
-            [text, "Contenu Email"]
+            [plaintext, "Contenu Email"]
         ]);
         if (!isValidRequiredFields) return;
     } else if (selectedMethod === "ai") {
         const name = document.getElementById(nameId).value.trim();
-        let subject, text;
+        let subject, textia;
         const scenario = document.getElementById("aiScenario").value.trim();
         const company  = document.getElementById("aiEntreprise").value.trim();
         const sender   = document.getElementById("aiExpediteur").value.trim();
         const email    = document.getElementById("aiEmailExpediteur").value.trim();
         subject = document.getElementById("aiGeneratedSubject").value.trim();
-        text    = document.getElementById("aiGeneratedContent").value.trim();
+        textia  = document.getElementById("aiGeneratedContent").value.trim();
 
 
 
@@ -200,7 +253,7 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
             [sender, "Nom de l'expéditeur"],
             [email, "Email de l'expéditeur"],
             [subject, "Sujet généré"],
-            [text, "Contenu généré"]
+            [textia, "Contenu généré"]
         ]);
         if (!isValidRequiredFields) return;
 
@@ -226,8 +279,58 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     return true;
 }
 
+let quill;
+let editQuillEditor;
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Initialisation de l'éditeur Quill
+    quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'link'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Gérer le switch entre mode texte / HTML
+    document.querySelectorAll('input[name="emailFormat"]').forEach((radio) => {
+        radio.addEventListener('change', function () {
+            if (this.value === "html") {
+                document.getElementById("textEditor").style.display = "none";
+                document.getElementById("htmlEditor").style.display = "block";
+            } else {
+                document.getElementById("textEditor").style.display = "block";
+                document.getElementById("htmlEditor").style.display = "none";
+            }
+        });
+    });
+
+    // Initialisation de l'éditeur Quill pour l'édition
+    editQuill = new Quill('#editQuillEditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'link'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Gérer le switch entre mode texte / HTML pour l'édition
+    document.querySelectorAll('input[name="editEmailFormat"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const isHtml = document.getElementById("editHtmlFormat").checked;
+            document.getElementById("editTextEditor").style.display = isHtml ? "none" : "block";
+            document.getElementById("editHtmlEditor").style.display = isHtml ? "block" : "none";
+        });
+    });
+
     // Basculement entre les champs manuels et IA
     document.getElementsByName("creationMethod").forEach(radio => {
         radio.addEventListener("change", function() {
@@ -408,12 +511,20 @@ function generateAIEmail() {
 function submitNewEmailTemplate() {
     const name = document.getElementById("newTemplateName").value;
     let subject, text;
+    let method;    
+
     if (document.getElementById("aiMethod").checked) {
         subject = document.getElementById("aiGeneratedSubject").value;
         text = document.getElementById("aiGeneratedContent").value;
     } else if (document.getElementById("manualMethod").checked) {
         subject = document.getElementById("newEmailSubject").value;
-        text = document.getElementById("newEmailText").value;
+        if (document.getElementById("htmlFormat").checked) {
+            text = quill.root.innerHTML;
+            method = "quillEditor";
+        } else {
+            text = document.getElementById("newEmailText").value;
+            method = "newEmailText";
+        }
     } else {
         Swal.fire({
             icon: "error",
@@ -424,7 +535,7 @@ function submitNewEmailTemplate() {
         return false;
     }
 
-    if (!validateEmailTemplateForm("newTemplateName", "newEmailSubject", "newEmailText")) {
+    if (!validateEmailTemplateForm("newTemplateName", "newEmailSubject", method)) {
         return;
     }
 
@@ -474,12 +585,27 @@ function submitNewEmailTemplate() {
 function validateEditEmailTemplateForm() {
     const name = document.getElementById("editTemplateName").value.trim();
     const subject = document.getElementById("editEmailSubject").value.trim();
-    const text = document.getElementById("editEmailText").value.trim();
     
+    let text, plaintext;
+    if (document.getElementById("editHtmlFormat").checked) {
+        text = editQuill.root.innerHTML.trim();
+        plaintext = editQuill.getText().trim();
+    } else if (document.getElementById("editTextFormat").checked) {
+        plaintext = document.getElementById("editEmailText").value.trim();
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: "Format de contenu non reconnu.",
+            confirmButtonColor: "#d33"
+        });
+        return false;
+    }
+
     const isValidRequiredFields = validateRequiredFields([
         [name, "Nom du modèle"],
         [subject, "Sujet Email"],
-        [text, "Contenu Email"]
+        [plaintext, "Contenu Email"]
     ]);
 
     if (!isValidRequiredFields) return;
@@ -491,11 +617,21 @@ function validateEditEmailTemplateForm() {
 // Fonction pour soumettre la modification d'un template
 function submitEditedEmailTemplate() {
     const templateId = document.getElementById("editTemplateId").value;
+    const name = document.getElementById("editTemplateName").value.trim();
+    const subject = document.getElementById("editEmailSubject").value.trim();
+    let text;
+
+    if (document.getElementById("editHtmlFormat").checked) {
+        text = editQuill.root.innerHTML.trim();
+    } else {
+        text = document.getElementById("editEmailText").value.trim();
+    }
+
     const data = {
         id: parseInt(templateId, 10),
-        name: document.getElementById("editTemplateName").value,
-        subject: document.getElementById("editEmailSubject").value,
-        text: document.getElementById("editEmailText").value
+        name,
+        subject,
+        text
     };
 
     if (!validateEditEmailTemplateForm()) {
@@ -538,6 +674,7 @@ function submitEditedEmailTemplate() {
         });
     });
 }
+
 </script>
 
 {% endblock %}
