@@ -353,10 +353,9 @@ def generate_ai_analysis(campaign_id):
 - Données soumises : {submitted}
 - Emails signalés : {reported}
 
-1. Analyse des résultats généraux : Résume l'efficacité de la campagne et les statistiques.
-2. Analyse détaillée : Analyse les comportements à risque, navigateurs/OS utilisés, géolocalisations, etc.
-3. Recommandations : Donné 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing
-4. Conclusion : Message final de sensibilisation, synthétique et professionnel.
+1. Analyse des résultats généraux : Résume l'efficacité de la campagne et les statistiques obtenues.
+2. Recommandations : Donné 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing
+3. Conclusion : Message final de sensibilisation, synthétique et professionnel.
 
 ⚠️ Contraintes :
 - Pas de Markdown, balises HTML ni caractères spéciaux (**, #, etc.).

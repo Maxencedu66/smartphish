@@ -87,26 +87,27 @@ def generate_docx_with_goreport(campaign_id, force=False):
 
 def split_ai_text_into_sections(text):
     """
-    Découpe un texte généré par IA en sections reconnaissables, même si le format est imparfait.
+    Découpe un texte généré par IA en sections reconnaissables.
     Nettoie le texte des caractères * typiques du markdown.
     Reconnaît les titres avec ou sans mise en forme Markdown.
     Retourne une liste de tuples (titre, contenu).
     """
 
-    # 🔹 Nettoyage du markdown : suppression de toutes les étoiles (ex : **titre**, *italique*)
+    # 🔹 Nettoyage Markdown : suppression des étoiles
     text = re.sub(r'\*+', '', text)
 
-    # Titres attendus (forme normalisée)
+    # 🔹 Titres attendus (analyse détaillée supprimée)
     TITRE_SECTIONS = {
         "analyse des résultats généraux": "Analyse des résultats généraux",
-        "analyse détaillée": "Analyse détaillée",
         "recommandations": "Recommandations",
         "conclusion": "Conclusion"
     }
 
-    # 🔹 Pattern pour détecter un titre clair en début de ligne (après nettoyage)
-    pattern = re.compile(r'^\s*(Analyse des résultats généraux|Analyse détaillée|Recommandations|Conclusion)\s*$',
-                         re.IGNORECASE | re.MULTILINE)
+    # 🔹 Pattern regex : détecte les titres seuls sur une ligne
+    pattern = re.compile(
+        r'^\s*(Analyse des résultats généraux|Recommandations|Conclusion)\s*$',
+        re.IGNORECASE | re.MULTILINE
+    )
 
     matches = list(pattern.finditer(text))
     sections = []
@@ -123,14 +124,13 @@ def split_ai_text_into_sections(text):
         if contenu:
             sections.append((titre_normalisé, contenu))
 
-    # 🔹 Ajouter les sections manquantes si besoin
+    # 🔹 Ajout de sections manquantes avec contenu vide
     titres_extraits = [t for t, _ in sections]
     for titre_attendu in TITRE_SECTIONS.values():
         if titre_attendu not in titres_extraits:
             sections.append((titre_attendu, ""))
 
     return sections
-
 
 
 def download_report_styled(campaign_id):
