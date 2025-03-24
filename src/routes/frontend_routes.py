@@ -138,13 +138,26 @@ def llm_status():
     print(status)
     return render_template('llm-status.html', status=status)
 
+@bp.route('/llm-status-get')
+def llm_status_ge():
+    status = get_ollama_status()
+    return jsonify(status)
+
 @bp.route('/llm-training')
 def llm_training():
     return render_template('llm-training.html')
 
 @bp.route('/llm-settings')
 def llm_settings():
-    return render_template('llm-settings.html')
+    models = get_models()
+    return render_template('llm-settings.html', models=models)
+
+@bp.route('/set-model', methods=['POST'])
+def set_model_frontend():
+    data = request.json
+    model_name = data.get("model")
+    set_used_model(model_name)
+    return jsonify({"result": "OK", "message": f"Modèle '{model_name}' défini."})
 
 @bp.route('/maj-status')
 def maj_status():

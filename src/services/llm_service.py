@@ -206,10 +206,14 @@ def generate_phishing_email(user_data):
     """Génère un email de phishing à l'aide de Mistral via Ollama."""
     prompt = generate_prompt(user_data)
     # print(prompt)
+    
+    used_model = get_used_model()
+    if not used_model:
+        raise Exception("Aucun modèle n'est actuellement utilisé.")
 
     valid = False
     while not valid:
-        response: EmailInfo = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}], format=EmailInfo.model_json_schema())
+        response: EmailInfo = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}], format=EmailInfo.model_json_schema())
         response_obj = EmailInfo.model_validate_json(response.message.content)
         
         # Strip the email content
@@ -257,6 +261,32 @@ def get_ollama_status():
                 break
     
     return info_dicts
+
+
+def get_models():
+    """Récupère la liste des modèles disponibles sur la base de données"""
+    conn = get_db_connection()
+    models = conn.execute("SELECT * FROM models").fetchall()
+    conn.close()
+    return models
+
+
+def get_used_model():
+    """Récupère le modèle actuellement utilisé dans la base de données"""
+    conn = get_db_connection()
+    model = conn.execute("SELECT name FROM models WHERE used = 1").fetchone()
+    conn.close()
+    return model[0] if model else None
+
+
+def set_used_model(model_name):
+    """Met à jour le modèle utilisé dans la base de données"""
+    conn = get_db_connection()
+    conn.execute("UPDATE models SET used = 0")
+    conn.execute("UPDATE models SET used = 1 WHERE name = ?", (model_name,))
+    conn.commit()
+    # print(f"Modèle {model_name} défini.")
+    conn.close()
 
 
 def generate_ai_analysis(campaign_id):
@@ -308,8 +338,13 @@ def generate_ai_analysis(campaign_id):
 
 Rends le texte fluide, facile à lire, et professionnel.
 """
+    # Récupération du modèle utilisé
+    used_model = get_used_model()
+    if not used_model:
+        raise Exception("Aucun modèle n'est actuellement utilisé.")
+
     # Appel à l'IA via Ollama (ici modèle "mistral")
-    response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
+    response = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}])
     texte = response.message.content.strip()
     return texte
 

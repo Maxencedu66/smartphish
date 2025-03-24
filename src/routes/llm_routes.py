@@ -25,8 +25,3 @@ def generate_email():
         return jsonify({"object": generated_email['object'], "content": generated_email['content']})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@llm_bp.route('/status', methods=['GET'])
-def get_status():
-    """Retourne les informations sur les modèles téléchargés et/ou en mémoire via Ollama."""
-    return jsonify(get_ollama_status())

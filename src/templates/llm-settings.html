@@ -8,23 +8,59 @@
 
 <h5 style="margin-top: 20px; margin-bottom: 13px;">Modèle conversationnel</h5>
 
+{% for model in models %}
 <div class="form-check mt-2">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
-    <label class="form-check-label" for="exampleRadios1">
-        Mistral (par défaut) (~4 Go), équilibré entre performance et rapidité
+    <input class="form-check-input" type="radio" name="exampleRadios" id="{{ model.name }}" value="{{ model.name }}"  {{ 'checked' if model.used else '' }} onclick="setModel()">
+    <label class="form-check-label" for="{{ model.name }}">
+        {{ model.description }}
     </label>
 </div>
-<div class="form-check mt-2">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
-    <label class="form-check-label" for="exampleRadios2">
-        Mixtral (~25 Go), plus performant mais plus lent
-    </label>
-</div>
-<div class="form-check mt-2">
-    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" disabled>
-    <label class="form-check-label" for="exampleRadios3">
-        Autre...
-    </label>
-</div>
+{% endfor %}
+
+<script>
+    function setModel() {
+        let new_model = document.querySelector('input[name="exampleRadios"]:checked').value;
+        // console.log(new_model);
+
+        fetch("/set-model", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model: new_model })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === "OK") {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Changement effectué",
+                        text: " ",
+                        timer: 1000,
+                        showConfirmButton: false,
+                        backdrop: false,
+                        position: "center"
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Échec du changement",
+                        text: "Erreur lors du changement de modèle. Veuillez réessayer.",
+                        backdrop: false,
+                        position: "center"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Erreur réseau :", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Erreur",
+                    text: "Une erreur est survenue. Veuillez réessayer.",
+                    backdrop: false,
+                    position: "center"
+                });
+            });
+    }
+
+</script>
 
 {% endblock %}
