@@ -38,10 +38,6 @@
                         </div>
                         <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
                     </form>
-
-                    <div class="text-center mt-3">
-                        <p>Déjà un compte ? <a href="/login" class="btn btn-link">Se connecter</a></p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -64,16 +60,12 @@
         let usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
         let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
 
-        if (!username || !password || !confirmPassword) {
-            Swal.fire({
-                icon: "info",
-                title: "Champs requis",
-                text: "Tous les champs sont requis.",
-                backdrop: false,
-                position: "center"
-            });
-            return;
-        }
+        const isValidRequiredFields = validateRequiredFields([
+            [username, "Nom d'utilisateur"],
+            [password, "Mot de passe"],
+            [confirmPassword, "Confirmation du mot de passe"]
+        ]);
+        if (!isValidRequiredFields) return;
 
         if (!usernameRegex.test(username)) {
             Swal.fire({
@@ -81,8 +73,8 @@
                 title: "Pseudonyme invalide",
                 html: `
                     <ul style="text-align: left; font-size: 16px;">
-                        <li>✅ Entre <strong>3 et 20 caractères</strong></li>
-                        <li>✅ Contient uniquement <strong>des lettres</strong>, <strong>des chiffres</strong> ou le caractère <strong>underscore (_)</strong></li>
+                        <li>Entre <strong>3 et 20 caractères</strong></li>
+                        <li>Contient uniquement <strong>des lettres</strong>, <strong>des chiffres</strong> ou le caractère <strong>underscore (_)</strong></li>
                     </ul>
                 `,
                 confirmButtonText: "OK",
@@ -95,14 +87,14 @@
         if (!passwordRegex.test(password)) {
             Swal.fire({
                 icon: "info",
-                title: "Mot de passe requis",
+                title: "Mot de passe non valide",
                 html: `
                     <ul style="text-align: left; font-size: 16px;">
-                        <li>✅ Au moins <strong>8 caractères</strong></li>
-                        <li>✅ Au moins <strong>une lettre minuscule</strong></li>
-                        <li>✅ Au moins <strong>une lettre majuscule</strong></li>
-                        <li>✅ Au moins <strong>un chiffre</strong></li>
-                        <li>✅ Au moins <strong>un caractère spécial</strong> (!@#$%^&*)</li>
+                        <li>Au moins <strong>8 caractères</strong></li>
+                        <li>Au moins <strong>une lettre minuscule</strong></li>
+                        <li>Au moins <strong>une lettre majuscule</strong></li>
+                        <li>Au moins <strong>un chiffre</strong></li>
+                        <li>Au moins <strong>un caractère spécial</strong> (!@#$%^&*)</li>
                     </ul>
                 `,
                 confirmButtonText: "OK",

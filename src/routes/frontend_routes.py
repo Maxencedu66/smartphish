@@ -20,7 +20,7 @@ bp = Blueprint('frontend', __name__, static_folder='../static', template_folder=
 # Middleware pour vérifier l'authentification
 @bp.before_request
 def check_auth():
-    allowed_routes = ["frontend.login_page", "auth.login", "frontend.register_page", "auth.register"]
+    allowed_routes = ["frontend.login_page", "auth.login"]
 
     if "user" not in session and request.endpoint not in allowed_routes:
         return redirect(url_for("frontend.login_page"))
