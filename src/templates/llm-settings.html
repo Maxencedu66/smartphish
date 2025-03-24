@@ -30,15 +30,28 @@
             .then(response => response.json())
             .then(data => {
                 if (data.result === "OK") {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Changement effectué",
-                        text: " ",
-                        timer: 1000,
-                        showConfirmButton: false,
-                        backdrop: false,
-                        position: "center"
-                    });
+                    if (data.need_pull) {
+                        Swal.fire({
+                            icon: "info",
+                            title: "Changement en cours...",
+                            text: "Le modèle est en cours de téléchargement. Cette opération peut prendre quelques minutes. Le modèle sera visible sur la page de statut des modèles lorsqu'il sera téléchargé. Vous pouvez continuer à utiliser l'application pendant ce temps.",
+                            width: '50em',
+                            // timer: 5000,
+                            showConfirmButton: true,
+                            backdrop: false,
+                            position: "center"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Changement effectué",
+                            text: " ",
+                            timer: 1000,
+                            showConfirmButton: false,
+                            backdrop: false,
+                            position: "center"
+                        });
+                    }
                 } else {
                     Swal.fire({
                         icon: "error",

@@ -6,6 +6,7 @@ from datetime import datetime
 from src.lib.goreport import Goreport
 from gophish import Gophish
 from src.config import Config
+import threading
 
 
 class EmailInfo(BaseModel):
@@ -279,6 +280,26 @@ def get_used_model():
     return model[0] if model else None
 
 
+def need_pull_model(model_name):
+    """Vérifie si un modèle doit être téléchargé depuis Ollama"""
+    models = get_ollama_status()
+    for model in models:
+        if model['name'].startswith(model_name):
+            return False
+    return True
+
+
+def try_pull_model(model_name):
+    """Tente de télécharger un modèle depuis Ollama"""
+    def pull_model():
+        ollama.pull(model=model_name)
+
+    pull_thread = threading.Thread(target=pull_model)
+    pull_thread.start()
+    print(f"Téléchargement du modèle {model_name} en cours...")
+    # pull_thread.join()
+
+
 def set_used_model(model_name):
     """Met à jour le modèle utilisé dans la base de données"""
     conn = get_db_connection()
@@ -287,6 +308,12 @@ def set_used_model(model_name):
     conn.commit()
     # print(f"Modèle {model_name} défini.")
     conn.close()
+    need_pull = need_pull_model(model_name)
+    print(f"Modèle {model_name} défini. Téléchargement nécessaire : {need_pull}")
+    if need_pull:
+        try_pull_model(model_name)
+        
+    return need_pull
 
 
 def generate_ai_analysis(campaign_id):
