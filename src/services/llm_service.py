@@ -64,15 +64,17 @@ def generate_prompt(user_data):
         - **But** : Récupérer des informations personnelles (nom, téléphone, RIB) sous couvert d'une invitation à un événement exclusif.
         - **Ton** : Enthousiaste et exclusif mais professionel et formel.
         - **Signature** : {user_data['expéditeur']}.
-        - **Destinataire** : Inconnu.
+        - **Destinataire** : Un collaborateur de l'entreprise, pas de nom spécifique.
         - **Entreprise** : '{user_data['entreprise']}'.
         - **Langue** : Français.
 
         Exemple : 
         ---
-        🎉 L'entreprise '{user_data['entreprise']}' organise un événement exclusif pour ses collaborateurs ! 
+        Cher collaborateur,
+        🎉 {user_data['entreprise']} organise un événement exclusif pour ses collaborateurs ! 
         Nombre de places limité, **inscrivez-vous vite** en répondant à ce mail avec vos noms, numéro de téléphone et RIB. 
         Ne manquez pas cette opportunité unique !
+        Bien à vous,
         ---
         
         Rappel : **Ne pas mettre de champs à remplir**. NE PAS METTRE DE choses avec des crochets [Nom], [Téléphone], etc sinon je me tire une balle et je suis sérieux OK ?
@@ -96,6 +98,106 @@ def generate_prompt(user_data):
         **Merci de répondre à ce mail avec vos identifiants** pour procéder à la mise à jour.
         ---
         """,
+        
+        "Organisation de covoiturage": f"""
+        Rédige un email **convivial et engageant** pour organiser un covoiturage quotidien entre collègues.
+        Le mail doit être **court et efficace**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
+        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        
+        - **But** : Organiser un covoiturage et obtenir des coordonnées.
+        - **Ton** : Amical et pratique.
+        - **Signature** : {user_data['expéditeur']}.
+        - **Langue** : Français.
+        
+        Exemple :
+        ---
+        Salut à tous,
+        Qui serait partant pour organiser un covoiturage quotidien pour aller au travail ?
+        Merci de répondre à ce mail avec vos coordonnées et adresse pour qu'on puisse s'organiser.
+        À bientôt !
+        ---
+        """,
+        
+        "Chèques de voyage": f"""
+        Rédige un email **formel et sérieux** annonçant la distribution de chèques voyage à tous les employés.
+        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
+        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        
+        - **But** : Obtenir des coordonnées sous couvert de distribution de chèques voyage.
+        - **Ton** : Formel et professionnel.
+        - **Signature** : {user_data['expéditeur']}.
+        - **Langue** : Français.
+        
+        Exemple :
+        ---
+        Bonjour,
+        Nous avons le plaisir de vous annoncer la distribution de chèques voyage à tous les employés.
+        Merci de répondre à ce mail avec vos coordonnées postales pour recevoir votre chèque.
+        Cordialement,
+        ---
+        """,
+        
+        "Salon à l'étranger": f"""
+        Rédige un email **convaincant et professionnel** pour inviter des employés à un salon professionnel à l'étranger.
+        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées (y compris postales).
+        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        Ne précise pas de dates.
+        
+        - **But** : Obtenir des coordonnées sous couvert d'une invitation à un salon professionnel.
+        - **Ton** : Convaincant et professionnel.
+        - **Signature** : {user_data['expéditeur']}.
+        - **Destinataire** : Un collaborateur de l'entreprise, pas de nom spécifique.
+        - **Langue** : Français.
+        
+        Exemple :
+        ---
+        Bonjour,
+        Nous avons le plaisir de vous inviter à un salon professionnel à l'étranger.
+        Merci de répondre à ce mail avec vos coordonnées pour recevoir votre invitation et que nous puissions réserver vos billets d'avion et de logement.
+        Cordialement,
+        ---
+        
+        Rappel : **Ne pas mettre de champs à remplir**. NE PAS METTRE DE choses avec des crochets [Nom], [Téléphone], etc sinon je me tire une balle et je suis sérieux OK ?
+        Si tu ne sais pas une information, n'en parle pas.
+        """,
+        
+        "Urgence médicale": f"""
+        Rédige un email **sérieux et urgent** annonçant une urgence médicale et demandant des informations personnelles.
+        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées (y compris postales).
+        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        
+        - **But** : Obtenir des coordonnées sous couvert d'une urgence médicale (services d'urgence & police).
+        - **Ton** : Sérieux et urgent.
+        - **Signature** : {user_data['expéditeur']}.
+        - **Langue** : Français.
+        
+        Exemple :
+        ---
+        Urgent,
+        Un collaborateur a eu un accident et nous avons besoin de vos coordonnées pour les fournir aux services d'urgence et de police.
+        Merci de répondre à ce mail avec vos coordonnées pour que nous puissions les transmettre rapidement.
+        Cordialement,
+        ---
+        """,
+        
+        "Support émotionnel": f"""
+        Rédige un email **bienveillant et empathique** annonçant qu'un collègue a besoin de soutien émotionnel et que le destinataire a été choisi pour l'aider.
+        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
+        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        
+        - **But** : Obtenir des coordonnées sous couvert de soutien émotionnel.
+        - **Ton** : Bienveillant et empathique.
+        - **Signature** : {user_data['expéditeur']}.
+        - **Langue** : Français.
+        
+        Exemple :
+        ---
+        Salut,
+        Un collègue a besoin de soutien émotionnel et nous avons pensé à toi pour l'aider.
+        Merci de répondre à ce mail avec tes coordonnées pour que nous puissions te mettre en contact avec lui.
+        Cordialement,
+        ---
+        """,
     }
 
     return prompts.get(scenario, "Scénario non trouvé.")
@@ -112,8 +214,13 @@ def generate_phishing_email(user_data):
         
         # Strip the email content
         lines = response_obj.contenu_mail.split("\n")
-        response_obj.contenu_mail = "\n".join([line.strip() for line in lines])
-        valid = '[dest' not in response_obj.contenu_mail.lower() and len(lines) > 1 and 'Dear ' not in response_obj.contenu_mail
+        response_obj.contenu_mail = ("\n".join([line.strip() for line in lines])).strip()
+        valid = len(lines) > 1 and 'Dear ' not in response_obj.contenu_mail
+        valid = valid and '[dest' not in response_obj.contenu_mail.lower()
+        valid = valid and '[coll' not in response_obj.contenu_mail.lower()
+        valid = valid and '[entr' not in response_obj.contenu_mail.lower()
+        valid = valid and '[reci' not in response_obj.contenu_mail.lower()
+        valid = valid and len([line for line in lines if len(line.strip()) > 0]) > 3
         
         if not valid:
             print("Email not valid, retrying...")
