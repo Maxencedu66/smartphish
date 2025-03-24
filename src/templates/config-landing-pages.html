@@ -190,19 +190,13 @@ function validateLandingPageForm(nameId, htmlId) {
     const html = document.getElementById(htmlId).value.trim();
 
     // Indiquer le nom des champs requis
-    const fields = [];
-    if (!name) fields.push("Nom Page de destination");
-    if (!html) fields.push("Contenu HTML");
+    const isValidRequiredFields = validateRequiredFields([
+        [name, "Nom Page de destination"],
+        [html, "Contenu HTML"]
+    ]);
 
-    if (fields.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champs requis manquants",
-            html: `<ul style="text-align: left;">${fields.map(f => `<li>${f}</li>`).join('')}</ul>`,
-            confirmButtonColor: "#f39c12"
-        });
-        return false;
-    }
+    if (!isValidRequiredFields) return;
+
     return true;
 }
 
@@ -377,15 +371,12 @@ function importSite() {
     const url = document.getElementById("importSiteURL").value.trim();
     const includeResources = document.getElementById("includeResources").checked;
 
-    if (!url) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champ requis manquant",
-            text: "Veuillez fournir l'URL du site.",
-            confirmButtonColor: "#f39c12"
-        });
-        return;
-    }
+    const isValidRequiredFields = validateRequiredFields([
+        [url, "URL du site"],
+        [html, "Contenu HTML"]
+    ]);
+    if (!isValidRequiredFields) return;
+
 
     const data = {
         url: url,

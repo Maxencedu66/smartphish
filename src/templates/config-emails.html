@@ -169,43 +169,56 @@
 
 <script>
 function validateEmailTemplateForm(nameId, subjectId, textId) {
-    const name = document.getElementById(nameId).value.trim();
-    const missingFields = [];
+    const selectedMethod = document.querySelector('input[name="creationMethod"]:checked').value;
 
-    let subject, text;
-    
-    const scenario = document.getElementById("aiScenario").value.trim();
-    const company  = document.getElementById("aiEntreprise").value.trim();
-    const sender   = document.getElementById("aiExpediteur").value.trim();
-    const email    = document.getElementById("aiEmailExpediteur").value.trim();
-    subject = document.getElementById("aiGeneratedSubject").value.trim();
-    text    = document.getElementById("aiGeneratedContent").value.trim();
+    if (selectedMethod === "manual") {
+        const name = document.getElementById(nameId).value.trim();
+        const subject = document.getElementById(subjectId).value.trim();
+        const text = document.getElementById(textId).value.trim();
+        const isValidRequiredFields = validateRequiredFields([
+            [name, "Nom du modèle"],
+            [subject, "Sujet Email"],
+            [text, "Contenu Email"]
+        ]);
+        if (!isValidRequiredFields) return;
+    } else if (selectedMethod === "ai") {
+        const name = document.getElementById(nameId).value.trim();
+        let subject, text;
+        const scenario = document.getElementById("aiScenario").value.trim();
+        const company  = document.getElementById("aiEntreprise").value.trim();
+        const sender   = document.getElementById("aiExpediteur").value.trim();
+        const email    = document.getElementById("aiEmailExpediteur").value.trim();
+        subject = document.getElementById("aiGeneratedSubject").value.trim();
+        text    = document.getElementById("aiGeneratedContent").value.trim();
 
-    if (!name)     missingFields.push("Nom du modèle");
-    if (!scenario) missingFields.push("Scénario");
-    if (!company)  missingFields.push("Nom de l'entreprise");
-    if (!sender)   missingFields.push("Nom de l'expéditeur");
-    if (!email)    missingFields.push("Email de l'expéditeur");
-    if (!subject)  missingFields.push("Sujet généré");
-    if (!text)     missingFields.push("Contenu généré");
 
 
-    if (missingFields.length > 0) {
+        const isValidRequiredFields = validateRequiredFields([
+            [name, "Nom du modèle"],
+            [scenario, "Scénario"],
+            [company, "Nom de l'entreprise"],
+            [sender, "Nom de l'expéditeur"],
+            [email, "Email de l'expéditeur"],
+            [subject, "Sujet généré"],
+            [text, "Contenu généré"]
+        ]);
+        if (!isValidRequiredFields) return;
+
+        if (!isValidEmail(email)) {
+            Swal.fire({
+                icon: "warning",
+                title: "Email de l'expéditeur invalide",
+                text: "Veuillez saisir une adresse email valide pour l'expéditeur.",
+                confirmButtonColor: "#f39c12"
+            });
+            return false;
+        }
+    } else {
         Swal.fire({
-            icon: "warning",
-            title: "Champs requis manquants",
-            html: `<ul style="text-align: left;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
-            confirmButtonColor: "#f39c12"
-        });
-        return false;
-    }
-
-    if (!isValidEmail(email)) {
-        Swal.fire({
-            icon: "warning",
-            title: "Email de l'expéditeur invalide",
-            text: "Veuillez saisir une adresse email valide pour l'expéditeur.",
-            confirmButtonColor: "#f39c12"
+            icon: "error",
+            title: "Erreur",
+            text: "Méthode de création non reconnue.",
+            confirmButtonColor: "#d33"
         });
         return false;
     }
@@ -297,26 +310,13 @@ function generateAIEmail() {
     const expediteur = document.getElementById("aiExpediteur").value;
     const email_expediteur = document.getElementById("aiEmailExpediteur").value;
 
-    const missingFields = [];
-    if (!scenario)           missingFields.push("Scénario");
-    if (!entreprise)         missingFields.push("Nom de l'entreprise");
-    if (!expediteur)         missingFields.push("Nom de l'expéditeur");
-    if (!email_expediteur)   missingFields.push("Email de l'expéditeur");
-    
-    if (missingFields.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champs requis manquants",
-            html: `
-                <p>Veuillez remplir les champs suivants :</p>
-                <ul style="text-align: left;">
-                    ${missingFields.map(f => `<li>${f}</li>`).join("")}
-                </ul>
-            `,
-            confirmButtonColor: "#f39c12"
-        });
-        return;
-    }
+    const isValidRequiredFields = validateRequiredFields([
+        [scenario, "Scénario"],
+        [entreprise, "Nom de l'entreprise"],
+        [expediteur, "Nom de l'expéditeur"],
+        [email_expediteur, "Email de l'expéditeur"]
+    ]);
+    if (!isValidRequiredFields) return;
 
     if (!isValidEmail(email_expediteur)) {
         Swal.fire({
@@ -411,9 +411,17 @@ function submitNewEmailTemplate() {
     if (document.getElementById("aiMethod").checked) {
         subject = document.getElementById("aiGeneratedSubject").value;
         text = document.getElementById("aiGeneratedContent").value;
-    } else {
+    } else if (document.getElementById("manualMethod").checked) {
         subject = document.getElementById("newEmailSubject").value;
         text = document.getElementById("newEmailText").value;
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: "Méthode de création non reconnue.",
+            confirmButtonColor: "#d33"
+        });
+        return false;
     }
 
     if (!validateEmailTemplateForm("newTemplateName", "newEmailSubject", "newEmailText")) {
@@ -467,21 +475,14 @@ function validateEditEmailTemplateForm() {
     const name = document.getElementById("editTemplateName").value.trim();
     const subject = document.getElementById("editEmailSubject").value.trim();
     const text = document.getElementById("editEmailText").value.trim();
-    const missingFields = [];
+    
+    const isValidRequiredFields = validateRequiredFields([
+        [name, "Nom du modèle"],
+        [subject, "Sujet Email"],
+        [text, "Contenu Email"]
+    ]);
 
-    if (!name) missingFields.push("Nom du modèle");
-    if (!subject) missingFields.push("Sujet");
-    if (!text) missingFields.push("Contenu");
-
-    if (missingFields.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champs requis manquants",
-            html: `<ul style="text-align: left;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
-            confirmButtonColor: "#f39c12"
-        });
-        return false;
-    }
+    if (!isValidRequiredFields) return;
 
     return true;
 }

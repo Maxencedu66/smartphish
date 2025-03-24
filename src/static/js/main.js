@@ -149,3 +149,24 @@ function isValidEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
+
+function validateRequiredFields(fieldMap) {
+    const missing = [];
+
+    for (const [value, label] of fieldMap) {
+        if (!value.trim()) {
+            missing.push(label);
+        }
+    }
+
+    if (missing.length > 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs requis manquants",
+            html: `<ul style="text-align: left;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
+            confirmButtonColor: "#f39c12"
+        });
+        return false;
+    }
+    return true;
+}
