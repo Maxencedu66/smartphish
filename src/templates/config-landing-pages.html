@@ -68,10 +68,12 @@
                 <!-- Code HTML de la landing page -->
                 <label for="newLandingPageHTML" class="form-label">HTML :</label>
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('newLandingPageHTML', 'previewNewPage')" type="button">Vue/Code</button>
+                    <!-- Le bouton bascule l'affichage entre le textarea et l'iframe de preview -->
+                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('newLandingPageHTML', 'previewNewPageFrame')" type="button">Vue/Code</button>
                 </div>
                 <textarea id="newLandingPageHTML" class="form-control" rows="5" required></textarea>
-                <div id="previewNewPage" class="border p-3 mt-2" style="display: none;"></div>
+                <!-- Utilisation d'un iframe pour isoler le rendu -->
+                <iframe id="previewNewPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
 
                 <!-- Options supplémentaires -->
                 <label class="form-label mt-2">Capture des données :</label>
@@ -100,6 +102,7 @@
     </div>
 </div>
 
+<!-- Le modal de modification reste inchangé -->
 <!-- ========== MODAL: MODIFIER UNE LANDING PAGE ========== -->
 <div class="modal fade" id="editLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
@@ -110,16 +113,14 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editLandingPageId">
-                
                 <label for="editLandingPageName" class="form-label">Nom :</label>
                 <input type="text" id="editLandingPageName" class="form-control mb-2" required>
-
                 <label for="editLandingPageHTML" class="form-label">HTML :</label>
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('editLandingPageHTML', 'previewEditPage')" type="button">Vue/Code</button>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('editLandingPageHTML', 'previewEditPageFrame')" type="button">Vue/Code</button>
                 </div>
                 <textarea id="editLandingPageHTML" class="form-control" rows="5" required></textarea>
-                <div id="previewEditPage" class="border p-3 mt-2" style="display: none;"></div>
+                <iframe id="previewEditPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                 
                 <!-- Options supplémentaires -->
                 <label class="form-label mt-2">Capture des données :</label>
@@ -129,7 +130,6 @@
                         Activer la capture des données
                     </label>
                 </div>
-
                 <label class="form-label mt-2">Capture des mots de passe :</label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="editCapturePasswords">
@@ -137,7 +137,6 @@
                         Capturer également les mots de passe
                     </label>
                 </div>
-
                 <label for="editRedirectUrl" class="form-label mt-2">URL de redirection :</label>
                 <input type="text" id="editRedirectUrl" class="form-control" placeholder="http://example.com">
             </div>
@@ -151,12 +150,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Charger les landing pages existantes
-    fetch('/config-landing-pages')
+    // Charger les landing pages via l'API
+    fetch('/api/gophish/landing_pages')
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById("landingPageTableBody");
-            tbody.innerHTML = ""; 
+            tbody.innerHTML = "";
             data.forEach(page => {
                 tbody.innerHTML += `
                     <tr data-id="${page.id}">
@@ -168,19 +167,81 @@ document.addEventListener("DOMContentLoaded", function() {
                     </tr>
                 `;
             });
+            assignEditEvents();
+            assignDeleteEvents();
         });
 });
 
-function togglePreview(textareaId, previewId) {
-    const textarea = document.getElementById(textareaId);
-    const preview = document.getElementById(previewId);
+function assignEditEvents() {
+    document.querySelectorAll(".edit-landing-page").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const pageId = this.getAttribute("data-id");
+            fetch(`/api/gophish/landing_pages/${pageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("editLandingPageId").value = data.id;
+                    document.getElementById("editLandingPageName").value = data.name;
+                    document.getElementById("editLandingPageHTML").value = data.html;
+                    document.getElementById("editCaptureCredentials").checked = data.capture_credentials;
+                    document.getElementById("editCapturePasswords").checked = data.capture_passwords;
+                    document.getElementById("editRedirectUrl").value = data.redirect_url || "";
+                })
+                .catch(err => console.error("Erreur lors du chargement de la page :", err));
+        });
+    });
+}
 
-    if (preview.style.display === "none") {
-        preview.innerHTML = textarea.value;
-        preview.style.display = "block";
+function assignDeleteEvents() {
+    document.querySelectorAll(".delete-landing-page").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const pageId = this.getAttribute("data-id");
+            Swal.fire({
+                title: "Supprimer cette page ?",
+                text: "Cette action est irréversible.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Oui, supprimer",
+                cancelButtonText: "Annuler",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/api/gophish/landing_pages/${pageId}`, { method: "DELETE" })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.error) {
+                                Swal.fire("Erreur", "Suppression impossible.", "error");
+                            } else {
+                                Swal.fire({
+                                    title: "Supprimée !",
+                                    text: "La page a été supprimée.",
+                                    icon: "success",
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => { location.reload(); });
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Erreur :", err);
+                            Swal.fire("Erreur", "Problème lors de la suppression.", "error");
+                        });
+                }
+            });
+        });
+    });
+}
+
+function togglePreview(textareaId, iframeId) {
+    const textarea = document.getElementById(textareaId);
+    const iframe = document.getElementById(iframeId);
+
+    if (iframe.style.display === "none") {
+        iframe.srcdoc = textarea.value;
+        iframe.style.display = "block";
         textarea.style.display = "none";
     } else {
-        preview.style.display = "none";
+        iframe.style.display = "none";
         textarea.style.display = "block";
     }
 }
@@ -212,7 +273,7 @@ function submitNewLandingPage() {
         redirect_url: document.getElementById("newRedirectUrl").value.trim() || null
     };
 
-    fetch("/config-landing-pages", {
+    fetch("/api/gophish/landing_pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -220,55 +281,17 @@ function submitNewLandingPage() {
     .then(res => res.json())
     .then(response => {
         if (response.error) {
-            Swal.fire({
-                icon: "error",
-                title: "Erreur lors de la création",
-                text: response.error,
-                confirmButtonColor: "#d33"
-            });
+            Swal.fire({ icon: "error", title: "Erreur", text: response.error, confirmButtonColor: "#d33" });
         } else {
-            Swal.fire({
-                icon: "success",
-                title: "Page créée avec succès !",
-                text: "Votre page de destination a été ajoutée.",
-                confirmButtonColor: "#28a745"
-            }).then(() => {
-                location.reload();
-            });
+            Swal.fire({ icon: "success", title: "Créée !", text: "La page a été ajoutée.", confirmButtonColor: "#28a745" })
+            .then(() => { location.reload(); });
         }
     })
     .catch(err => {
         console.error("Erreur:", err);
-        Swal.fire({
-            icon: "error",
-            title: "Erreur serveur",
-            text: "Une erreur s'est produite lors de la création de la page.",
-            confirmButtonColor: "#d33"
-        });
+        Swal.fire({ icon: "error", title: "Erreur serveur", text: "Une erreur s'est produite.", confirmButtonColor: "#d33" });
     });
 }
-
-// Chargement des données pour modification
-document.querySelectorAll(".edit-landing-page").forEach(btn => {
-    btn.addEventListener("click", function() {
-        const pageId = this.getAttribute("data-id");
-
-        fetch(`/config-landing-pages/${pageId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("editLandingPageId").value = data.id;
-                document.getElementById("editLandingPageName").value = data.name;
-                document.getElementById("editLandingPageHTML").value = data.html;
-                // Remplir également les options si elles sont définies
-                document.getElementById("editCaptureCredentials").checked = data.capture_credentials;
-                document.getElementById("editCapturePasswords").checked = data.capture_passwords;
-                document.getElementById("editRedirectUrl").value = data.redirect_url || "";
-            })
-            .catch(err => console.error("Erreur lors du chargement de la page de destination :", err));
-    });
-});
-
-
 
 // Modification d'une landing page
 function submitEditedLandingPage() {
@@ -284,7 +307,7 @@ function submitEditedLandingPage() {
         redirect_url: document.getElementById("editRedirectUrl").value.trim() || null
     };
 
-    fetch(`/config-landing-pages/${pageId}`, {
+    fetch(`/api/gophish/landing_pages/${pageId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -292,81 +315,32 @@ function submitEditedLandingPage() {
     .then(res => res.json())
     .then(response => {
         if (response.error) {
-            Swal.fire({
-                icon: "error",
-                title: "Erreur lors de la mise à jour",
-                text: response.error,
-                confirmButtonColor: "#d33"
-            });
+            Swal.fire({ icon: "error", title: "Erreur", text: response.error, confirmButtonColor: "#d33" });
         } else {
-            Swal.fire({
-                icon: "success",
-                title: "Mise à jour réussie !",
-                text: "Votre page de destination a été mise à jour.",
-                confirmButtonColor: "#28a745"
-            }).then(() => {
-                location.reload();
-            });
+            Swal.fire({ icon: "success", title: "Mise à jour réussie !", text: "La page a été modifiée.", confirmButtonColor: "#28a745" })
+            .then(() => { location.reload(); });
         }
     })
     .catch(err => {
         console.error("Erreur:", err);
-        Swal.fire({
-            icon: "error",
-            title: "Erreur serveur",
-            text: "Une erreur s'est produite lors de la mise à jour.",
-            confirmButtonColor: "#d33"
-        });
+        Swal.fire({ icon: "error", title: "Erreur serveur", text: "Une erreur s'est produite.", confirmButtonColor: "#d33" });
     });
 }
 
-
-// Suppression d'une landing page
-document.querySelectorAll(".delete-landing-page").forEach(btn => {
-    btn.addEventListener("click", function() {
-      const pageId = this.getAttribute("data-id");
-
-      Swal.fire({
-        title: "Supprimer cette page de destination ?",
-        text: "Cette action est irréversible. Êtes-vous sûr ?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#6c757d",
-        confirmButtonText: "Oui, supprimer",
-        cancelButtonText: "Annuler",
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          fetch(`/config-landing-pages/${pageId}`, { 
-            method: "DELETE"
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.error) {
-              Swal.fire("Erreur", "Impossible de supprimer cette page de destination.", "error");
-            } else {
-              Swal.fire({
-                title: "Supprimée !",
-                text: "La page de destination a été supprimée avec succès.",
-                icon: "success",
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                location.reload();
-              });
-            }
-          })
-          .catch(err => {
-            console.error("Erreur lors de la suppression de la page de destination :", err);
-            Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
-          });
-        }
-      });
-    });
+// Réinitialiser le formulaire lorsque le modal de création est fermé
+document.getElementById('newLandingPageModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById("newLandingPageName").value = "";
+    document.getElementById("newLandingPageHTML").value = "";
+    document.getElementById("newRedirectUrl").value = "";
+    document.getElementById("newCaptureCredentials").checked = true;
+    document.getElementById("newCapturePasswords").checked = false;
+    document.getElementById("importSiteURL").value = "";
+    document.getElementById("includeResources").checked = false;
+    // Réinitialiser l'affichage de l'aperçu
+    document.getElementById("previewNewPageFrame").style.display = "none";
+    document.getElementById("newLandingPageHTML").style.display = "block";
 });
 
-// Fonction pour importer un site et pré-remplir le formulaire de création
 function importSite() {
     const url = document.getElementById("importSiteURL").value.trim();
     const includeResources = document.getElementById("includeResources").checked;
@@ -400,8 +374,26 @@ function importSite() {
                 confirmButtonColor: "#d33"
             });
         } else {
-            // Remplir le textarea HTML avec le code récupéré
-            document.getElementById("newLandingPageHTML").value = response.html;
+            let finalHTML = response.html;
+            if (includeResources) {
+                // Si l'option d'inclusion des ressources est cochée,
+                // on ajuste le href de la balise <base> pour qu'il corresponde à l'URL importée.
+                //finalHTML = adjustBaseUrl(finalHTML, url);
+                // Vous pouvez éventuellement vérifier si le site est compatible en testant le contenu de la balise <base>
+                if (!finalHTML.includes(`href="${url}"`)) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erreur lors de l'import",
+                        text: "Ce site n'est pas compatible avec l'import des ressources.",
+                        confirmButtonColor: "#d33"
+                    });
+                    return;
+                }
+            } else {
+                // Si on n'inclut pas les ressources, on peut nettoyer le HTML en retirant la balise <base>.
+                finalHTML = finalHTML.replace(/<base[^>]*>/gi, '');
+            }
+            document.getElementById("newLandingPageHTML").value = finalHTML;
             Swal.fire({
                 icon: "success",
                 title: "Site importé avec succès !",
@@ -420,5 +412,6 @@ function importSite() {
         });
     });
 }
+
 </script>
 {% endblock %}

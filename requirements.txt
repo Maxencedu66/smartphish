@@ -5,3 +5,4 @@ Flask-Session
 bcrypt
 fpdf
 reportlab
+python-docx

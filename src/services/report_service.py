@@ -1,109 +1,116 @@
-from flask import send_file
-from io import BytesIO
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph, Frame, Spacer, BaseDocTemplate, PageTemplate
-from reportlab.lib.units import inch
-from src.routes.auth_routes import get_db_connection
+import subprocess
 import os
+import re
+from flask import send_file
+from datetime import datetime
+from pathlib import Path
+from docx import Document
+from docx.shared import Pt
+from io import BytesIO
+import ollama
+from src.config import Config
+from gophish import Gophish
+from src.lib.goreport import Goreport
+from src.services.llm_service import generate_ai_analysis
 
+def get_latest_goreport_docx(campaign_id):
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    candidates = sorted(Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"), key=os.path.getmtime, reverse=True)
+    return candidates[0] if candidates else None
+
+def generate_docx_with_goreport(campaign_id, force=False):
+    print(f"🚀 Génération GoReport pour la campagne {campaign_id}")
+
+    # Dossier de stockage des rapports
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    reports_path = Path(reports_dir)
+    pattern = f"rapport_campagne_{campaign_id}_*.docx"
+
+    # Si force est True, supprimer les anciens rapports pour cette campagne
+    if force:
+        for f in reports_path.glob(pattern):
+            try:
+                os.remove(f)
+                print(f"🗑 Suppression de l'ancien rapport : {f}")
+            except Exception as e:
+                print("Erreur lors de la suppression :", e)
+
+    # Lancement de GoReport pour générer le rapport de base
+    result = subprocess.run(
+        ["python3", "GoReport.py", "--id", str(campaign_id), "--format", "word"],
+        cwd=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "services")),
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        print("❌ GoReport Error:", result.stderr)
+        raise RuntimeError("Erreur GoReport : " + result.stderr)
+
+    print("✅ GoReport exécuté avec succès")
+
+    # Récupérer le dernier fichier généré
+    latest_file = None
+    for f in sorted(reports_path.glob(pattern), key=os.path.getmtime, reverse=True):
+        latest_file = f
+        break
+
+    if not latest_file:
+        raise FileNotFoundError("Aucun fichier DOCX généré par GoReport")
+
+    print(f"📄 Rapport trouvé : {latest_file}")
+
+    # Génération du texte d'analyse via l'IA
+    ai_text = generate_ai_analysis(campaign_id)
+    # Ouvrir le document généré pour y ajouter le rapport d'analyse
+    document = Document(str(latest_file))
+    document.add_page_break()
+    document.add_heading("Analyse de la campagne", level=1)
+    # Découper le texte généré en sections
+    sections = split_ai_text_into_sections(ai_text)
+    for title, content in sections:
+        document.add_heading(title, level=2)
+        p = document.add_paragraph(content)
+        p.style.font.size = Pt(11)
+    
+    # Sauvegarder le document final
+    document.save(str(latest_file))
+    
+    # Retourner le fichier final
+    return send_file(
+        str(latest_file),
+        as_attachment=True,
+        download_name=latest_file.name,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+def split_ai_text_into_sections(text):
+    """
+    Découpe le texte généré par l'IA en sections en utilisant un pattern sur les titres (ex : "1. Analyse des résultats généraux:")
+    """
+    pattern = re.compile(r'(\d+\.\s*[^:]+:)')
+    parts = pattern.split(text)
+    sections = []
+    # Si le premier élément est vide, on commence à l'index 1
+    start = 1 if parts and parts[0].strip() == "" else 0
+    for i in range(start, len(parts) - 1, 2):
+        heading = parts[i].strip()
+        content = parts[i+1].strip()
+        sections.append((heading, content))
+    # Si le découpage ne fonctionne pas (texte non structuré), on renvoie le texte complet sous un seul titre
+    if not sections:
+        sections.append(("Analyse complète", text))
+    return sections
 
 def download_report_styled(campaign_id):
-    conn = get_db_connection()
-    row = conn.execute("SELECT content FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-    conn.close()
-
-    if not row:
+    reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
+    candidates = sorted(Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"), key=os.path.getmtime, reverse=True)
+    latest_file = candidates[0] if candidates else None
+    if not latest_file:
         return "Rapport introuvable", 404
-
-    content = row["content"]
-    lines = content.split("\n")
-
-    # Préparer le PDF
-    buffer = BytesIO()
-    width, height = A4
-    margin = 50
-
-    # Styles
-    styles = getSampleStyleSheet()
-
-    normal_style = ParagraphStyle(
-        name="Normal",
-        parent=styles["Normal"],
-        fontName="Helvetica",
-        fontSize=11,
-        leading=16,
-        spaceBefore=4
+    return send_file(
+        str(latest_file),
+        as_attachment=True,
+        download_name=latest_file.name,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-
-    section_title_style = ParagraphStyle(
-        name="SectionTitle",
-        parent=styles["Heading2"],
-        fontName="Helvetica-Bold",
-        fontSize=14,
-        leading=20,
-        textColor=colors.darkblue,
-        spaceBefore=12,
-        spaceAfter=6,
-    )
-
-    # Construction du contenu
-    story = []
-
-    # Ajout du logo et du titre sur chaque page
-    def header_footer(canvas, doc):
-        # Logo
-        logo_path = "./src/static/img/logo.png"
-        if os.path.exists(logo_path):
-            logo = ImageReader(logo_path)
-            canvas.drawImage(logo, margin, height - 70, width=80, preserveAspectRatio=True, mask='auto')
-
-        # Titre centré
-        canvas.setFont("Helvetica-Bold", 16)
-        canvas.drawCentredString(width / 2, height - 50, "📄 Rapport de Campagne - SmartPhish")
-
-        # Ligne de séparation
-        canvas.setStrokeColor(colors.grey)
-        canvas.setLineWidth(1)
-        canvas.line(margin, height - 80, width - margin, height - 80)
-
-        # Pied de page
-        canvas.setFont("Helvetica", 9)
-        canvas.setFillColor(colors.grey)
-        canvas.drawRightString(width - margin, 20, f"Page {doc.page}")
-
-    # Traitement des lignes
-    for line in lines:
-        line = line.strip()
-        if not line:
-            story.append(Spacer(1, 10))
-            continue
-        if line.lower().startswith("résultats") or \
-           line.lower().startswith("analyse") or \
-           line.lower().startswith("recommandations") or \
-           line.lower().startswith("conclusion") or \
-           line.lower().startswith("introduction"):
-            story.append(Paragraph(line, section_title_style))
-        else:
-            story.append(Paragraph(line, normal_style))
-
-    # Document
-    doc = BaseDocTemplate(buffer, pagesize=A4,
-                          leftMargin=margin, rightMargin=margin,
-                          topMargin=120, bottomMargin=40)
-
-    frame = Frame(doc.leftMargin, doc.bottomMargin,
-                  doc.width, doc.height, id='normal')
-
-    doc.addPageTemplates([PageTemplate(id='SmartPhish', frames=frame, onPage=header_footer)])
-
-    # Génère le PDF
-    doc.build(story)
-    buffer.seek(0)
-
-    return send_file(buffer, as_attachment=True,
-                     download_name=f"rapport_campagne_{campaign_id}.pdf",
-                     mimetype="application/pdf")

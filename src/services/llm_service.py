@@ -3,6 +3,10 @@ from ollama import ListResponse, ProcessResponse
 from pydantic import BaseModel
 from src.routes.auth_routes import get_db_connection
 from datetime import datetime
+from src.lib.goreport import Goreport
+from gophish import Gophish
+from src.config import Config
+
 
 class EmailInfo(BaseModel):
   objet_mail: str
@@ -147,53 +151,58 @@ def get_ollama_status():
     return info_dicts
 
 
-def generate_and_save_report_to_db(campaign_data, scenario):
-    prompt = f"""
-Tu es un expert en cybersécurité. Rédige un rapport professionnel de sensibilisation structuré selon les sections suivantes :
+def generate_ai_analysis(campaign_id):
+    """
+    Génère les 4 sections d'analyse (générale, détaillée, recommandations, conclusion) en se basant sur les stats de la campagne.
+    Cette fonction s'inspire de la logique de generate_and_save_report_to_db sans sauvegarder en BDD.
+    """
+    # Instancier et configurer GoReport pour récupérer les infos de la campagne
+    goreport = Goreport(report_format="word", config_file=None, google=False, verbose=False)
+    goreport.api = Gophish(Config.GOPHISH_API_KEY, host=Config.GOPHISH_API_URL, verify=False)
+    # Récupération des données de campagne
+    campaign_data = goreport.api.campaigns.get(campaign_id=campaign_id)
+    goreport.campaign = campaign_data
+    goreport.collect_all_campaign_info(combine_reports=False)
+    goreport.process_timeline_events(combine_reports=False)
+    goreport.process_results(combine_reports=False)
 
-1. Introduction : Résume les objectifs de la campagne de phishing.
-2. Résultats : Présente les statistiques suivantes :
-   - Nom de la campagne : {campaign_data['name']}
-   - Date : {campaign_data['created_date']}
-   - Scénario utilisé : {scenario}
-   - Nombre de destinataires : {len(campaign_data['results'])}
-   - Emails ouverts : {sum(1 for r in campaign_data['results'] if r['status'] == 'Opened')}
-   - Clics sur les liens : {sum(1 for r in campaign_data['results'] if r['status'] == 'Clicked')}
-   - Données soumises : {sum(1 for r in campaign_data['results'] if r['status'] == 'Submitted Data')}
-3. Analyse des erreurs humaines : Explique les comportements à risque observés.
-4. Recommandations : Donne 3 conseils concrets pour éviter ce type d'erreur.
-5. Conclusion : Message de sensibilisation pour inciter à la vigilance.
+    # Extraction des statistiques
+    opened = goreport.total_unique_opened
+    clicked = goreport.total_unique_clicked
+    submitted = goreport.total_unique_submitted
+    reported = goreport.total_unique_reported
+    total = goreport.total_targets
+    cam_name = goreport.cam_name
+    cam_date = goreport.launch_date.split("T")[0] if goreport.launch_date else "inconnue"
 
-Formate ce rapport pour qu’il soit lisible ligne par ligne (sans balise HTML ni LaTeX ni markdown) en respectant les titres de sections en majuscule ou démarqués.
 
-Langue : Français uniquement.
-Rend cela lisible que ce soit pour les dates, l'heure de création du rapport etc... On ne doit pas deviner que c'est une IA qui a écrit le rapport.
+    # Construction du prompt pour l'IA
+    prompt = f"""Tu es un expert en cybersécurité. Rédige les 4 sections suivantes en te basant sur les résultats réels de la campagne de phishing suivante :
+
+- Nom de la campagne : {cam_name}
+- Date : {cam_date}
+
+- Nombre de destinataires : {total}
+- Emails ouverts : {opened}
+- Clics sur les liens : {clicked}
+- Données soumises : {submitted}
+- Emails signalés : {reported}
+
+1. Analyse des résultats généraux : Donne un résumé clair de l'efficacité de la campagne et des statistiques observées.
+2. Analyse détaillée : Donne une analyse plus poussée des comportements à risque, navigateurs/OS, géolocalisations, etc.
+3. Recommandations : 3 conseils précis pour mieux se protéger.
+4. Conclusion : Message final de sensibilisation.
+
+⚠️ Règles :
+- Pas de format Markdown, HTML ou balises.
+- Texte professionnel, clair et en français uniquement.
+- Bien structuré avec des titres reconnaissables.
+
+Rends le texte fluide, facile à lire, et professionnel.
 """
-
+    # Appel à l'IA via Ollama (ici modèle "mistral")
     response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
     texte = response.message.content.strip()
-
-    conn = get_db_connection()
-    campaign_id = campaign_data["id"]
-    timestamp = datetime.utcnow().isoformat()
-
-    # Vérifie si un rapport existe déjà
-    existing = conn.execute("SELECT id FROM reports WHERE campaign_id = ?", (campaign_id,)).fetchone()
-
-    if existing:
-        # 🔁 Met à jour l'entrée existante
-        conn.execute(
-            "UPDATE reports SET content = ?, updated_at = ? WHERE campaign_id = ?",
-            (texte, timestamp, campaign_id)
-        )
-    else:
-        # ➕ Sinon insère une nouvelle entrée
-        conn.execute(
-            "INSERT INTO reports (campaign_id, content, created_at) VALUES (?, ?, ?)",
-            (campaign_id, texte, timestamp)
-        )
-
-    conn.commit()
-    conn.close()
-
     return texte
+
+

@@ -7,18 +7,14 @@
    - `Landing pages`
 
 Landing page: 
-   - Gérer la capture des données de la landing page
-   - Corriger bug affichage de la page google.com avec les balise base
-   - Néttoyer la page si on la quitte, car elleconserve les infos de la petite fenetre
-   - adapter la tialle de la fenetre avec le code html.
+   - (didou) adapter la taille de la fenetre avec le code html et l'affichage en général.
    - Gérer l'URL de redirection
-   - Gérer l'importation d'une page à partir de son URL
    - Dans la page de création de campagne, ajouter la possibilité de choisir une landing page existante ou de ne pas en chosir
 
 URL de phishing :
-   - Voir à quoi ca sert
+   - Permet de renseigner l'url de phishing pour la landing page, voir comment elle foncitonne, si on peut la modifier pour chaque campagne
    - Retirer l'obligation de s'en servir dans la création de campagne.
-   - la rendre fonctionnelle
+   - la rendre fonctionnelle autre qu'en local
 
 
 
@@ -33,5 +29,11 @@ ca n'a pas de sens notre système de compte qui permet d'accéder à toute la BD
    - (optionnel) Faire un système de gestion de droits d'accès pour les utilisateurs, avec un système de rôles (admin, user, etc) et de permissions (lecture, écriture, etc)
 
 
+Affichage et suivi des campagne:
+   - Le suivi des camapgne ne fonctionne pas, pour la camapgne test perso mail 3, tu devrais avoir un lien cliqué normalement
+   - Il faut afficher le suivi des events tu peux voir su gophish le détail des event par rapport à une personne de la campagne, normalement pour moi ca a changé
+
 IA et Landing page:
+   - (didou) adapter la taille de la fenetre avec le code html et l'affichage en général.
    - Il faudrait pouvoir réussir à fiare générer les landing page par L'IA, c'est un truc plus compliqué à faire sans connaissance pour les utilisateur, donc plus utiles meme que la génération du mail. En plus on pourrait bien faire notre prompt pour qu'il sache quoi mettre dedans.
+   -
