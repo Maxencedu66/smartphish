@@ -65,6 +65,7 @@ def generate_prompt(user_data):
         - **Ton** : Enthousiaste et exclusif mais professionel et formel.
         - **Signature** : {user_data['expéditeur']}.
         - **Destinataire** : Inconnu.
+        - **Entreprise** : '{user_data['entreprise']}'.
         - **Langue** : Français.
 
         Exemple : 
@@ -112,7 +113,7 @@ def generate_phishing_email(user_data):
         # Strip the email content
         lines = response_obj.contenu_mail.split("\n")
         response_obj.contenu_mail = "\n".join([line.strip() for line in lines])
-        valid = '[' not in response_obj.contenu_mail and len(lines) > 1 and 'Dear ' not in response_obj.contenu_mail
+        valid = '[dest' not in response_obj.contenu_mail.lower() and len(lines) > 1 and 'Dear ' not in response_obj.contenu_mail
         
         if not valid:
             print("Email not valid, retrying...")
