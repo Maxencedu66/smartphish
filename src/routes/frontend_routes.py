@@ -156,8 +156,8 @@ def llm_settings():
 def set_model_frontend():
     data = request.json
     model_name = data.get("model")
-    set_used_model(model_name)
-    return jsonify({"result": "OK", "message": f"Modèle '{model_name}' défini."})
+    need_pull = set_used_model(model_name)
+    return jsonify({"result": "OK", "need_pull": need_pull})
 
 @bp.route('/maj-status')
 def maj_status():
