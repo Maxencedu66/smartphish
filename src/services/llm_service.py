@@ -326,17 +326,25 @@ def generate_ai_analysis(campaign_id):
 - Données soumises : {submitted}
 - Emails signalés : {reported}
 
-1. Analyse des résultats généraux : Donne un résumé clair de l'efficacité de la campagne et des statistiques observées.
-2. Analyse détaillée : Donne une analyse plus poussée des comportements à risque, navigateurs/OS, géolocalisations, etc.
-3. Recommandations : 3 conseils précis pour mieux se protéger.
-4. Conclusion : Message final de sensibilisation.
+1. Analyse des résultats généraux : Résume l'efficacité de la campagne et les statistiques.
+2. Analyse détaillée : Analyse les comportements à risque, navigateurs/OS utilisés, géolocalisations, etc.
+3. Recommandations : Donné 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing
+4. Conclusion : Message final de sensibilisation, synthétique et professionnel.
 
-⚠️ Règles :
-- Pas de format Markdown, HTML ou balises.
-- Texte professionnel, clair et en français uniquement.
-- Bien structuré avec des titres reconnaissables.
+⚠️ Contraintes :
+- Pas de Markdown, balises HTML ni caractères spéciaux (**, #, etc.).
+- Texte clair, professionnel, structuré et en français uniquement.
+- Utilise une mise en page lisible avec des titres bien visibles (ex : Titre sur une ligne seule, saut de ligne avant/après).
+- Recommandations sous forme de liste numérotée, avec un saut de ligne entre chaque point.
 
-Rends le texte fluide, facile à lire, et professionnel.
+Exemple pour les recommandations :
+1. TITRE DE LA RECOMMANDATION
+   Explication...
+
+2. TITRE DE LA RECOMMANDATION
+   Explication...
+
+Rends le texte fluide, aéré et facile à lire pour une insertion directe dans un document Word.
 """
     # Récupération du modèle utilisé
     used_model = get_used_model()

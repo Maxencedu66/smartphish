@@ -84,30 +84,74 @@ def generate_docx_with_goreport(campaign_id, force=False):
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
+
 def split_ai_text_into_sections(text):
     """
-    Découpe le texte généré par l'IA en sections en utilisant un pattern sur les titres (ex : "1. Analyse des résultats généraux:")
+    Découpe un texte généré par IA en sections reconnaissables, même si le format est imparfait.
+    Nettoie le texte des caractères * typiques du markdown.
+    Reconnaît les titres avec ou sans mise en forme Markdown.
+    Retourne une liste de tuples (titre, contenu).
     """
-    pattern = re.compile(r'(\d+\.\s*[^:]+:)')
-    parts = pattern.split(text)
+
+    # 🔹 Nettoyage du markdown : suppression de toutes les étoiles (ex : **titre**, *italique*)
+    text = re.sub(r'\*+', '', text)
+
+    # Titres attendus (forme normalisée)
+    TITRE_SECTIONS = {
+        "analyse des résultats généraux": "Analyse des résultats généraux",
+        "analyse détaillée": "Analyse détaillée",
+        "recommandations": "Recommandations",
+        "conclusion": "Conclusion"
+    }
+
+    # 🔹 Pattern pour détecter un titre clair en début de ligne (après nettoyage)
+    pattern = re.compile(r'^\s*(Analyse des résultats généraux|Analyse détaillée|Recommandations|Conclusion)\s*$',
+                         re.IGNORECASE | re.MULTILINE)
+
+    matches = list(pattern.finditer(text))
     sections = []
-    # Si le premier élément est vide, on commence à l'index 1
-    start = 1 if parts and parts[0].strip() == "" else 0
-    for i in range(start, len(parts) - 1, 2):
-        heading = parts[i].strip()
-        content = parts[i+1].strip()
-        sections.append((heading, content))
-    # Si le découpage ne fonctionne pas (texte non structuré), on renvoie le texte complet sous un seul titre
-    if not sections:
-        sections.append(("Analyse complète", text))
+
+    if not matches:
+        return [("Analyse complète", text.strip())]
+
+    for i, match in enumerate(matches):
+        titre_brut = match.group(1).strip().lower()
+        titre_normalisé = TITRE_SECTIONS.get(titre_brut, titre_brut.title())
+        start = match.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        contenu = text[start:end].strip()
+        if contenu:
+            sections.append((titre_normalisé, contenu))
+
+    # 🔹 Ajouter les sections manquantes si besoin
+    titres_extraits = [t for t, _ in sections]
+    for titre_attendu in TITRE_SECTIONS.values():
+        if titre_attendu not in titres_extraits:
+            sections.append((titre_attendu, ""))
+
     return sections
 
+
+
 def download_report_styled(campaign_id):
+    """
+    Cherche le dernier rapport Word généré pour une campagne donnée et le renvoie en téléchargement.
+    """
+    # Répertoire contenant les rapports générés
     reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
-    candidates = sorted(Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"), key=os.path.getmtime, reverse=True)
+
+    # Récupérer les rapports triés par date (du plus récent au plus ancien)
+    candidates = sorted(
+        Path(reports_dir).glob(f"rapport_campagne_{campaign_id}_*.docx"),
+        key=os.path.getmtime,
+        reverse=True
+    )
+
     latest_file = candidates[0] if candidates else None
     if not latest_file:
         return "Rapport introuvable", 404
+
+    # Envoyer le fichier en téléchargement
     return send_file(
         str(latest_file),
         as_attachment=True,
