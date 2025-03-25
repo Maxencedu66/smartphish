@@ -358,7 +358,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     document.getElementById("editTemplateId").value = data.id;
                     document.getElementById("editTemplateName").value = data.name;
                     document.getElementById("editEmailSubject").value = data.subject;
-                    document.getElementById("editEmailText").value = data.text || "";
+
+                    const isHtml = data.text && data.text.includes("<") && data.text.includes(">");
+
+                    if (isHtml) {
+                        document.getElementById("editHtmlFormat").checked = true;
+                        document.getElementById("editTextEditor").style.display = "none";
+                        document.getElementById("editHtmlEditor").style.display = "block";
+                        editQuill.root.innerHTML = data.text;
+                    } else {
+                        document.getElementById("editTextFormat").checked = true;
+                        document.getElementById("editTextEditor").style.display = "block";
+                        document.getElementById("editHtmlEditor").style.display = "none";
+                        document.getElementById("editEmailText").value = data.text || "";
+                    }
                 })
                 .catch(err => console.error("Erreur lors du chargement du modèle :", err));
         });
