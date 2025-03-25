@@ -30,8 +30,8 @@
                 <td>{{ template.name }}</td>
                 <td>{{ template.subject }}</td>
                 <td class="text-end">
-                    <button class="btn btn-primary btn-sm edit-template" data-id="{{ template.id }}" data-bs-toggle="modal" data-bs-target="#editEmailTemplateModal">✏️ Modifier</button>
-                    <button class="btn btn-danger btn-sm delete-template" data-id="{{ template.id }}">🗑️ Supprimer</button>
+                    <button class="btn btn-primary btn-sm edit-template" data-id="{{ template.id }}" data-bs-toggle="modal" data-bs-target="#editEmailTemplateModal">Modifier</button>
+                    <button class="btn btn-danger btn-sm delete-template" data-id="{{ template.id }}">Supprimer</button>
                 </td>
             </tr>
             {% endfor %}
@@ -50,11 +50,11 @@
             <div class="modal-body">
                 <form id="newEmailTemplateForm">
                     <div class="mb-3">
-                        <label for="newTemplateName" class="form-label">Nom :</label>
-                        <input type="text" id="newTemplateName" class="form-control" required>
+                        <label for="newTemplateName" class="form-label"><strong>Nom :</strong></label>
+                        <input type="text" id="newTemplateName" placeholder="Indiquez un nom pour ce modèle..." class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Méthode de création :</label>
+                        <label class="form-label"><strong>Méthode de création :</strong></label>
                         <div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="creationMethod" id="manualMethod" value="manual" checked>
@@ -69,12 +69,12 @@
                     <!-- Champs pour saisie manuelle -->
                     <div id="manualFields">
                         <div class="mb-3">
-                            <label for="newEmailSubject" class="form-label">Sujet :</label>
-                            <input type="text" id="newEmailSubject" class="form-control" required>
+                            <label for="newEmailSubject" class="form-label"><strong>Sujet :</strong></label>
+                            <input type="text" id="newEmailSubject" placeholder="Sujet de l’e-mail" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Format :</label>
+                            <label class="form-label"><strong>Format :</strong></label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="emailFormat" id="textFormat" value="text" checked>
                                 <label class="form-check-label" for="textFormat">Texte</label>
@@ -86,12 +86,12 @@
                         </div>
                         
                         <div class="mb-3" id="textEditor">
-                            <label for="newEmailText" class="form-label">Contenu :</label>
-                            <textarea id="newEmailText" class="form-control" rows="5" required></textarea>
+                            <label for="newEmailText" class="form-label"><strong>Contenu :</strong></label>
+                            <textarea id="newEmailText" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
                         </div>
                         
                         <div class="mb-3" id="htmlEditor" style="display:none;">
-                            <label for="newEmailHtml" class="form-label">Contenu HTML :</label>
+                            <label for="newEmailHtml" class="form-label"><strong>Contenu HTML :</strong></label>
                             <div id="quillEditor" style="height: 250px;"></div>
                             <input type="hidden" id="newEmailHtml">
 
@@ -100,7 +100,7 @@
                     <!-- Champs pour génération par IA -->
                     <div id="aiFields" style="display:none;">
                         <div class="mb-3">
-                            <label for="aiScenario" class="form-label">Choisissez un scénario :</label>
+                            <label for="aiScenario" class="form-label"><strong>Choisissez un scénario :</strong></label>
                             <select id="aiScenario" class="form-select">
                                 <option value="">-- Sélectionnez --</option>
                                 <option value="Départ à la retraite">Départ à la retraite</option>
@@ -115,16 +115,16 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="aiEntreprise" class="form-label">Nom de l'entreprise :</label>
-                            <input type="text" id="aiEntreprise" class="form-control">
+                            <label for="aiEntreprise" class="form-label"><strong>Nom de l'entreprise :</strong></label>
+                            <input type="text" id="aiEntreprise" placeholder="Indiquez le nom de votre entreprise..." class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="aiExpediteur" class="form-label">Nom de l'expéditeur :</label>
-                            <input type="text" id="aiExpediteur" class="form-control">
+                            <label for="aiExpediteur" class="form-label"><strong>Nom de l'expéditeur :</strong></label>
+                            <input type="text" id="aiExpediteur" placeholder="Entrez le nom de l’expéditeur..." class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="aiEmailExpediteur" class="form-label">Email expéditeur :</label>
-                            <input type="email" id="aiEmailExpediteur" class="form-control">
+                            <label for="aiEmailExpediteur" class="form-label"><strong>Email expéditeur :</strong></label>
+                            <input type="email" id="aiEmailExpediteur" placeholder="Entrez l’adresse e-mail de l’expéditeur..." class="form-control">
                         </div>
                         <div class="mb-3">
                             <button type="button" class="btn btn-primary" onclick="generateAIEmail()">Générer l'email par IA</button>
@@ -137,14 +137,14 @@
                         </div>
                         <!-- Résultat de l'IA avec bouton Régénérer -->
                         <div id="aiResult" style="display:none;">
-                            <h5>Email généré</h5>
+                            <h5><strong>Email généré</strong></h5>
                             <div class="mb-3">
-                                <label for="aiGeneratedSubject" class="form-label">Sujet généré :</label>
-                                <input type="text" id="aiGeneratedSubject" class="form-control" required>
+                                <label for="aiGeneratedSubject" class="form-label"><strong>Sujet généré :</strong></label>
+                                <input type="text" id="aiGeneratedSubject" placeholder="Sujet généré par l'IA" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="aiGeneratedContent" class="form-label">Contenu généré :</label>
-                                <textarea id="aiGeneratedContent" class="form-control" required></textarea>
+                                <label for="aiGeneratedContent" class="form-label"><strong>Contenu généré :</strong></label>
+                                <textarea id="aiGeneratedContent" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" required></textarea>
                             </div>
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-warning" onclick="generateAIEmail()">Régénérer</button>
@@ -171,16 +171,16 @@
             <div class="modal-body">
                 <input type="hidden" id="editTemplateId">
                 <div class="mb-3">
-                    <label for="editTemplateName" class="form-label">Nom :</label>
-                    <input type="text" id="editTemplateName" class="form-control" required>
+                    <label for="editTemplateName" class="form-label"><strong>Nom :</strong></label>
+                    <input type="text" id="editTemplateName" placeholder="Indiquez un nom pour ce modèle..." class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label for="editEmailSubject" class="form-label">Sujet :</label>
-                    <input type="text" id="editEmailSubject" class="form-control" required>
+                    <label for="editEmailSubject" class="form-label"><strong>Sujet :</strong></label>
+                    <input type="text" id="editEmailSubject" placeholder="Sujet de l'e-mail" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Format :</label>
+                    <label class="form-label"><strong>Format :</strong></label>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="editEmailFormat" id="editTextFormat" value="text" checked>
                         <label class="form-check-label" for="editTextFormat">Texte</label>
@@ -194,13 +194,13 @@
 
                 <!-- Texte brut -->
                 <div class="mb-3" id="editTextEditor">
-                    <label for="editEmailText" class="form-label">Contenu :</label>
-                    <textarea id="editEmailText" class="form-control" rows="5"></textarea>
+                    <label for="editEmailText" class="form-label"><strong>Contenu :</strong></label>
+                    <textarea id="editEmailText" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5"></textarea>
                 </div>
 
                 <!-- HTML avec Quill -->
                 <div class="mb-3" id="editHtmlEditor" style="display: none;">
-                    <label for="editEmailHtml" class="form-label">Contenu HTML :</label>
+                    <label for="editEmailHtml" class="form-label"><strong>Contenu HTML :</strong></label>
                     <div id="editQuillEditor" style="height: 250px;"></div>
                 </div>
 

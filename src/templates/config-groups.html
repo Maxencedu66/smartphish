@@ -51,12 +51,12 @@
                       data-id="{{ group.id }}"
                       data-bs-toggle="modal" 
                       data-bs-target="#editGroupModal">
-                ✏️ Modifier
+                Modifier
               </button>
     
               <!-- Delete Button -->
               <button class="btn btn-danger btn-sm delete-group" data-id="{{ group.id }} ">
-                🗑️ Supprimer
+                Supprimer
               </button>
             </td>
           </tr>
@@ -76,8 +76,8 @@
           <div class="modal-body">
             <form id="newGroupForm">
               <div class="mb-3">
-                <label for="newGroupName" class="form-label">Nom du Groupe:</label>
-                <input type="text" id="newGroupName" class="form-control" required>
+                <label for="newGroupName" class="form-label"><strong>Nom du Groupe:</strong></label>
+                <input type="text" id="newGroupName" placeholder="Indiquez un nom pour ce groupe..." class="form-control" required>
               </div>
               <h6>Membres</h6>
               <div id="newGroupMembers" class="mb-2"></div>
@@ -107,8 +107,8 @@
             <form id="editGroupForm">
               <input type="hidden" id="editGroupId" value="">
               <div class="mb-3">
-                <label for="editGroupName" class="form-label">Nom du Groupe:</label>
-                <input type="text" id="editGroupName" class="form-control" required>
+                <label for="editGroupName" class="form-label"><strong>Nom du Groupe:</strong></label>
+                <input type="text" id="editGroupName" placeholder="Indiquez un nom pour ce groupe..." class="form-control" required>
               </div>
               <h6>Membres</h6>
               <div id="editGroupMembers" class="mb-2"></div>
@@ -139,16 +139,6 @@
           const name = document.getElementById(formId).value.trim();
           const memberRows = document.querySelectorAll(`#${membersContainerId} .member-row`);
 
-          if (!name) {
-              Swal.fire({
-                  icon: "warning",
-                  title: "Champ requis !",
-                  text: "Veuillez entrer un nom pour le groupe.",
-                  confirmButtonColor: "#f39c12"
-              });
-              return false;
-          }
-
           if (memberRows.length === 0) {
               Swal.fire({
                   icon: "warning",
@@ -158,6 +148,11 @@
               });
               return false;
           }
+
+          const isValidRequiredFields = validateRequiredFields([
+            [name, "Nom du Groupe"],
+          ]);
+          if (!isValidRequiredFields) return;
 
           for (let i = 0; i < memberRows.length; i++) {
               const row = memberRows[i];
@@ -259,7 +254,7 @@
           <input type="text" name="first_name[]" placeholder="Prénom" class="form-control">
           <input type="text" name="last_name[]" placeholder="Nom" class="form-control">
           <input type="text" name="position[]" placeholder="Position" class="form-control">
-          <button type="button" class="btn btn-danger btn-sm remove-member">❌</button>
+          <button type="button" class="btn btn-sm remove-member">❌</button>
         `;
         container.appendChild(row);
         row.querySelector(".remove-member").addEventListener("click", function() {
@@ -368,10 +363,10 @@
                   row.innerHTML = `
                     <span class="fw-bold" style="width: 20px;">${memberCount}.</span>
                     <input type="email" name="email[]" class="form-control" value="${t.email}" required>
-                    <input type="text" name="first_name[]" class="form-control" value="${t.first_name || ''}">
-                    <input type="text" name="last_name[]" class="form-control" value="${t.last_name || ''}">
-                    <input type="text" name="position[]" class="form-control" value="${t.position || ''}">
-                    <button type="button" class="btn btn-danger btn-sm remove-member">❌</button>
+                    <input type="text" name="first_name[]" class="form-control" placeholder="Nom" value="${t.first_name || ''}">
+                    <input type="text" name="last_name[]" class="form-control" placeholder="Prénom" value="${t.last_name || ''}">
+                    <input type="text" name="position[]" class="form-control" placeholder="Position" value="${t.position || ''}">
+                    <button type="button" class="btn btn-sm remove-member">❌</button>
                   `;
                   container.appendChild(row);
                   // Bouton remove

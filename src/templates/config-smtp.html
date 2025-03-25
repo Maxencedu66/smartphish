@@ -52,11 +52,11 @@
                   data-id="{{ profile.id }}"
                   data-bs-toggle="modal" 
                   data-bs-target="#editSmtpModal">
-            ✏️ Modifier
+            Modifier
           </button>
 
           <button class="btn btn-danger btn-sm delete-smtp" data-id="{{ profile.id }}">
-            🗑️ Supprimer
+            Supprimer
           </button>
         </td>
       </tr>
@@ -76,24 +76,24 @@
       <div class="modal-body">
         <form id="newSmtpForm">
           <div class="mb-3">
-            <label for="newSmtpName" class="form-label">Nom du Profil:</label>
-            <input type="text" id="newSmtpName" class="form-control" required>
+            <label for="newSmtpName" class="form-label"><strong>Nom du Profil:</strong></label>
+            <input type="text" id="newSmtpName" placeholder="Donnez un nom à ce profil d’envoi..." class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpHost" class="form-label">Hôte SMTP:</label>
-            <input type="text" id="newSmtpHost" class="form-control" required>
+            <label for="newSmtpHost" class="form-label"><strong>Hôte SMTP:</strong></label>
+            <input type="text" id="newSmtpHost" placeholder="Ex : smtp.mailprovider.com" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpFromAddress" class="form-label">Adresse Mail Source:</label>
-            <input type="email" id="newSmtpFromAddress" class="form-control" required>
+            <label for="newSmtpFromAddress" class="form-label"><strong>Adresse Mail Source:</strong></label>
+            <input type="email" id="newSmtpFromAddress" placeholder="Ex : contact@votresite.fr" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="newSmtpUsername" class="form-label">Pseudonyme:</label>
-            <input type="text" id="newSmtpUsername" class="form-control">
+            <label for="newSmtpUsername" class="form-label"><strong>Pseudonyme:</strong></label>
+            <input type="text" id="newSmtpUsername" placeholder="Pseudo" class="form-control">
           </div>
           <div class="mb-3">
-            <label for="newSmtpPassword" class="form-label">Mot de passe:</label>
-            <input type="password" id="newSmtpPassword" class="form-control">
+            <label for="newSmtpPassword" class="form-label"><strong>Mot de passe:</strong></label>
+            <input type="password" id="newSmtpPassword" placeholder="********" class="form-control">
           </div>
           <div class="mb-3">
             <label>
@@ -122,16 +122,16 @@
         <form id="editSmtpForm">
           <input type="hidden" id="editSmtpId">
           <div class="mb-3">
-            <label for="editSmtpName" class="form-label">Nom du Profil:</label>
-            <input type="text" id="editSmtpName" class="form-control" required>
+            <label for="editSmtpName" class="form-label"><strong>Nom du Profil:</strong></label>
+            <input type="text" id="editSmtpName" placeholder="Donnez un nom à ce profil d’envoi..." class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="editSmtpHost" class="form-label">Hôte SMTP:</label>
-            <input type="text" id="editSmtpHost" class="form-control" required>
+            <label for="editSmtpHost" class="form-label"><strong>Hôte SMTP:</strong></label>
+            <input type="text" id="editSmtpHost" placeholder="Ex : smtp.mailprovider.com" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="editSmtpFromAddress" class="form-label">Adresse Mail Source:</label>
-            <input type="email" id="editSmtpFromAddress" class="form-control" required>
+            <label for="editSmtpFromAddress" class="form-label"><strong>Adresse Mail Source:</strong></label>
+            <input type="email" id="editSmtpFromAddress" placeholder="Ex : contact@votresite.fr" class="form-control" required>
           </div>
         </form>
       </div>
@@ -151,20 +151,12 @@
       const host = document.getElementById(hostId).value.trim();
       const email = document.getElementById(emailId).value.trim();
 
-      const fields = [];
-      if (!name) fields.push("Nom du profil");
-      if (!host) fields.push("Hôte SMTP");
-      if (!email) fields.push("Adresse e-mail source");
-
-      if (fields.length > 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Champs requis !",
-            html: `<ul style="text-align: left;">${fields.map(f => `<li>${f}</li>`).join('')}</ul>`,
-            confirmButtonColor: "#f39c12"
-        });
-        return false;
-      }
+      const isValidRequiredFields = validateRequiredFields([
+        [name, "Nom du Profil"],
+        [host, "Hôte SMTP"],
+        [email, "Adresse e-mail source"]
+      ]);
+      if (!isValidRequiredFields) return;
 
       if (!isValidEmail(email)) {
           Swal.fire({
