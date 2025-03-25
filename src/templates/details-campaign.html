@@ -39,40 +39,34 @@
         <div class="card shadow p-3 fixed-card-email">
             <h6 class="text-uppercase font-weight-bold text-center">📤 Emails envoyés</h6>
             <h3 class="text-primary text-center">{{ campaign.results | length }}</h3>
+            </p>
         </div>
     </div>
 
     <!-- Affichage des Statistiques -->
-    <div class="row mt-4 text-center">
-        {% set total_sent = campaign.results | length %}
-        {% set opened = campaign.results | selectattr('status', 'equalto', 'Opened') | list | length %}
-        {% set clicked = campaign.results | selectattr('status', 'equalto', 'Clicked') | list | length %}
-        {% set submitted = campaign.results | selectattr('status', 'equalto', 'Submitted') | list | length %}
-        {% set reported = campaign.results | selectattr('reported', 'equalto', true) | list | length %}
-    
-        {% set email_stats = {
-            'Emails ouverts': opened,
-            'Liens cliqués': clicked,
-            'Données soumises': submitted,
-            'Emails signalés': reported
-        } %}
-    
-        {% for label, value in email_stats.items() %}
-            {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
-            {% set color_class = 'border-blue' %}
-            {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
-            {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
-            {% if percentage > 60 %} {% set color_class = 'border-orange' %} {% endif %}
-            {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
-    
-            <div class="col-6 col-md-3 d-flex flex-column align-items-center">
-                <div class="circle-stat {{ color_class }}">
-                    <h3 class="circle-number">{{ value }}</h3>
+    <div class="row mt-4 text-center d-flex justify-content-center">
+        {% set total_sent = stats["Emails envoyés"] %}
+
+        {% for label, value in stats.items() %}
+            {% if label != "Emails envoyés" %}
+                {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
+                {% set color_class = 'border-blue' %}
+                {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
+                {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
+                {% if percentage > 60 %} {% set color_class = 'border-orange' %} {% endif %}
+                {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
+
+                <div class="col-6 col-md-3 d-flex flex-column align-items-center mb-4">
+                    <div class="circle-stat {{ color_class }}">
+                        <h3 class="circle-number">{{ value }}</h3>
+                    </div>
+                    <h5 class="mt-2">{{ label }}</h5>
                 </div>
-                <h5 class="mt-2">{{ label }}</h5>
-            </div>
+            {% endif %}
         {% endfor %}
     </div>
+
+
 </div>
 </div>
 
@@ -143,7 +137,7 @@
                                 <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
                                     {{ result.status }}
                                 </td>
-                                <td class="td-details">{{ "✅" if result.reported else "❌" }}</td>
+                                <td class="td-details">{{ "Oui" if result.reported else "Non" }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

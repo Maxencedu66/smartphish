@@ -83,23 +83,25 @@ def follow_campaign():
     
     return render_template('follow-campaign.html', campaigns=campaigns)
 
+
 @bp.route("/details_campaign/<int:campaign_id>")
 def details_campaign(campaign_id):
-    campaigns = get_campaigns()
-    # Recherche de la campagne avec l'ID reçu
-    selected_campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
-    if not selected_campaign:
-        return "Campagne non trouvée", 404
-    # Recherch Nom du Groupe
-    groups = get_groups()
-    campaign_emails = {result["email"] for result in selected_campaign["results"]}
-    group_name = "Inconnu"
-    for group in groups:
-        group_emails = {target["email"] for target in group["targets"]}
-        if campaign_emails.issubset(group_emails): 
-            group_name = group["name"]
-            break
-    return render_template("details-campaign.html", campaign=selected_campaign, group_name=group_name)
+    campaign = get_campaign(campaign_id)
+    summary = get_campaign_summary(campaign_id)
+
+    if not campaign or "error" in campaign or not summary:
+        return "Campagne non trouvée ou erreur", 404
+
+    stats_api = summary.get("stats", {})
+    stats = {
+        "Emails envoyés": stats_api.get("sent", 0),
+        "Emails ouverts": stats_api.get("opened", 0),
+        "Liens cliqués": stats_api.get("clicked", 0),
+        "Données soumises": stats_api.get("submitted_data", 0),
+        "Emails signalés": stats_api.get("email_reported", 0)
+    }
+
+    return render_template("details-campaign.html", campaign=campaign, stats=stats)
 
 
 
