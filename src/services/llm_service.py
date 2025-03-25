@@ -213,6 +213,7 @@ def generate_phishing_email(user_data):
         raise Exception("Aucun modèle n'est actuellement utilisé.")
 
     valid = False
+    tries = 0
     while not valid:
         response: EmailInfo = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}], format=EmailInfo.model_json_schema())
         response_obj = EmailInfo.model_validate_json(response.message.content)
@@ -225,11 +226,15 @@ def generate_phishing_email(user_data):
         valid = valid and '[coll' not in response_obj.contenu_mail.lower()
         valid = valid and '[entr' not in response_obj.contenu_mail.lower()
         valid = valid and '[reci' not in response_obj.contenu_mail.lower()
+        valid = valid and '<' not in response_obj.contenu_mail.lower() and '>' not in response_obj.contenu_mail.lower()
         valid = valid and len([line for line in lines if len(line.strip()) > 0]) > 3
         
         if not valid:
             print("Email not valid, retrying...")
             # print(response_obj.contenu_mail)
+            tries += 1
+            if tries > 10:
+                raise Exception("Impossible de générer un email valide. Réessayez plus tard / changez de modèle.")
     
     return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail}
 
