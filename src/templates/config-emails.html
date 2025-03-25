@@ -514,6 +514,7 @@ function generateAIEmail() {
         document.getElementById("aiResult").scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
     .catch(err => {
+        clearTimeout(timeout);
         Swal.close();
         console.error("Erreur lors de la génération par IA:", err);
         Swal.fire({
