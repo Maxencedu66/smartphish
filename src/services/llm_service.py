@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from src.routes.auth_routes import get_db_connection
 from datetime import datetime
 from src.lib.goreport import Goreport
-from gophish import Gophish
 from src.config import Config
 import threading
 
@@ -318,15 +317,26 @@ def set_used_model(model_name):
 
 def generate_ai_analysis(campaign_id):
     """
-    Génère les 4 sections d'analyse (générale, détaillée, recommandations, conclusion) en se basant sur les stats de la campagne.
+    Génère les 4 sections d'analyse (générale, détaillée, recommandations, conclusion)
+    en se basant sur les statistiques de la campagne.
     Cette fonction s'inspire de la logique de generate_and_save_report_to_db sans sauvegarder en BDD.
     """
+    # Importer la fonction get_campaign et la fonction utilitaire dict_to_obj
+    from src.services.gophish_service import get_campaign
+    from src.lib.goreport import dict_to_obj
+
     # Instancier et configurer GoReport pour récupérer les infos de la campagne
     goreport = Goreport(report_format="word", config_file=None, google=False, verbose=False)
-    goreport.api = Gophish(Config.GOPHISH_API_KEY, host=Config.GOPHISH_API_URL, verify=False)
-    # Récupération des données de campagne
-    campaign_data = goreport.api.campaigns.get(campaign_id=campaign_id)
-    goreport.campaign = campaign_data
+    
+    # Récupération des données de campagne via l'appel API
+    campaign_data = get_campaign(campaign_id)
+    if campaign_data.get("error"):
+        raise Exception(f"Erreur dans la récupération de la campagne ID {campaign_id}: {campaign_data.get('error')}")
+    
+    # Conversion du dictionnaire en objet pour compatibilité avec le reste du code
+    goreport.campaign = dict_to_obj(campaign_data)
+    
+    # Traitement des données de la campagne
     goreport.collect_all_campaign_info(combine_reports=False)
     goreport.process_timeline_events(combine_reports=False)
     goreport.process_results(combine_reports=False)
@@ -339,7 +349,6 @@ def generate_ai_analysis(campaign_id):
     total = goreport.total_targets
     cam_name = goreport.cam_name
     cam_date = goreport.launch_date.split("T")[0] if goreport.launch_date else "inconnue"
-
 
     # Construction du prompt pour l'IA
     prompt = f"""Tu es un expert en cybersécurité. Rédige les 4 sections suivantes en te basant sur les résultats réels de la campagne de phishing suivante :
@@ -354,7 +363,7 @@ def generate_ai_analysis(campaign_id):
 - Emails signalés : {reported}
 
 1. Analyse des résultats généraux : Résume l'efficacité de la campagne et les statistiques obtenues.
-2. Recommandations : Donné 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing
+2. Recommandations : Donne 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing.
 3. Conclusion : Message final de sensibilisation, synthétique et professionnel.
 
 ⚠️ Contraintes :
@@ -381,5 +390,3 @@ Rends le texte fluide, aéré et facile à lire pour une insertion directe dans 
     response = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}])
     texte = response.message.content.strip()
     return texte
-
-

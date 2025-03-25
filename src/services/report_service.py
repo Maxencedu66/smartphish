@@ -9,7 +9,6 @@ from docx.shared import Pt
 from io import BytesIO
 import ollama
 from src.config import Config
-from gophish import Gophish
 from src.lib.goreport import Goreport
 from src.services.llm_service import generate_ai_analysis
 

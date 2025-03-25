@@ -2,7 +2,7 @@
 
 import requests
 import bcrypt
-from src.config import Config
+from config import Config
 
 
 HEADERS = {
