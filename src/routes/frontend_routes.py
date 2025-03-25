@@ -83,10 +83,11 @@ def follow_campaign():
     
     return render_template('follow-campaign.html', campaigns=campaigns)
 
-
 @bp.route("/details_campaign/<int:campaign_id>")
 def details_campaign(campaign_id):
     campaign = get_campaign(campaign_id)
+
+    # Récupération Data
     summary = get_campaign_summary(campaign_id)
 
     if not campaign or "error" in campaign or not summary:
@@ -101,7 +102,20 @@ def details_campaign(campaign_id):
         "Emails signalés": stats_api.get("email_reported", 0)
     }
 
-    return render_template("details-campaign.html", campaign=campaign, stats=stats)
+    # Payload pour les données soumises
+    timeline = campaign.get("timeline", [])
+    submissions = {}
+    for event in timeline:
+        if event.get("message") == "Submitted Data":
+            email = event.get("email")
+            try:
+                details = json.loads(event.get("details", "{}"))
+                payload = details.get("payload", {})
+                submissions[email] = payload
+            except json.JSONDecodeError:
+                continue
+
+    return render_template("details-campaign.html", campaign=campaign, stats=stats, submissions=submissions)
 
 
 

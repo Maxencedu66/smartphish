@@ -139,6 +139,24 @@
                                 </td>
                                 <td class="td-details">{{ "Oui" if result.reported else "Non" }}</td>
                             </tr>
+                            {% if result.email in submissions %}
+                                <tr class="bg-light">
+                                    <td colspan="8">
+                                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#details-{{ loop.index }}" aria-expanded="false" aria-controls="details-{{ loop.index }}">
+                                            Afficher les données soumises
+                                        </button>
+                                        <div class="collapse mt-2" id="details-{{ loop.index }}">
+                                            <div class="card card-body">
+                                                <ul>
+                                                    {% for key, value in submissions[result.email].items() %}
+                                                        <li><strong>{{ key }}:</strong> {{ value[0] }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
