@@ -17,16 +17,11 @@ the browser user-agents and IP addresses, to generate statistics for browser ver
 systems, and locations.
 """
 
-# 3rd Party Libraries
-import click
 
 # Goreport Libraries
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from lib import banners, goreport
-
+# services/Goreport.py
+from src.lib import goreport_lib
+import click
 
 # Setup an AliasedGroup for CLICK
 class AliasedGroup(click.Group):
@@ -91,10 +86,9 @@ def parse_options(self, id, format, combine, complete, config, google, verbose):
        * word: A formatted docx file. A template.docx file is required (see the README).\n
        * quick: Command line output of some basic stats. Good for a quick check or client call.\n
     """
-    # Print the Gophish banner
-    banners.print_banner()
+  
     # Create a new Goreport object that will use the specified report format
-    gophish = goreport.Goreport(format, config, google, verbose)
+    gophish = goreport_lib.Goreport(format, config, google, verbose)
     # Execute reporting for the provided list of IDs
     gophish.run(id, combine, complete)
 

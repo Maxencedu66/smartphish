@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 import re
 from flask import send_file
 from datetime import datetime
@@ -9,7 +10,7 @@ from docx.shared import Pt
 from io import BytesIO
 import ollama
 from src.config import Config
-from src.lib.goreport import Goreport
+from src.lib.goreport_lib import Goreport
 from src.services.llm_service import generate_ai_analysis
 
 def get_latest_goreport_docx(campaign_id):
@@ -35,9 +36,11 @@ def generate_docx_with_goreport(campaign_id, force=False):
                 print("Erreur lors de la suppression :", e)
 
     # Lancement de GoReport pour générer le rapport de base
+  
+
     result = subprocess.run(
-        ["python3", "GoReport.py", "--id", str(campaign_id), "--format", "word"],
-        cwd=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "services")),
+        [sys.executable, "-m", "src.services.goreport_service", "--id", str(campaign_id), "--format", "word"],
+        cwd=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
         capture_output=True,
         text=True
     )

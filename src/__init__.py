@@ -7,6 +7,11 @@ from src.routes.gophish_routes import gophish_bp
 from src.routes.auth_routes import auth_bp
 
 
+from src.services.goreport_service import *
+from src.lib.goreport_lib import *
+
+
+
 def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
 

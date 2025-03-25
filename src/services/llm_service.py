@@ -1,11 +1,12 @@
 import ollama
 from ollama import ListResponse, ProcessResponse
 from pydantic import BaseModel
-from src.routes.auth_routes import get_db_connection
 from datetime import datetime
-from src.lib.goreport import Goreport
-from src.config import Config
 import threading
+from src.routes.auth_routes import get_db_connection
+from src.lib.goreport_lib import Goreport
+from src.config import Config
+
 
 
 class EmailInfo(BaseModel):
@@ -323,7 +324,7 @@ def generate_ai_analysis(campaign_id):
     """
     # Importer la fonction get_campaign et la fonction utilitaire dict_to_obj
     from src.services.gophish_service import get_campaign
-    from src.lib.goreport import dict_to_obj
+    from src.lib.goreport_lib import dict_to_obj
 
     # Instancier et configurer GoReport pour récupérer les infos de la campagne
     goreport = Goreport(report_format="word", config_file=None, google=False, verbose=False)
