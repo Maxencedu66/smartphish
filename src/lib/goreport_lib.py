@@ -6,30 +6,17 @@ This is the GoReport class. GoReport handles everything from connecting to the t
 server to pulling campaign information and reporting the results.
 """
 
-try:
-    # 3rd Party Libraries
-    from gophish import Gophish
-except:
-    print("[!] Could not import the Gophish library! Make sure it is installed.\n\
-Run: `python3 -m pip intall gophish`\n\
-Test it by running `python3` and then, in the \
-Python prompt, typing `from gophish import Gophish`.")
-    exit()
-
 # Standard Libraries
 import configparser
 import os.path
 import sys
 from collections import Counter
 from datetime import datetime
+from types import SimpleNamespace
+import json
 
-# Ajoute le dossier racine (src) au PYTHONPATH
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
-sys.path.append(SRC_DIR)
-
-from config import Config
-
+from src.services.gophish_service import *
+from src.config import Config  # Si config.py est directement sous src/
 
 # 3rd Party Libraries
 import requests
@@ -37,11 +24,21 @@ import xlsxwriter
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Cm, Pt, RGBColor
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 from user_agents import parse
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# Je crois qu'on peut s'en passer sans bug
+#from requests.packages.urllib3.exceptions import InsecureRequestWarning
+#requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+# Fonction utilitaire pour convertir les dictionnaires en objets
+def dict_to_obj(d):
+    if isinstance(d, dict):
+        return SimpleNamespace(**{k: dict_to_obj(v) for k, v in d.items()})
+    elif isinstance(d, list):
+        return [dict_to_obj(item) for item in d]
+    else:
+        return d
 
 class Goreport(object):
     """
@@ -164,127 +161,150 @@ class Goreport(object):
         # NOTE: This step succeeds even with a bad API key, so the true test is fetching an ID
         print(f"[+] Connecting to Gophish at {GP_HOST}")
         print(f"L.. The API Authorization endpoint is: {GP_HOST}/api/campaigns/?api_key={API_KEY}")
-        self.api = Gophish(API_KEY, host=GP_HOST, verify=False)
+
 
     def run(self, id_list, combine_reports, set_complete_status):
-        """Run everything to process the target campaign."""
-        # Output some feedback for user options
+        """
+        Traite les campagnes fournies par leur ID, collecte les informations et génère un rapport.
+        Les données sont récupérées via l'API HTTP (module gophish_service) et converties en objets.
+        """
+        # Affichage des options
         if combine_reports:
-            print("[+] Campaign results will be combined into a single report.")
+            print("[+] Les résultats des campagnes seront combinés dans un seul rapport.")
         if set_complete_status:
-            print('[+] Campaign statuses will be set to "Complete" after processing the results.')
+            print('[+] Le statut des campagnes sera marqué comme "Complete" après traitement.')
+
+        # Traitement des ID fournis (supporte les plages et les listes séparées par des virgules)
         try:
-            # Create the list of campaign IDs
             temp_id = []
-            # Handle a mixed set of ranges and comma-separated IDs
-            if "-" and "," in id_list:
+            if "-" in id_list and "," in id_list:
                 temp = id_list.split(",")
                 for x in temp:
                     if "-" in x:
-                        lower = x.split("-")[0]
-                        upper = x.split("-")[1]
+                        lower, upper = x.split("-")
                         for y in range(int(lower), int(upper) + 1):
                             temp_id.append(str(y))
                     else:
                         temp_id.append(x)
-            # Process IDs provided as one or more ranges
             elif "-" in id_list:
-                lower = id_list.split("-")[0]
-                upper = id_list.split("-")[1]
+                lower, upper = id_list.split("-")
                 for y in range(int(lower), int(upper) + 1):
                     temp_id.append(str(y))
-            # Process single or only comma-separated IDs
             else:
                 temp_id = id_list.split(",")
             id_list = temp_id
         except Exception as e:
-            print("[!] Could not interpret your provided campaign IDs. \
-Ensure the IDs are provided as comma-separated integers or interger ranges, e.g. 5,50-55,71.")
-            print(f"L.. Details: {e}")
+            print("[!] Impossible d'interpréter les ID de campagne fournis. Veuillez fournir des ID séparés par des virgules ou des plages (ex. 5,50-55,71).")
+            print(f"L.. Détails : {e}")
             sys.exit()
-        # Begin processing the campaign IDs by removing any duplicates
+
+        # Suppression des doublons et tri des ID
         try:
-            # Get length of user-provided list
             initial_len = len(id_list)
-            # Remove duplicate IDs and sort IDs as integers
             id_list = sorted(set(id_list), key=int)
-            # Get length of unique, sorted list
             unique_len = len(id_list)
         except Exception as e:
             temp = []
-            for id in id_list:
+            for ident in id_list:
                 try:
-                    int(id)
+                    int(ident)
                 except:
-                    temp.append(id)
-            print(f"[!] There are {len(temp)} invalid campaign ID(s), i.e. not an integer.")
-            print(f"L.. Offending IDs: {','.join(temp)}")
-            print(f"L.. Details: {e}")
+                    temp.append(ident)
+            print(f"[!] Il y a {len(temp)} ID de campagne invalides (non entiers).")
+            print(f"L.. ID invalides : {','.join(temp)}")
+            print(f"L.. Détails : {e}")
             sys.exit()
-        print(f"[+] A total of {initial_len} campaign IDs have been provided for processing.")
-        # If the lengths are different, then GoReport removed one or more dupes
+        print(f"[+] Un total de {initial_len} ID de campagne ont été fournis pour traitement.")
         if initial_len != unique_len:
             dupes = initial_len - unique_len
-            print(f"L.. GoReport found {dupes} duplicate campaign IDs, so those have been trimmed.")
-        # Provide  list of all IDs that will be processed
-        print(f"[+] GoReport will process the following campaign IDs: {','.join(id_list)}")
-        # If --combine is used with just one ID it can break reporting, so we catch that here
+            print(f"L.. {dupes} ID en double ont été supprimés.")
+        print(f"[+] Les campagnes suivantes seront traitées : {','.join(id_list)}")
         if len(id_list) == 1 and combine_reports:
             combine_reports = False
-        # Go through each campaign ID and get the results
+
         campaign_counter = 1
         for CAM_ID in id_list:
-            print(f"[+] Now fetching results for Campaign ID {CAM_ID} ({campaign_counter}/{len(id_list)}).")
+            print(f"[+] Récupération des résultats pour la campagne ID {CAM_ID} ({campaign_counter}/{len(id_list)}).")
             try:
-                # Request the details for the provided campaign ID
-                self.campaign = self.api.campaigns.get(campaign_id=CAM_ID)
-            except Exception as e:
-                print(f"[!] There was a problem fetching this campaign {CAM_ID}'s details. Make sure your URL and API key are correct. Check HTTP vs HTTPS!")
-                print(f"L.. Details: {e}")
-            try:
-                try:
-                    # Check to see if a success message was returned with a message
-                    # Possible reasons: campaign ID doesn't exist or problem with host/API key
-                    if self.campaign.success is False:
-                        print(f"[!] Failed to get results for campaign ID {CAM_ID}")
-                        print(f"L.. Details: {self.campaign.message}")
-                        # We can't let an error with an ID stop reporting, so check if this was the last ID
-                        if CAM_ID == id_list[-1] and combine_reports:
-                            self.generate_report()
-                # If self.campaign.success does not exist then we were successful
-                except:
-                    print("[+] Success!")
-                    # Collect campaign details and process data
-                    self.collect_all_campaign_info(combine_reports)
-                    self.process_timeline_events(combine_reports)
-                    self.process_results(combine_reports)
-                    # If the --complete flag was set, now set campaign status to Complete
-                    if set_complete_status:
-                        print(f"[+] Setting campaign ID {CAM_ID}'s status to Complete.")
-                        try:
-                            set_complete = self.api.campaigns.complete(CAM_ID)
-                            try:
-                                if set_complete.success is False:
-                                    print(f"[!] Failed to set campaign status for ID {CAM_ID}.")
-                                    print(f"L.. Details: {set_complete.message}")
-                            # If set_complete.success does not exist then we were successful
-                            except:
-                                pass
-                        except Exception as e:
-                            print(f"[!] Failed to set campaign status for ID {CAM_ID}.")
-                            print(f"L.. Details: {e}")
-                    # Check if this is the last campaign ID in the list
-                    # If this is the last ID and combined reports is on, generate the report
+                # Récupération des détails via l'appel API
+                campaign_data = get_campaign(CAM_ID)
+                if campaign_data.get("error"):
+                    print(f"[!] Échec de récupération des détails pour la campagne ID {CAM_ID}.")
+                    print(f"L.. Détails : {campaign_data.get('error')}")
                     if CAM_ID == id_list[-1] and combine_reports:
                         self.generate_report()
-                    # Otherwise, if we are not combining reports, generate the reports
-                    elif combine_reports is False:
-                        self.generate_report()
                     campaign_counter += 1
+                    continue
+                else:
+                    # Conversion du dictionnaire en objet pour compatibilité avec le reste du code
+                    self.campaign = dict_to_obj(campaign_data)
             except Exception as e:
-                print(f"[!] There was a problem processing campaign ID {CAM_ID}!")
-                print(f"L.. Details: {e}")
+                print(f"[!] Problème lors de la récupération des détails de la campagne ID {CAM_ID} !")
+                print(f"L.. Détails : {e}")
                 sys.exit()
+
+            # --- Débogage : Affichage et correction de la timeline ---
+            try:
+                if hasattr(self.campaign, 'timeline') and isinstance(self.campaign.timeline, list):
+                    for event in self.campaign.timeline:
+                        if isinstance(event.details, str):
+                            if event.details.strip() != "":
+                                try:
+                                    # Convertir la chaîne JSON en dictionnaire
+                                    event.details = json.loads(event.details)
+                                except Exception as parse_err:
+                                    print(f"[DEBUG] Erreur lors du parsing de details pour l'événement {event}: {parse_err}")
+                                    event.details = {}
+                            else:
+                                event.details = {}
+            except Exception as e_tl:
+                print(f"[DEBUG] Erreur lors du traitement de la timeline: {e_tl}")
+
+            try:
+                # Optionnel : vérifier si la campagne récupérée comporte une erreur via un attribut 'success'
+                try:
+                    if hasattr(self.campaign, 'success') and self.campaign.success is False:
+                        print(f"[!] Échec lors de la récupération des résultats pour la campagne ID {CAM_ID}")
+                        if hasattr(self.campaign, 'message'):
+                            print(f"L.. Détails : {self.campaign.message}")
+                        if CAM_ID == id_list[-1] and combine_reports:
+                            self.generate_report()
+                        campaign_counter += 1
+                        continue
+                except Exception as e_inner:
+                    print(f"[DEBUG] Exception dans le test de l'attribut 'success': {e_inner}")
+                    pass
+
+                print("[+] Succès !")
+                # Traitement des informations de la campagne
+                self.collect_all_campaign_info(combine_reports)
+                self.process_timeline_events(combine_reports)
+                self.process_results(combine_reports)
+
+                # Marquage de la campagne comme complète si l'option est activée
+                if set_complete_status:
+                    print(f"[+] Marquage de la campagne ID {CAM_ID} comme terminée.")
+                    try:
+                        result = complete_campaign(CAM_ID)
+                        if not result.get("success", False):
+                            print(f"[!] Échec lors du marquage de la campagne ID {CAM_ID} comme terminée.")
+                            print(f"L.. Détails : {result.get('message', result.get('content'))}")
+                    except Exception as e_mark:
+                        print(f"[!] Échec lors du marquage de la campagne ID {CAM_ID} comme terminée.")
+                        print(f"L.. Détails : {e_mark}")
+
+                # Génération du rapport
+                if CAM_ID == id_list[-1] and combine_reports:
+                    self.generate_report()
+                elif not combine_reports:
+                    self.generate_report()
+
+                campaign_counter += 1
+            except Exception as e:
+                print(f"[!] Problème lors du traitement de la campagne ID {CAM_ID} !")
+                print(f"L.. Détails : {e}")
+                sys.exit()
+
 
     def lookup_ip(self, ip):
         """Lookup the provided IP address with ipinfo.io for location data.
