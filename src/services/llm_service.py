@@ -22,18 +22,20 @@ def generate_prompt(user_data):
         Rédige un email informel annonçant le départ à la retraite d'un collègue. Ne specifie pas son nom.
         Le mail doit être **court, direct et sans fioritures**. 
         Il doit inciter les destinataires à **répondre rapidement** en fournissant leurs coordonnées (RIB et numéro de téléphone).
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         
         - **But** : Organiser un repas de départ et demander subtilement un RIB et des coordonnées.
         - **Ton** : Amical et détendu.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
 
         Exemple : 
         ---
-        Salut à tous, 
+        Salut {'{{.FirstName}}'}, 
         On organise un dîner pour le départ à la retraite d'un collègue. J'aurai besoin de savoir qui est dispo et de récupérer un acompte pour réserver. 
-        Merci d'envoyer votre RIB et numéro de téléphone pour qu'on puisse s'organiser. 
+        Merci d'envoyer votre RIB et numéro de téléphone pour qu'on puisse s'organiser.
+        Voilà le lien pour confirmer ta présence : {'[Départ retraite]({{.URL}})'}
         À bientôt !
         ---
         """,
@@ -41,80 +43,85 @@ def generate_prompt(user_data):
         "Erreur de paiement - RIB nécessaire": f"""
         Rédige un email **sérieux et court**, annonçant une erreur de versement de salaire. 
         Il doit **rassurer** le destinataire et l'inciter à envoyer son **RIB** rapidement.
-        Ne donnes pas le numéro de téléphone de l'expéditeur, seulement son email.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
 
         - **But** : Obtenir un RIB sous prétexte d'une correction de paiement.
         - **Ton** : Professionnel et bienveillant.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
 
         Exemple : 
         ---
-        Bonjour, 
-        Une erreur a été détectée dans votre paiement ce mois-ci. Afin de procéder rapidement au virement, merci de renvoyer votre RIB à cette adresse : {user_data['email_expediteur']}. 
+        Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
+        **Une erreur a été détectée dans votre paiement ce mois-ci**. Afin de procéder rapidement au virement, merci de vérifier votre RIB à cette adresse : {'[Mes coordonnées de paiement]({{.URL}})'}
         Désolé pour ce désagrément, nous faisons le nécessaire au plus vite.
+        Cordialement,
         ---
         """,
 
         "Invitation à un événement exclusif": f"""
         Rédige un email **dynamique et engageant** tout en restant formel pour des employés, invitant à un événement professionnel restreint. 
         L'email doit **être convaincant** et inciter l'employé à répondre au mail avec ses **coordonnées personnelles**.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
 
         - **But** : Récupérer des informations personnelles (nom, téléphone, RIB) sous couvert d'une invitation à un événement exclusif.
         - **Ton** : Enthousiaste et exclusif mais professionel et formel.
         - **Signature** : {user_data['expéditeur']}.
-        - **Destinataire** : Un collaborateur de l'entreprise, pas de nom spécifique.
         - **Entreprise** : '{user_data['entreprise']}'.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
 
         Exemple : 
         ---
-        Cher collaborateur,
+        Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
         🎉 {user_data['entreprise']} organise un événement exclusif pour ses collaborateurs ! 
-        Nombre de places limité, **inscrivez-vous vite** en répondant à ce mail avec vos noms, numéro de téléphone et RIB. 
+        Nombre de places limité, **inscrivez-vous vite** en remplissant le sondage avec vos noms, numéro de téléphone et RIB. 
+        Lien pour vous inscrire : {'[Evènement exclusif]({{.URL}})'}.
         Ne manquez pas cette opportunité unique !
         Bien à vous,
         ---
         
-        Rappel : **Ne pas mettre de champs à remplir**. NE PAS METTRE DE choses avec des crochets [Nom], [Téléphone], etc sinon je me tire une balle et je suis sérieux OK ?
         Si tu ne sais pas une information, n'en parle pas.
         """,
 
         "Mise à jour de sécurité urgente": f"""
         Rédige un **email officiel** annonçant une **mise à jour de sécurité obligatoire**. 
-        Il doit inciter le destinataire à **répondre au mail** avec **ses identifiants** pour "mettre à jour" ses accès.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
+        Il doit inciter le destinataire à **se connecter** pour "mettre à jour" ses accès.
 
         - **But** : Faire croire à une mise à jour système pour obtenir des identifiants.
         - **Ton** : Sérieux et impersonnel.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
 
         Exemple : 
         ---
-        Bonjour cher collaborateur, 
+        Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
         Dans le cadre de l'amélioration de la sécurité informatique de {user_data['entreprise']}, une **mise à jour de vos accès** est nécessaire.  
-        **Merci de répondre à ce mail avec vos identifiants** pour procéder à la mise à jour.
+        **Merci de vous connecter ici avec vos identifiants** : {'[Mise à jour des accès]({{.URL}})'} pour procéder à la mise à jour.
+        Nous vous remercions pour votre coopération.
         ---
         """,
         
         "Organisation de covoiturage": f"""
         Rédige un email **convivial et engageant** pour organiser un covoiturage quotidien entre collègues.
         Le mail doit être **court et efficace**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         
         - **But** : Organiser un covoiturage et obtenir des coordonnées.
         - **Ton** : Amical et pratique.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
         
         Exemple :
         ---
-        Salut à tous,
-        Qui serait partant pour organiser un covoiturage quotidien pour aller au travail ?
-        Merci de répondre à ce mail avec vos coordonnées et adresse pour qu'on puisse s'organiser.
+        Salut {'{{.FirstName}}'},
+        Serais-tu partant pour organiser un covoiturage quotidien pour aller au travail ?
+        Merci de remplir le sondage avec tes coordonnées et adresse postale pour qu'on puisse s'organiser !
+        Sondage : {'[Sondage covoiturage]({{.URL}})'}
         À bientôt !
         ---
         """,
@@ -122,18 +129,19 @@ def generate_prompt(user_data):
         "Chèques de voyage": f"""
         Rédige un email **formel et sérieux** annonçant la distribution de chèques voyage à tous les employés.
         Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         
         - **But** : Obtenir des coordonnées sous couvert de distribution de chèques voyage.
         - **Ton** : Formel et professionnel.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
         
         Exemple :
         ---
-        Bonjour,
+        Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
         Nous avons le plaisir de vous annoncer la distribution de chèques voyage à tous les employés.
-        Merci de répondre à ce mail avec vos coordonnées postales pour recevoir votre chèque.
+        Merci de remplir vos coordonnées postales pour recevoir votre chèque : {'[Formulaire de réception]({{.URL}})'}.
         Cordialement,
         ---
         """,
@@ -141,42 +149,43 @@ def generate_prompt(user_data):
         "Salon à l'étranger": f"""
         Rédige un email **convaincant et professionnel** pour inviter des employés à un salon professionnel à l'étranger.
         Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées (y compris postales).
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         Ne précise pas de dates.
         
         - **But** : Obtenir des coordonnées sous couvert d'une invitation à un salon professionnel.
         - **Ton** : Convaincant et professionnel.
         - **Signature** : {user_data['expéditeur']}.
-        - **Destinataire** : Un collaborateur de l'entreprise, pas de nom spécifique.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
         
         Exemple :
         ---
-        Bonjour,
+        Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
         Nous avons le plaisir de vous inviter à un salon professionnel à l'étranger.
-        Merci de répondre à ce mail avec vos coordonnées pour recevoir votre invitation et que nous puissions réserver vos billets d'avion et de logement.
+        Merci de répondre au formulaire avec vos coordonnées pour recevoir votre invitation et que nous puissions réserver vos billets d'avion et de logement.
+        Lien : {'[Formulaire salon]({{.URL}})'}.
         Cordialement,
         ---
         
-        Rappel : **Ne pas mettre de champs à remplir**. NE PAS METTRE DE choses avec des crochets [Nom], [Téléphone], etc sinon je me tire une balle et je suis sérieux OK ?
         Si tu ne sais pas une information, n'en parle pas.
         """,
         
         "Urgence médicale": f"""
         Rédige un email **sérieux et urgent** annonçant une urgence médicale et demandant des informations personnelles.
         Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées (y compris postales).
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         
         - **But** : Obtenir des coordonnées sous couvert d'une urgence médicale (services d'urgence & police).
         - **Ton** : Sérieux et urgent.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
         
         Exemple :
         ---
         Urgent,
         Un collaborateur a eu un accident et nous avons besoin de vos coordonnées pour les fournir aux services d'urgence et de police.
-        Merci de répondre à ce mail avec vos coordonnées pour que nous puissions les transmettre rapidement.
+        Merci de les renseigner sur le site {'[Services Urgence]({{.URL}})'} vos coordonnées pour que nous puissions les transmettre rapidement.
         Cordialement,
         ---
         """,
@@ -184,24 +193,60 @@ def generate_prompt(user_data):
         "Support émotionnel": f"""
         Rédige un email **bienveillant et empathique** annonçant qu'un collègue a besoin de soutien émotionnel et que le destinataire a été choisi pour l'aider.
         Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
-        Ne **PAS** mettre de champs à remplir (ex: nom du destinataire [Destinataire]), le mail doit être **prêt à être envoyé** sans **AUCUN** changement.
         
         - **But** : Obtenir des coordonnées sous couvert de soutien émotionnel.
         - **Ton** : Bienveillant et empathique.
         - **Signature** : {user_data['expéditeur']}.
         - **Langue** : Français.
+        - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
+        - **Faux lien** : {'[texte]({{.URL}})'}
         
         Exemple :
         ---
-        Salut,
+        Salut {'{{.FirstName}}'},
         Un collègue a besoin de soutien émotionnel et nous avons pensé à toi pour l'aider.
-        Merci de répondre à ce mail avec tes coordonnées pour que nous puissions te mettre en contact avec lui.
+        Merci de m'envoyer tes coordonnées sur le site pour que nous puissions te mettre en contact avec lui.
+        Site : {'[Formulaire]({{.URL}})'}
         Cordialement,
         ---
         """,
     }
 
     return prompts.get(scenario, "Scénario non trouvé.")
+
+def email_to_html(email: EmailInfo):
+    """Convertit un email en HTML."""
+    # Replace line breaks with HTML line breaks
+    content_parsed = email.contenu_mail.replace("\n", "\n<br>")
+    # Add <strong> tags awhen there are **
+    # Note: it must add <strong> then </strong> to avoid nested tags
+    while "**" in content_parsed:
+        content_parsed = content_parsed.replace("**", "<strong>", 1).replace("**", "</strong>", 1)
+    # Replace link with a <a> tag
+    while '[' in content_parsed and ']' in content_parsed and '(' in content_parsed and ')' in content_parsed:
+        start_link = content_parsed.find('[')
+        end_link = content_parsed.find(']')
+        start_url = content_parsed.find('(', end_link)
+        end_url = content_parsed.find(')', start_url)
+        if start_link < end_link < start_url < end_url:
+            link_text = content_parsed[start_link + 1:end_link]
+            link_url = content_parsed[start_url + 1:end_url]
+            content_parsed = content_parsed[:start_link] + f'<a href="{link_url}">{link_text}</a>' + content_parsed[end_url + 1:]
+        else:
+            break
+    # Generate HTML
+    html = f"<!DOCTYPE html>\n\
+    <html lang=\"fr\">\n\
+    <head>\n\
+        <meta charset=\"UTF-8\">\n\
+        <title>{email.objet_mail}</title>\n\
+    </head>\n\
+    <body>\n\
+        {content_parsed}\n\
+    </body>\n\
+    </html>\
+    "
+    return html
 
 def generate_phishing_email(user_data):
     """Génère un email de phishing à l'aide de Mistral via Ollama."""
@@ -228,6 +273,9 @@ def generate_phishing_email(user_data):
         valid = valid and '[reci' not in response_obj.contenu_mail.lower()
         valid = valid and '<' not in response_obj.contenu_mail.lower() and '>' not in response_obj.contenu_mail.lower()
         valid = valid and len([line for line in lines if len(line.strip()) > 0]) > 3
+        valid = valid and '[' in response_obj.contenu_mail and ']' in response_obj.contenu_mail
+        valid = valid and '(' in response_obj.contenu_mail and ')' in response_obj.contenu_mail
+        valid = valid and 'URL' in response_obj.contenu_mail
         
         if not valid:
             print("Email not valid, retrying...")
@@ -236,7 +284,7 @@ def generate_phishing_email(user_data):
             if tries > 10:
                 raise Exception("Impossible de générer un email valide. Réessayez plus tard / changez de modèle.")
     
-    return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail}
+    return {"object": response_obj.objet_mail, "content": response_obj.contenu_mail, "html": email_to_html(response_obj)}
 
 def get_ollama_status():
     """Récupère les informations sur les modèles téléchargés et/ou en mémoire via Ollama."""

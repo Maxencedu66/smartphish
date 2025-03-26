@@ -141,7 +141,7 @@ def generate_email():
 
     generated_email = generate_phishing_email(user_data)
 
-    return jsonify({"object": generated_email['object'], "content": generated_email['content']})
+    return jsonify({"object": generated_email['object'], "content": generated_email['content'], "html": generated_email['html']})
 
 
 @bp.route('/analysis-correction')

@@ -388,6 +388,7 @@ function generateAIEmail() {
         // Remplir les champs de l'IA avec l'email généré et afficher le résultat
         document.getElementById("aiGeneratedSubject").value = data.object;
         document.getElementById("aiGeneratedContent").value = data.content;
+        document.getElementById("aiGeneratedHtml").srcdoc = data.html;
         document.getElementById("aiResult").style.display = "block";
 
         // Ajuste la hauteur du textarea pour le contenu généré
