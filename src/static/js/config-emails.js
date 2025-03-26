@@ -414,7 +414,19 @@ function generateAIEmail() {
 function submitNewEmailTemplate() {
     const name = document.getElementById("newTemplateName").value;
     let subject, text;
-    let method;    
+    let method;
+
+    if (isDuplicateName(name, "#emailTemplateTableBody", {
+        columnIndex: 0,
+        rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nom déjà utilisé',
+            text: 'Un modèle avec ce nom existe déjà.',
+        });
+        return;
+    }
 
     if (document.getElementById("aiMethod").checked) {
         subject = document.getElementById("aiGeneratedSubject").value;
@@ -534,6 +546,21 @@ function submitEditedEmailTemplate() {
     const name = document.getElementById("editTemplateName").value.trim();
     const subject = document.getElementById("editEmailSubject").value.trim();
     let text;
+
+    const id = document.getElementById("editTemplateId").value;
+
+    if (isDuplicateName(name, "#emailTemplateTableBody", {
+        columnIndex: 0,
+        excludeId: id,
+        rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nom déjà utilisé',
+            text: 'Un modèle avec ce nom existe déjà.',
+        });
+        return;
+    }
 
     const editHtmlFormat = document.getElementById("editHtmlFormat");
     const editTextFormat = document.getElementById("editTextFormat");

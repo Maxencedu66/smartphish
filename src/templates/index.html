@@ -13,8 +13,6 @@
         <h1 class="title">SmartPhish</h1>
         
         <div class="header-buttons">
-            
-            <button onclick="window.location.href='/register'">Créer un compte</button>
             <button onclick="logout()">Déconnexion</button>
             <!--
             <button id="btnSettings">Settings</button>
@@ -36,6 +34,7 @@
             <li><a class="menu-link {% if request.path == '/llm-status' %}active{% endif %}" href="/llm-status">🤖 Statut du LLM</a></li>
             <!-- <li><a class="menu-link {% if request.path == '/llm-training' %}active{% endif %}" href="/llm-training">📡 Entrainement du LLM</a></li> -->
             <li><a class="menu-link {% if request.path == '/llm-settings' %}active{% endif %}" href="/llm-settings">⚙️ Paramètres du LLM</a></li>
+            <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">👥 Création de compte</a></li>
         </ul>
     </aside>
 
@@ -46,17 +45,5 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script> 
-        function logout() {
-            fetch("/logout", {
-                method: "GET",
-                credentials: "same-origin"
-            })
-            .then(() => {
-                window.location.href = "/login"; 
-            })
-            .catch(error => console.error("Erreur de déconnexion :", error));
-        }
-    </script>
 </body>
 </html>

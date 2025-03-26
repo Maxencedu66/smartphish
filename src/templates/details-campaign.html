@@ -210,27 +210,21 @@
                                 <span class="badge bg-dark px-3 py-2">Aperçu du contenu</span>
                             </h5>
                             
-                                                        
-                            <!-- Toggle Switch -->
                             <div class="d-flex align-items-center">
-                                <span class="fw-semibold text-muted me-3">Vue</span>
+                                <span class="fw-semibold text-muted me-2">Vue</span>
                                 <div class="form-check form-switch m-0">
                                     <input class="form-check-input" type="checkbox" id="toggleView" onchange="toggleView()">
                                 </div>
                                 <span class="fw-semibold text-muted ms-2">Code</span>
                             </div>
                             
+
                             
                         </div>
-                
-                        <!-- Cadre FIXE pour l'affichage -->
-                        <div class="border p-2 bg-white overflow-auto" style="height: 200px;">
-                            <!-- Aperçu HTML -->
-                            <iframe id="htmlPreview" class="w-100 h-100 border-0"></iframe>
-                
-                            <!-- Code Source -->
-                            <pre id="codeView" class="text-wrap d-none">{{ campaign.page.html }}</pre>
-                        </div>
+                        <pre id="codeView" class="text-wrap">{{ campaign.page.html }}</pre>
+                        <div id="htmlPreview" class="border p-3 mt-2 bg-white d-none" style="height: 200px; overflow:auto;"></div>
+
+
                     </div>
                 </div>
 

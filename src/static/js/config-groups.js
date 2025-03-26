@@ -135,6 +135,20 @@ function submitNewGroup() {
     const memberRows = document.querySelectorAll("#newGroupMembers .member-row");
     const targets = [];
 
+
+    const nameWithoutTrim = document.getElementById("newGroupName").value;
+    if (isDuplicateName(nameWithoutTrim, "#groupTableBody", {
+      columnIndex: 0,
+      rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nom déjà utilisé',
+            text: 'Un groupe avec ce nom existe déjà.',
+        });
+        return;
+    }
+
     if (!validateGroupForm("newGroupName", "newGroupMembers")) {
         return;
     }
@@ -263,6 +277,22 @@ function submitEditedGroup() {
   const name = document.getElementById("editGroupName").value.trim();
   const memberRows = document.querySelectorAll("#editGroupMembers .member-row");
   const targets = [];
+
+  const nameWithoutTrim = document.getElementById("editGroupName").value;
+  const id = document.getElementById("editGroupId").value;
+
+  if (isDuplicateName(nameWithoutTrim, "#groupTableBody", {
+      columnIndex: 0,
+      excludeId: id,
+      rowIdAttribute: "data-id"
+  })) {
+      Swal.fire({
+          icon: 'error',
+          title: 'Nom déjà utilisé',
+          text: 'Un groupe avec ce nom existe déjà.',
+      });
+      return;
+  }
 
   if (!validateGroupForm("editGroupName", "editGroupMembers")) {
         return;

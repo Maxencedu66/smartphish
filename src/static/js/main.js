@@ -133,13 +133,14 @@ function lancement() {
     alert("Email validé et prêt à être envoyé.");
 }
 
-
 function logout() {
-    localStorage.removeItem("username");  // Supprime l'utilisateur stocké
-    fetch("/logout", { method: "GET", credentials: "same-origin" })
+    localStorage.removeItem("username"); 
+    fetch("/logout", {
+        method: "GET",
+        credentials: "same-origin"
+    })
     .then(() => {
-        console.log("Déconnexion réussie !");
-        window.location.href = "/login";  // Redirige vers la page de connexion
+        window.location.href = "/login"; 
     })
     .catch(error => console.error("Erreur de déconnexion :", error));
 }
@@ -169,4 +170,39 @@ function validateRequiredFields(fieldMap) {
         return false;
     }
     return true;
+}
+
+
+function isDuplicateName(name, tableBodySelector, options = {}) {
+    const {
+        columnIndex = 0,
+        excludeId = null,
+        rowIdAttribute = "data-id",
+        idSelector = null,
+    } = options;
+
+    const nameToCheck = name.trim().toLowerCase();
+    const rows = document.querySelectorAll(`${tableBodySelector} tr`);
+
+    for (let row of rows) {
+        const cells = row.querySelectorAll("td");
+        if (cells.length <= columnIndex) continue;
+
+        const cellText = cells[columnIndex]?.textContent?.trim().toLowerCase();
+        if (cellText !== nameToCheck) continue;
+
+        let rowId = null;
+        if (idSelector) {
+            rowId = idSelector(row);
+        } else {
+            const idSource = row.querySelector(`[${rowIdAttribute}]`);
+            rowId = idSource?.getAttribute(rowIdAttribute);
+        }
+
+        if (!excludeId || rowId !== excludeId) {
+            return true;
+        }
+    }
+
+    return false;
 }

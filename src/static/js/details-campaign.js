@@ -1,23 +1,17 @@
-function loadHTMLPreview() {
-    var iframe = document.getElementById("htmlPreview");
-    var doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`{{ campaign.page.html | safe}}`);
-    doc.close();
-}
-
 function toggleView() {
-    var toggle = document.getElementById("toggleView").checked;
-    var htmlPreview = document.getElementById("htmlPreview");
-    var codeView = document.getElementById("codeView");
+    const toggle = document.getElementById("toggleView").checked;
+    const codeView = document.getElementById("codeView");
+    const htmlPreview = document.getElementById("htmlPreview");
 
     if (toggle) {
-        htmlPreview.classList.add("d-none");
-        codeView.classList.remove("d-none");
-    } else {
+        // Affichage "vue"
+        const rawHtml = codeView.textContent || codeView.innerText;
+        htmlPreview.innerHTML = rawHtml;
         htmlPreview.classList.remove("d-none");
         codeView.classList.add("d-none");
+    } else {
+        // Affichage "code"
+        htmlPreview.classList.add("d-none");
+        codeView.classList.remove("d-none");
     }
 }
-
-window.onload = loadHTMLPreview;

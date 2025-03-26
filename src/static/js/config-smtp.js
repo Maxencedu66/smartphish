@@ -25,150 +25,182 @@ function validateSmtpForm(nameId, hostId, emailId) {
 }
 
 function submitNewSmtp() {
-if (!validateSmtpForm("newSmtpName", "newSmtpHost", "newSmtpFromAddress")) {
-    return;
-}
+    const name = document.getElementById("newSmtpName").value;
 
-const data = {
-    name: document.getElementById("newSmtpName").value,
-    host: document.getElementById("newSmtpHost").value,
-    from_address: document.getElementById("newSmtpFromAddress").value,
-    username: document.getElementById("newSmtpUsername").value,
-    password: document.getElementById("newSmtpPassword").value,
-    ignore_cert_errors: document.getElementById("newSmtpIgnoreCert").checked
-};
-
-fetch("/config-smtp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-})
-.then(res => res.json())
-.then(response => {
-    if (response.error) {
+    if (isDuplicateName(name, "#smtpTableBody", {
+        columnIndex: 0,
+        rowIdAttribute: "data-id"
+    })) {
         Swal.fire({
             icon: "error",
-            title: "Erreur !",
-            text: response.error,
+            title: "Nom déjà utilisé",
+            text: "Un profil SMTP avec ce nom existe déjà.",
             confirmButtonColor: "#d33"
         });
-    } else {
-        Swal.fire({
-            icon: "success",
-            title: "Profil SMTP ajouté !",
-            text: "Le profil SMTP a été enregistré avec succès.",
-            confirmButtonColor: "#28a745"
-        }).then(() => {
-            location.reload();
-        });
+        return;
     }
-})
-.catch(err => {
-    Swal.close();
-    console.error(err);
-    Swal.fire({
-        icon: "error",
-        title: "Erreur inconnue !",
-        text: "Une erreur s'est produite lors de la création du profil SMTP.",
-        confirmButtonColor: "#d33"
-    });
-});
-}
-
-function submitEditedSmtp() {
-if (!validateSmtpForm("editSmtpName", "editSmtpHost", "editSmtpFromAddress")) {
-    return;
-}
-
-const profileId = document.getElementById("editSmtpId").value;
-const data = {
-    id: parseInt(profileId, 10),
-    name: document.getElementById("editSmtpName").value,
-    host: document.getElementById("editSmtpHost").value,
-    from_address: document.getElementById("editSmtpFromAddress").value
-};
-
-fetch(`/config-smtp/${profileId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-})
-.then(res => res.json())
-.then(response => {
-    if (response.error) {
-        Swal.fire({
-            icon: "error",
-            title: "Erreur !",
-            text: response.error,
-            confirmButtonColor: "#d33"
-        });
-    } else {
-        Swal.fire({
-            icon: "success",
-            title: "Profil SMTP modifié !",
-            text: "Les modifications ont été enregistrées avec succès.",
-            confirmButtonColor: "#28a745"
-        }).then(() => {
-            location.reload();
-        });
+        
+    if (!validateSmtpForm("newSmtpName", "newSmtpHost", "newSmtpFromAddress")) {
+        return;
     }
-})
-.catch(err => {
-    Swal.close();
-    console.error(err);
-    Swal.fire({
-        icon: "error",
-        title: "Erreur inconnue !",
-        text: "Une erreur s'est produite lors de la modification du profil SMTP.",
-        confirmButtonColor: "#d33"
-    });
-});
-}
 
-//    SUPPRESSION D'UN SMTP PROFILE
-document.querySelectorAll(".delete-smtp").forEach(btn => {
-btn.addEventListener("click", function() {
-    const profileId = this.getAttribute("data-id");
+    const data = {
+        name: document.getElementById("newSmtpName").value,
+        host: document.getElementById("newSmtpHost").value,
+        from_address: document.getElementById("newSmtpFromAddress").value,
+        username: document.getElementById("newSmtpUsername").value,
+        password: document.getElementById("newSmtpPassword").value,
+        ignore_cert_errors: document.getElementById("newSmtpIgnoreCert").checked
+    };
 
-    Swal.fire({
-    title: "Supprimer ce profil d'envoi ?",
-    text: "Cette action est irréversible. Êtes-vous sûr ?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Oui, supprimer",
-    cancelButtonText: "Annuler",
-    reverseButtons: true
-    }).then((result) => {
-    if (result.isConfirmed) {
-        // Si l'utilisateur confirme, envoi de la requête DELETE
-        fetch(`/config-smtp/${profileId}`, {
-        method: "DELETE"
-        })
-        .then(res => res.json())
-        .then(data => {
-        if (data.error) {
-            Swal.fire("Erreur", "Impossible de supprimer ce profil SMTP.", "error");
+    fetch("/config-smtp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur !",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
         } else {
             Swal.fire({
-            title: "Supprimé !",
-            text: "Le profil d'envoi a été supprimé avec succès.",
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false
+                icon: "success",
+                title: "Profil SMTP ajouté !",
+                text: "Le profil SMTP a été enregistré avec succès.",
+                confirmButtonColor: "#28a745"
             }).then(() => {
-            location.reload();
+                location.reload();
             });
         }
-        })
-        .catch(err => {
-        console.error("Erreur lors de la suppression du profil SMTP :", err);
-        Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur inconnue !",
+            text: "Une erreur s'est produite lors de la création du profil SMTP.",
+            confirmButtonColor: "#d33"
         });
-    }
     });
-});
+    }
+
+function submitEditedSmtp() {
+    const name = document.getElementById("editSmtpName").value;
+    const id = document.getElementById("editSmtpId").value;
+
+    if (isDuplicateName(name, "#smtpTableBody", {
+        columnIndex: 0,
+        excludeId: id,
+        rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: "error",
+            title: "Nom déjà utilisé",
+            text: "Un profil SMTP avec ce nom existe déjà.",
+            confirmButtonColor: "#d33"
+        });
+        return;
+    }
+        
+    if (!validateSmtpForm("editSmtpName", "editSmtpHost", "editSmtpFromAddress")) {
+        return;
+    }
+
+    const profileId = document.getElementById("editSmtpId").value;
+    const data = {
+        id: parseInt(profileId, 10),
+        name: document.getElementById("editSmtpName").value,
+        host: document.getElementById("editSmtpHost").value,
+        from_address: document.getElementById("editSmtpFromAddress").value
+    };
+
+    fetch(`/config-smtp/${profileId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur !",
+                text: response.error,
+                confirmButtonColor: "#d33"
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Profil SMTP modifié !",
+                text: "Les modifications ont été enregistrées avec succès.",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error(err);
+        Swal.fire({
+            icon: "error",
+            title: "Erreur inconnue !",
+            text: "Une erreur s'est produite lors de la modification du profil SMTP.",
+            confirmButtonColor: "#d33"
+        });
+    });
+    }
+
+    //    SUPPRESSION D'UN SMTP PROFILE
+    document.querySelectorAll(".delete-smtp").forEach(btn => {
+    btn.addEventListener("click", function() {
+        const profileId = this.getAttribute("data-id");
+
+        Swal.fire({
+        title: "Supprimer ce profil d'envoi ?",
+        text: "Cette action est irréversible. Êtes-vous sûr ?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler",
+        reverseButtons: true
+        }).then((result) => {
+        if (result.isConfirmed) {
+            // Si l'utilisateur confirme, envoi de la requête DELETE
+            fetch(`/config-smtp/${profileId}`, {
+            method: "DELETE"
+            })
+            .then(res => res.json())
+            .then(data => {
+            if (data.error) {
+                Swal.fire("Erreur", "Impossible de supprimer ce profil SMTP.", "error");
+            } else {
+                Swal.fire({
+                title: "Supprimé !",
+                text: "Le profil d'envoi a été supprimé avec succès.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+                }).then(() => {
+                location.reload();
+                });
+            }
+            })
+            .catch(err => {
+            console.error("Erreur lors de la suppression du profil SMTP :", err);
+            Swal.fire("Erreur", "Une erreur s'est produite lors de la suppression.", "error");
+            });
+        }
+        });
+    });
 });
 
 

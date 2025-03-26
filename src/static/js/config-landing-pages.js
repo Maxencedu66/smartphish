@@ -113,6 +113,20 @@ function validateLandingPageForm(nameId, htmlId) {
 
 // Création d'une nouvelle landing page
 function submitNewLandingPage() {
+    const name = document.getElementById("newLandingPageName").value;
+
+    if (isDuplicateName(name, "#landingPageTableBody", {
+        columnIndex: 0,
+        rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nom déjà utilisé',
+            text: 'Une page de destination avec ce nom existe déjà.',
+        });
+        return;
+    }
+
     if (!validateLandingPageForm("newLandingPageName", "newLandingPageHTML")) return;
 
     const data = {
@@ -145,6 +159,22 @@ function submitNewLandingPage() {
 
 // Modification d'une landing page
 function submitEditedLandingPage() {
+    const name = document.getElementById("editLandingPageName").value;
+    const id = document.getElementById("editLandingPageId").value;
+
+    if (isDuplicateName(name, "#landingPageTableBody", {
+        columnIndex: 0,
+        excludeId: id,
+        rowIdAttribute: "data-id"
+    })) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nom déjà utilisé',
+            text: 'Une page de destination avec ce nom existe déjà.',
+        });
+        return;
+    }
+    
     if (!validateLandingPageForm("editLandingPageName", "editLandingPageHTML")) return;
 
     const pageId = document.getElementById("editLandingPageId").value;
