@@ -5,13 +5,16 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     if (selectedMethod === "manual") {
         const name = document.getElementById(nameId).value.trim();
         const subject = document.getElementById(subjectId).value.trim();
-        
+    
         if (document.getElementById("htmlFormat").checked) {
             text = quill.root.innerHTML.trim();
             plaintext = quill.getText().trim();
         } else if (document.getElementById("textFormat").checked) {
             plaintext = document.getElementById(textId).value.trim();
+        } else if (document.getElementById("fullHtmlFormat").checked) {
+            plaintext = document.getElementById("fullHtmlTextarea").value.trim();
         }
+        
 
         const isValidRequiredFields = validateRequiredFields([
             [name, "Nom du modèle"],
@@ -19,6 +22,7 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
             [plaintext, "Contenu Email"]
         ]);
         if (!isValidRequiredFields) return;
+
     } else if (selectedMethod === "ai") {
         const name = document.getElementById(nameId).value.trim();
         let subject, textia;
@@ -64,6 +68,75 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     return true;
 }
 
+// View full HTML
+function toggleEditFullHtmlView() {
+    const textarea = document.getElementById("editFullHtmlTextarea");
+    const preview = document.getElementById("editFullHtmlPreview");
+
+    if (textarea.style.display !== "none") {
+        preview.srcdoc = textarea.value;
+        textarea.style.display = "none";
+        preview.style.display = "block";
+    } else {
+        textarea.style.display = "block";
+        preview.style.display = "none";
+    }
+}
+
+function toggleFullHtmlView() {
+    const textarea = document.getElementById("fullHtmlTextarea");
+    const preview = document.getElementById("fullHtmlPreview");
+
+    if (textarea.style.display !== "none") {
+        preview.srcdoc = textarea.value;
+        textarea.style.display = "none";
+        preview.style.display = "block";
+    } else {
+        textarea.style.display = "block";
+        preview.style.display = "none";
+    }
+}
+
+// Gestion Quil Editor
+let isSourceView = false;
+
+function toggleSource() {
+    const editorContainer = document.getElementById("htmlEditor");
+    const htmlTextarea = document.getElementById("manualHtmlView");
+
+    if (!isSourceView) {
+        // Passer en mode HTML brut
+        htmlTextarea.value = quill.root.innerHTML.trim();
+        htmlTextarea.style.display = "block";
+        editorContainer.querySelector(".ql-editor").style.display = "none";
+    } else {
+        // Repasser en mode WYSIWYG
+        quill.root.innerHTML = htmlTextarea.value.trim();
+        htmlTextarea.style.display = "none";
+        editorContainer.querySelector(".ql-editor").style.display = "block";
+    }
+
+    isSourceView = !isSourceView;
+}
+
+function toggleEditSource() {
+    const quillContainer = document.getElementById("editQuillEditor");
+    const htmlTextarea = document.getElementById("editManualHtmlView");
+
+    if (quillContainer.style.display === "none") {
+        // Revenir à l'éditeur visuel
+        quillContainer.style.display = "block";
+        htmlTextarea.style.display = "none";
+        editQuill.root.innerHTML = htmlTextarea.value;
+    } else {
+        // Passer à la vue code
+        htmlTextarea.value = editQuill.root.innerHTML;
+        quillContainer.style.display = "none";
+        htmlTextarea.style.display = "block";
+    }
+}
+
+
 let quill;
 let editQuillEditor;
 
@@ -84,15 +157,20 @@ document.addEventListener("DOMContentLoaded", function() {
     // Gérer le switch entre mode texte / HTML
     document.querySelectorAll('input[name="emailFormat"]').forEach((radio) => {
         radio.addEventListener('change', function () {
-            if (this.value === "html") {
-                document.getElementById("textEditor").style.display = "none";
-                document.getElementById("htmlEditor").style.display = "block";
-            } else {
+            document.getElementById("textEditor").style.display = "none";
+            document.getElementById("htmlEditor").style.display = "none";
+            document.getElementById("fullHtmlEditor").style.display = "none";
+    
+            if (this.value === "text") {
                 document.getElementById("textEditor").style.display = "block";
-                document.getElementById("htmlEditor").style.display = "none";
+            } else if (this.value === "html") {
+                document.getElementById("htmlEditor").style.display = "block";
+            } else if (this.value === "fullhtml") {
+                document.getElementById("fullHtmlEditor").style.display = "block";
             }
         });
     });
+    
 
     // Initialisation de l'éditeur Quill pour l'édition
     editQuill = new Quill('#editQuillEditor', {
@@ -110,11 +188,21 @@ document.addEventListener("DOMContentLoaded", function() {
     // Gérer le switch entre mode texte / HTML pour l'édition
     document.querySelectorAll('input[name="editEmailFormat"]').forEach(radio => {
         radio.addEventListener('change', () => {
-            const isHtml = document.getElementById("editHtmlFormat").checked;
-            document.getElementById("editTextEditor").style.display = isHtml ? "none" : "block";
-            document.getElementById("editHtmlEditor").style.display = isHtml ? "block" : "none";
+            const format = radio.value;
+            document.getElementById("editTextEditor").style.display = "none";
+            document.getElementById("editHtmlEditor").style.display = "none";
+            document.getElementById("editFullHtmlEditor").style.display = "none";
+    
+            if (format === "text") {
+                document.getElementById("editTextEditor").style.display = "block";
+            } else if (format === "html") {
+                document.getElementById("editHtmlEditor").style.display = "block";
+            } else if (format === "fullhtml") {
+                document.getElementById("editFullHtmlEditor").style.display = "block";
+            }
         });
     });
+    
 
     // Basculement entre les champs manuels et IA
     document.getElementsByName("creationMethod").forEach(radio => {
@@ -131,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Modification d'un template
     document.querySelectorAll(".edit-template").forEach(btn => {
-        btn.addEventListener("click", function() {
+        btn.addEventListener("click", function () {
             const templateId = this.getAttribute("data-id");
             fetch(`/templates/${templateId}`)
                 .then(response => response.json())
@@ -140,27 +228,43 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert("Erreur lors de la récupération du modèle.");
                         return;
                     }
+    
                     document.getElementById("editTemplateId").value = data.id;
                     document.getElementById("editTemplateName").value = data.name;
                     document.getElementById("editEmailSubject").value = data.subject;
-
-                    const isHtml = data.text && data.text.includes("<") && data.text.includes(">");
-
-                    if (isHtml) {
+    
+                    document.getElementById("editTextEditor").style.display = "none";
+                    document.getElementById("editHtmlEditor").style.display = "none";
+                    document.getElementById("editFullHtmlEditor").style.display = "none";
+    
+                    document.getElementById("editEmailText").value = "";
+                    document.getElementById("editFullHtmlTextarea").value = "";
+                    editQuill.root.innerHTML = "";
+    
+                    // 1. Format HTML complet
+                    if (data.html && data.html.includes("<html")) {
+                        document.getElementById("editFullHtmlFormat").checked = true;
+                        document.getElementById("editFullHtmlEditor").style.display = "block";
+                        document.getElementById("editFullHtmlTextarea").value = data.html;
+                    }
+                    // 2. Format HTML (Quill)
+                    else if (data.html) {
                         document.getElementById("editHtmlFormat").checked = true;
-                        document.getElementById("editTextEditor").style.display = "none";
                         document.getElementById("editHtmlEditor").style.display = "block";
-                        editQuill.root.innerHTML = data.text;
-                    } else {
+                        editQuill.root.innerHTML = data.html;
+                    }
+                    // 3. Format Texte
+                    else {
                         document.getElementById("editTextFormat").checked = true;
                         document.getElementById("editTextEditor").style.display = "block";
-                        document.getElementById("editHtmlEditor").style.display = "none";
                         document.getElementById("editEmailText").value = data.text || "";
                     }
                 })
                 .catch(err => console.error("Erreur lors du chargement du modèle :", err));
         });
     });
+    
+    
 
     // Suppression d'un template
     document.querySelectorAll(".delete-template").forEach(btn => {
@@ -320,10 +424,13 @@ function submitNewEmailTemplate() {
         if (document.getElementById("htmlFormat").checked) {
             text = quill.root.innerHTML;
             method = "quillEditor";
-        } else {
+        } else if (document.getElementById("textFormat").checked) {
             text = document.getElementById("newEmailText").value;
             method = "newEmailText";
-        }
+        } else if (document.getElementById("fullHtmlFormat").checked) {
+            text = document.getElementById("fullHtmlTextarea").value;
+            method = "fullHtmlTextarea";
+        }        
     } else {
         Swal.fire({
             icon: "error",
@@ -337,13 +444,18 @@ function submitNewEmailTemplate() {
     if (!validateEmailTemplateForm("newTemplateName", "newEmailSubject", method)) {
         return;
     }
-
-    const data = {
+    
+    let data = {
         name: name,
-        subject: subject,
-        text: text
+        subject: subject
     };
-
+    
+    if (document.getElementById("fullHtmlFormat").checked || document.getElementById("htmlFormat").checked) {
+        data.html = text;
+    } else {
+        data.text = text;
+    }
+    
     fetch("/templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -391,7 +503,10 @@ function validateEditEmailTemplateForm() {
         plaintext = editQuill.getText().trim();
     } else if (document.getElementById("editTextFormat").checked) {
         plaintext = document.getElementById("editEmailText").value.trim();
-    } else {
+    } else if (document.getElementById("fullHtmlFormat").checked) {
+        plaintext = document.getElementById("fullHtmlTextarea").value.trim();
+    }
+     else {
         Swal.fire({
             icon: "error",
             title: "Erreur",
@@ -420,22 +535,38 @@ function submitEditedEmailTemplate() {
     const subject = document.getElementById("editEmailSubject").value.trim();
     let text;
 
-    if (document.getElementById("editHtmlFormat").checked) {
-        text = editQuill.root.innerHTML.trim();
-    } else {
-        text = document.getElementById("editEmailText").value.trim();
-    }
+    const editHtmlFormat = document.getElementById("editHtmlFormat");
+    const editTextFormat = document.getElementById("editTextFormat");
+    const editFullHtmlFormat = document.getElementById("editFullHtmlFormat");
 
+    if (editHtmlFormat && editHtmlFormat.checked) {
+        text = editQuill.root.innerHTML.trim();
+    } else if (editTextFormat && editTextFormat.checked) {
+        text = document.getElementById("editEmailText").value.trim();
+    } else if (editFullHtmlFormat && editFullHtmlFormat.checked) {
+        text = document.getElementById("editFullHtmlTextarea").value.trim();
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: "Format de contenu non reconnu.",
+            confirmButtonColor: "#d33"
+        });
+        return;
+    }
     const data = {
         id: parseInt(templateId, 10),
         name,
-        subject,
-        text
+        subject
     };
 
-    if (!validateEditEmailTemplateForm()) {
-        return;
+    if (editHtmlFormat?.checked || editFullHtmlFormat?.checked) {
+        data.html = text;
+    } else {
+        data.text = text;
     }
+
+    if (!validateEditEmailTemplateForm()) return;
 
     fetch(`/templates/${templateId}`, {
         method: "PUT",

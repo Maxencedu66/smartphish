@@ -83,7 +83,7 @@
                 <div class="card mt-3 card-details">
                     <div class="card-body bg-light p-3" style="border: 1px solid #ddd;">
                         <p><strong>Expéditeur :</strong> {{ campaign.smtp.from_address }}</p>
-                        <p><strong>Destinataire :</strong> {{ group_name }}</p>
+                        <p><strong>Groupe Destinataire :</strong> {{ group_name }}</p>
                         <p><strong>Date d'envoi :</strong> {{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
                         <p><strong>Date de modification :</strong> {{ campaign.template.modified_date[:10] }} {{ campaign.template.modified_date[11:16] }}</p>
                         <p><strong>Objet :</strong> {{ campaign.template.subject }}</p>

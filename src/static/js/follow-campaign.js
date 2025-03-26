@@ -115,7 +115,7 @@ function regenerateReport(campaignId) {
 
 function updateDownloadButton(campaignId) {
     const btn = document.getElementById(`report-btn-${campaignId}`);
-    btn.innerText = "📥 Télécharger le rapport";
+    btn.innerText = "Télécharger le rapport";
     btn.classList.remove("btn-secondary");
     btn.classList.add("btn-success");
     btn.onclick = () => {
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.exists) {
                     updateDownloadButton(id);
                 } else {
-                    btnEl.innerText = "🧠 Générer le rapport";
+                    btnEl.innerText = "Générer le rapport";
                     btnEl.classList.remove("btn-secondary");
                     btnEl.classList.add("btn-info");
                     btnEl.onclick = function () {
