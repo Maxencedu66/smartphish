@@ -90,12 +90,22 @@
                             <textarea id="newEmailText" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
                         </div>
                         
-                        <div class="mb-3" id="htmlEditor" style="display:none;">
+                        <div id="htmlEditor" style="display:none;">
                             <label for="newEmailHtml" class="form-label"><strong>Contenu HTML :</strong></label>
+                        
+                            <!-- Quill (mode visuel) -->
                             <div id="quillEditor" style="height: 250px;"></div>
+                        
+                            <!-- HTML brut (mode source) -->
+                            <textarea id="manualHtmlView" style="display: none; width: 100%; height: 250px;" class="form-control" spellcheck="false"></textarea>
+                        
+                            <!-- Bouton switch mode -->
+                            <button type="button" class="btn btn-secondary mt-2" onclick="toggleSource()">🔁 Basculer Vue / Code</button>
+                        
+                            <!-- Champ caché pour envoi -->
                             <input type="hidden" id="newEmailHtml">
-
                         </div>
+                        
                     </div>
                     <!-- Champs pour génération par IA -->
                     <div id="aiFields" style="display:none;">
@@ -201,7 +211,9 @@
                 <!-- HTML avec Quill -->
                 <div class="mb-3" id="editHtmlEditor" style="display: none;">
                     <label for="editEmailHtml" class="form-label"><strong>Contenu HTML :</strong></label>
-                    <div id="editQuillEditor" style="height: 250px;"></div>
+                    <div id="editQuillEditor" style="height: 250px;">
+                        <input type="hidden" id="editEmailHtml">
+                    </div>
                 </div>
 
             </div>
@@ -284,6 +296,28 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     return true;
 }
 
+let isSourceView = false;
+
+function toggleSource() {
+    const quillContainer = document.querySelector('#quillEditor');
+    const textarea = document.getElementById('manualHtmlView');
+
+    if (!isSourceView) {
+        // Source HTML
+        textarea.value = quill.root.innerHTML;
+        textarea.style.display = 'block';
+        quillContainer.style.display = 'none';
+    } else {
+        // Vue
+        const newHtml = textarea.value;
+        quill.root.innerHTML = newHtml;
+        textarea.style.display = 'none';
+        quillContainer.style.display = 'block';
+    }
+
+    isSourceView = !isSourceView;
+}
+
 let quill;
 let editQuillEditor;
 
@@ -292,12 +326,20 @@ document.addEventListener("DOMContentLoaded", function() {
     quill = new Quill('#quillEditor', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                [{ header: [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'link'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['clean']
-            ]
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, false] }],
+                    ['bold', 'italic', 'underline', 'link'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['code-block'],
+                    ['clean'],
+                    ['source']
+                ],
+                handlers: {
+                    'source': toggleSource
+                }
+            }
+
         }
     });
 
@@ -528,20 +570,28 @@ function generateAIEmail() {
 // Fonction pour soumettre le nouveau template
 function submitNewEmailTemplate() {
     const name = document.getElementById("newTemplateName").value;
-    let subject, text;
+    let subject, text, html;
     let method;    
 
     if (document.getElementById("aiMethod").checked) {
         subject = document.getElementById("aiGeneratedSubject").value;
         text = document.getElementById("aiGeneratedContent").value;
+        html = "";
     } else if (document.getElementById("manualMethod").checked) {
         subject = document.getElementById("newEmailSubject").value;
         if (document.getElementById("htmlFormat").checked) {
             text = quill.root.innerHTML;
             method = "quillEditor";
+            if (isSourceView) {
+                html = document.getElementById("manualHtmlView").value.trim();
+            } else {
+                html = quill.root.innerHTML.trim();
+            }
+
         } else {
             text = document.getElementById("newEmailText").value;
             method = "newEmailText";
+            html = ""; 
         }
     } else {
         Swal.fire({
@@ -557,10 +607,13 @@ function submitNewEmailTemplate() {
         return;
     }
 
+    document.getElementById("newEmailHtml").value = html;
+
     const data = {
         name: name,
         subject: subject,
-        text: text
+        text: text,
+        html: html
     };
 
     fetch("/templates", {
