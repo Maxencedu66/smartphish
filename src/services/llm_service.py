@@ -6,7 +6,7 @@ import threading
 from src.routes.auth_routes import get_db_connection
 from src.lib.goreport_lib import Goreport
 from src.config import Config
-
+import re
 
 
 class EmailInfo(BaseModel):
@@ -444,3 +444,36 @@ Rends le texte fluide, aéré et facile à lire pour une insertion directe dans 
     response = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}])
     texte = response.message.content.strip()
     return texte
+
+
+
+def extract_html_from_llm(raw_response: str) -> str:
+    match = re.search(r'<!DOCTYPE html>.*?</html>', raw_response, re.DOTALL | re.IGNORECASE)
+    return match.group(0).strip() if match else "Erreur : HTML non trouvé."
+
+
+def generate_phishing_landing(user_data):
+    scenario = user_data["scénario"]
+    entreprise = user_data.get("entreprise", "")
+    expediteur = user_data.get("expéditeur", "")
+
+    prompt = f"""
+    Génère uniquement le **code HTML complet** (et rien d'autre) d'une page de destination pour le scénario : "{scenario}".
+
+    Contraintes :
+    - Langue : français
+    - Ne commente pas ta réponse.
+    - Réponds UNIQUEMENT avec le code HTML.
+    - Structure HTML complète et autonome
+    - Formulaire avec `action="{{{{.URL}}}}"`, champs email / mdp / rib selon le besoin
+    - Design sobre et crédible (type institutionnel)
+    """
+
+    model = get_used_model()
+    
+    response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+    
+    
+    html_code = extract_html_from_llm(response.message.content)
+    print(html_code)
+    return html_code

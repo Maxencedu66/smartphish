@@ -1,6 +1,6 @@
 # Routes pour la gestion du LLM (Génération des emails)
 from flask import Blueprint, request, jsonify
-from src.services.llm_service import generate_phishing_email, get_ollama_status
+from src.services.llm_service import generate_phishing_email, get_ollama_status, generate_phishing_landing
 
 llm_bp = Blueprint('llm', __name__)
 
@@ -23,5 +23,25 @@ def generate_email():
     try:
         generated_email = generate_phishing_email(user_data)
         return jsonify({"object": generated_email['object'], "content": generated_email['content']})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@llm_bp.route('/generate-landing', methods=['POST'])
+def generate_landing():
+    data = request.json
+    scenario = data.get("scenario")
+    entreprise = data.get("entreprise", "")
+    expediteur = data.get("expediteur", "")
+
+    user_data = {
+        "scénario": scenario,
+        "entreprise": entreprise,
+        "expéditeur": expediteur
+    }
+
+    try:
+        html = generate_phishing_landing(user_data)
+        return jsonify({"html": html})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

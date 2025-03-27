@@ -144,6 +144,27 @@ def generate_email():
     return jsonify({"object": generated_email['object'], "content": generated_email['content'], "html": generated_email['html']})
 
 
+
+@bp.route('/generate-landing', methods=['POST'])
+def generate_landing():
+    data = request.json
+    scenario = data.get("scenario")
+    entreprise = data.get("entreprise", "")
+    expediteur = data.get("expediteur", "")
+
+    user_data = {
+        "scénario": scenario,
+        "entreprise": entreprise,
+        "expéditeur": expediteur
+    }
+
+    try:
+        html = generate_phishing_landing(user_data)
+        return jsonify({"html": html})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @bp.route('/analysis-correction')
 def analysis_correction():
     return render_template('analysis-correction.html')
