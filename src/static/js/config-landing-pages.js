@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
 });
 
+
 function assignEditEvents() {
     document.querySelectorAll(".edit-landing-page").forEach(btn => {
         btn.addEventListener("click", function() {
@@ -291,3 +292,27 @@ function importSite() {
         });
     });
 }
+
+const newCaptureCredentials = document.getElementById('newCaptureCredentials');
+const newCapturePasswords = document.getElementById('newCapturePasswords');
+
+newCaptureCredentials.addEventListener('change', () => {
+    if (newCaptureCredentials.checked) {
+        newCapturePasswords.disabled = false;
+        newCapturePasswords.disabled = !newCaptureCredentials.checked;
+    } else {
+        newCapturePasswords.disabled = true;
+    }
+});
+
+const editCaptureCredentials = document.getElementById('editCaptureCredentials');
+const editCapturePasswords = document.getElementById('editCapturePasswords');
+
+editCaptureCredentials.addEventListener('change', () => {
+    if (editCaptureCredentials.checked) {
+        editCapturePasswords.disabled = false;
+        editCapturePasswords.disabled = !editCaptureCredentials.checked;
+    } else {
+        editCapturePasswords.disabled = true;
+    }
+});

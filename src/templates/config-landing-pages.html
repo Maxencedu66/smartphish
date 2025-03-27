@@ -83,7 +83,7 @@
                 <!-- Options supplémentaires -->
                 <label class="form-label mt-2"><strong>Capture des données :</strong></label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="newCaptureCredentials" checked>
+                    <input class="form-check-input" type="checkbox" id="newCaptureCredentials">
                     <label class="form-check-label" for="newCaptureCredentials">
                         Activer la capture des données
                     </label>
@@ -91,7 +91,7 @@
 
                 <label class="form-label mt-2"><strong>Capture des mots de passe :</strong></label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="newCapturePasswords">
+                    <input class="form-check-input" type="checkbox" id="newCapturePasswords" disabled>
                     <label class="form-check-label" for="newCapturePasswords">
                         Capturer également les mots de passe
                     </label>
@@ -159,6 +159,5 @@
 
     
 <script src="{{ url_for('static', filename='js/config-landing-pages.js') }}" defer></script>
-
 
 {% endblock %}
