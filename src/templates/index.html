@@ -34,8 +34,10 @@
             <li><a class="menu-link {% if request.path == '/llm-status' %}active{% endif %}" href="/llm-status">🤖 Statut du LLM</a></li>
             <!-- <li><a class="menu-link {% if request.path == '/llm-training' %}active{% endif %}" href="/llm-training">📡 Entrainement du LLM</a></li> -->
             <li><a class="menu-link {% if request.path == '/llm-settings' %}active{% endif %}" href="/llm-settings">⚙️ Paramètres du LLM</a></li>
-            <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">👥 Création de compte</a></li>
-        </ul>
+            {% if session.role == 'admin' %}
+                <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">👥 Création de compte</a></li>
+            {% endif %}
+        /ul>
     </aside>
 
     <main id="content">

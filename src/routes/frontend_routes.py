@@ -1,6 +1,6 @@
 # Routes pour afficher les pages HTML, évite de tout mélanger dans le fichier principal app.py
 import os
-from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session, send_file
+from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session, send_file, abort
 from src.services.llm_service import *
 from src.services.gophish_service import *
 from src.services.report_service import *
@@ -13,9 +13,17 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from src.services.gophish_service import get_templates
 from src.services.report_service import *
-
+from functools import wraps
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("role") != "admin":
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Middleware pour vérifier l'authentification
 @bp.before_request
@@ -30,6 +38,7 @@ def login_page():
     return render_template("login.html")
 
 @bp.route("/register")
+@admin_required
 def register_page():
     return render_template("register.html")
 

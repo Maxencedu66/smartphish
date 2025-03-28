@@ -1,52 +1,63 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un compte | SmartPhish</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body class="d-flex align-items-center justify-content-center vh-100">
+{% extends 'index.html' %}
+{% block title %}Gestion administrateur{% endblock %}
+{% block content %}
+  
+<h2 class="mb-4"><i class="bi bi-bullseye"></i>Gestion des utilisateurs</h2>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="text-center">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo SmartPhish" class="img-fluid mb-3" style="max-width: 150px;">
-                    <h2 class="mb-4">Créer un compte</h2>
-                </div>
 
-                <div class="card shadow p-4">
-                    <h4 class="text-center mb-3">Inscription</h4>
-                    
-                    <!-- Message d'erreur -->
-                    <!-- <div id="error-message" class="alert alert-danger d-none"></div> -->
-
-                    <form onsubmit="event.preventDefault(); register();">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Nom d'utilisateur</label>
-                            <input type="text" id="username" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <input type="password" id="password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm-password" class="form-label">Confirmer le mot de passe</label>
-                            <input type="password" id="confirm-password" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn btn-success" onclick="openUserModal()">Créer un utilisateur</button>
     </div>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
- 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ url_for('static', filename='js/register.js') }}" defer></script>
+    <table class="table table-bordered" id="user-table">
+        <thead>
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="user-table-body">
+            <!-- Les utilisateurs seront injectés ici -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de création/modification -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="userForm" onsubmit="submitUserForm(event)">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Créer un utilisateur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-username" />
+            <div class="mb-3">
+                <label class="form-label"><strong>Nom d'utilisateur</strong></label>
+                <input type="text" class="form-control" id="username"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><strong>Mot de passe</strong></label>
+                <input type="password" class="form-control" id="password"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><strong>Rôle</strong></label>
+                <select class="form-control" id="role">
+                    <option value="user">Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Valider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+{% endblock %}
