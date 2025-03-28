@@ -19,6 +19,55 @@ document.addEventListener("DOMContentLoaded", function() {
             assignEditEvents();
             assignDeleteEvents();
         });
+
+    // Basculer entre méthode IA et manuelle avec réinitialisation complète des champs du modal de création
+    const manualSection = document.getElementById("manualFields");
+    const aiSection = document.getElementById("aiFields");
+
+    document.querySelectorAll('input[name="creationMethod"]').forEach(radio => {
+        radio.addEventListener("change", function() {
+            if (this.value === "ai") {
+                // Réinitialiser les champs du mode manuel/import
+                document.getElementById("newLandingPageHTML").value = "";
+                document.getElementById("previewNewPageFrame").style.display = "none";
+                // Réinitialiser les champs du mode IA
+                document.getElementById("aiGeneratedLandingHTML").value = "";
+                document.getElementById("previewAIALandingFrame").style.display = "none";
+                aiSection.style.display = "block";
+                manualSection.style.display = "none";
+            } else {
+                // Réinitialiser les champs du mode IA
+                document.getElementById("aiGeneratedLandingHTML").value = "";
+                document.getElementById("previewAIALandingFrame").style.display = "none";
+                // Réinitialiser les champs du mode manuel/import
+                document.getElementById("newLandingPageHTML").value = "";
+                document.getElementById("previewNewPageFrame").style.display = "none";
+                aiSection.style.display = "none";
+                manualSection.style.display = "block";
+            }
+        });
+    });
+
+    // Réinitialiser complètement le modal de création à l'ouverture
+    document.getElementById('newLandingPageModal').addEventListener('show.bs.modal', function () {
+        document.getElementById("newLandingPageName").value = "";
+        document.getElementById("newLandingPageHTML").value = "";
+        document.getElementById("newRedirectUrl").value = "";
+        document.getElementById("newCaptureCredentials").checked = true;
+        document.getElementById("newCapturePasswords").checked = false;
+        document.getElementById("importSiteURL").value = "";
+        document.getElementById("includeResources").checked = false;
+        document.getElementById("previewNewPageFrame").style.display = "none";
+        document.getElementById("newLandingPageHTML").style.display = "block";
+        // Réinitialiser la sélection de la méthode
+        document.getElementById("manualMethod").checked = true;
+        document.getElementById("aiMethod").checked = false;
+        manualSection.style.display = "block";
+        aiSection.style.display = "none";
+        // Réinitialiser les champs IA
+        document.getElementById("aiGeneratedLandingHTML").value = "";
+        document.getElementById("previewAIALandingFrame").style.display = "none";
+    });
 });
 
 
@@ -29,6 +78,7 @@ function assignEditEvents() {
             fetch(`/api/gophish/landing_pages/${pageId}`)
                 .then(response => response.json())
                 .then(data => {
+                    // Utiliser ici les IDs du modal d'édition (non réinitialisés)
                     document.getElementById("editLandingPageId").value = data.id;
                     document.getElementById("editLandingPageName").value = data.name;
                     document.getElementById("editLandingPageHTML").value = data.html;
@@ -85,7 +135,6 @@ function assignDeleteEvents() {
 function togglePreview(textareaId, iframeId) {
     const textarea = document.getElementById(textareaId);
     const iframe = document.getElementById(iframeId);
-
     if (iframe.style.display === "none") {
         iframe.srcdoc = textarea.value;
         iframe.style.display = "block";
@@ -96,43 +145,69 @@ function togglePreview(textareaId, iframeId) {
     }
 }
 
+function togglePreviewIA(textareaId, iframeId) {
+    const textarea = document.getElementById(textareaId);
+    const iframe = document.getElementById(iframeId);
+    if (iframe.style.display === "none") {
+        iframe.srcdoc = textarea.value;
+        iframe.style.display = "block";
+        textarea.style.display = "none";
+    } else {
+        iframe.style.display = "none";
+        textarea.style.display = "block";
+    }
+}
+
+function validateRequiredFields(fields) {
+    for (let i = 0; i < fields.length; i++) {
+        if (!fields[i][0]) {
+            Swal.fire({
+                icon: "warning",
+                title: "Champ requis",
+                text: fields[i][1] + " est obligatoire.",
+                confirmButtonColor: "#f39c12"
+            });
+            return false;
+        }
+    }
+    return true;
+}
 
 function validateLandingPageForm(nameId, htmlId) {
     const name = document.getElementById(nameId).value.trim();
     const html = document.getElementById(htmlId).value.trim();
-
-    // Indiquer le nom des champs requis
-    const isValidRequiredFields = validateRequiredFields([
+    return validateRequiredFields([
         [name, "Nom de la page"],
         [html, "Contenu vide"]
     ]);
-
-    if (!isValidRequiredFields) return;
-
-    return true;
 }
 
-// Création d'une nouvelle landing page
 function submitNewLandingPage() {
-    const name = document.getElementById("newLandingPageName").value;
+    const name = document.getElementById("newLandingPageName").value.trim();
+    let htmlContent = "";
+    // Récupérer le contenu selon la méthode choisie (manuel ou IA)
+    if (document.getElementById("aiMethod").checked) {
+        htmlContent = document.getElementById("aiGeneratedLandingHTML").value.trim();
+    } else {
+        htmlContent = document.getElementById("newLandingPageHTML").value.trim();
+    }
 
-    if (isDuplicateName(name, "#landingPageTableBody", {
-        columnIndex: 0,
-        rowIdAttribute: "data-id"
-    })) {
+    if (isDuplicateName(name, "#landingPageTableBody", { columnIndex: 0, rowIdAttribute: "data-id" })) {
         Swal.fire({
             icon: 'error',
             title: 'Nom déjà utilisé',
-            text: 'Une page de destination avec ce nom existe déjà.',
+            text: 'Une page de destination avec ce nom existe déjà.'
         });
         return;
     }
 
-    if (!validateLandingPageForm("newLandingPageName", "newLandingPageHTML")) return;
+    // Valider en fonction de la méthode choisie
+    const htmlFieldId = document.getElementById("aiMethod").checked ? "aiGeneratedLandingHTML" : "newLandingPageHTML";
+    if (!validateLandingPageForm("newLandingPageName", htmlFieldId)) return;
 
     const data = {
-        name: document.getElementById("newLandingPageName").value,
-        html: document.getElementById("newLandingPageHTML").value,
+        name: name,
+        html: htmlContent,
         capture_credentials: document.getElementById("newCaptureCredentials").checked,
         capture_passwords: document.getElementById("newCapturePasswords").checked,
         redirect_url: document.getElementById("newRedirectUrl").value.trim() || null
@@ -158,20 +233,15 @@ function submitNewLandingPage() {
     });
 }
 
-// Modification d'une landing page
 function submitEditedLandingPage() {
     const name = document.getElementById("editLandingPageName").value;
     const id = document.getElementById("editLandingPageId").value;
 
-    if (isDuplicateName(name, "#landingPageTableBody", {
-        columnIndex: 0,
-        excludeId: id,
-        rowIdAttribute: "data-id"
-    })) {
+    if (isDuplicateName(name, "#landingPageTableBody", { columnIndex: 0, excludeId: id, rowIdAttribute: "data-id" })) {
         Swal.fire({
             icon: 'error',
             title: 'Nom déjà utilisé',
-            text: 'Une page de destination avec ce nom existe déjà.',
+            text: 'Une page de destination avec ce nom existe déjà.'
         });
         return;
     }
@@ -208,8 +278,8 @@ function submitEditedLandingPage() {
     });
 }
 
-// Réinitialiser le formulaire lorsque le modal de création est fermé
-document.getElementById('newLandingPageModal').addEventListener('hidden.bs.modal', function () {
+// Réinitialiser complètement le modal de création à l'ouverture
+document.getElementById('newLandingPageModal').addEventListener('show.bs.modal', function () {
     document.getElementById("newLandingPageName").value = "";
     document.getElementById("newLandingPageHTML").value = "";
     document.getElementById("newRedirectUrl").value = "";
@@ -217,20 +287,81 @@ document.getElementById('newLandingPageModal').addEventListener('hidden.bs.modal
     document.getElementById("newCapturePasswords").checked = false;
     document.getElementById("importSiteURL").value = "";
     document.getElementById("includeResources").checked = false;
-    // Réinitialiser l'affichage de l'aperçu
     document.getElementById("previewNewPageFrame").style.display = "none";
     document.getElementById("newLandingPageHTML").style.display = "block";
+    // Réinitialiser la sélection de la méthode : mode manuel/import par défaut
+    document.getElementById("manualMethod").checked = true;
+    document.getElementById("aiMethod").checked = false;
+    document.getElementById("manualFields").style.display = "block";
+    document.getElementById("aiFields").style.display = "none";
+    // Réinitialiser les champs IA
+    document.getElementById("aiGeneratedLandingHTML").value = "";
+    document.getElementById("previewAIALandingFrame").style.display = "none";
 });
+
+function generateAILanding() {
+    const scenario = document.getElementById("landingScenario").value;
+    if (!scenario) {
+        Swal.fire({
+            icon: "warning",
+            title: "Scénario requis",
+            text: "Veuillez sélectionner un scénario avant de générer une landing page.",
+            confirmButtonColor: "#f39c12"
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Génération en cours...",
+        text: "Merci de patienter.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("/generate-landing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            scenario: scenario,
+            entreprise: "SmartCorp",
+            expediteur: "RH"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        Swal.close();
+        if (data.error) {
+            Swal.fire("Erreur", data.error, "error");
+        } else {
+            // Remplir le textarea du mode IA avec le code généré
+            const htmlTextarea = document.getElementById("aiGeneratedLandingHTML");
+            document.getElementById("newLandingPageName").value = `LP - ${scenario}`;
+            htmlTextarea.value = data.html;
+            // Mettre à jour l'aperçu si visible
+            const previewFrame = document.getElementById("previewAIALandingFrame");
+            if (previewFrame.style.display === "block") {
+                previewFrame.srcdoc = htmlTextarea.value;
+            }
+            Swal.fire("Succès", "Landing page générée par IA !", "success");
+        }
+    })
+    .catch(err => {
+        console.error("Erreur IA :", err);
+        Swal.close();
+        Swal.fire("Erreur", "Impossible de générer la landing page.", "error");
+    });
+}
 
 function importSite() {
     const url = document.getElementById("importSiteURL").value.trim();
     const includeResources = document.getElementById("includeResources").checked;
 
-    const isValidRequiredFields = validateRequiredFields([
-        [url, "URL du site"],
-    ]);
-    if (!isValidRequiredFields) return;
-
+    const isValid = validateRequiredFields([[url, "URL du site"]]);
+    if (!isValid) return;
 
     const data = {
         url: url,
@@ -239,9 +370,7 @@ function importSite() {
 
     fetch("/import_site", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(res => res.json())
@@ -256,10 +385,6 @@ function importSite() {
         } else {
             let finalHTML = response.html;
             if (includeResources) {
-                // Si l'option d'inclusion des ressources est cochée,
-                // on ajuste le href de la balise <base> pour qu'il corresponde à l'URL importée.
-                //finalHTML = adjustBaseUrl(finalHTML, url);
-                // Vous pouvez éventuellement vérifier si le site est compatible en testant le contenu de la balise <base>
                 if (!finalHTML.includes(`href="${url}"`)) {
                     Swal.fire({
                         icon: "error",
@@ -270,7 +395,6 @@ function importSite() {
                     return;
                 }
             } else {
-                // Si on n'inclut pas les ressources, on peut nettoyer le HTML en retirant la balise <base>.
                 finalHTML = finalHTML.replace(/<base[^>]*>/gi, '');
             }
             document.getElementById("newLandingPageHTML").value = finalHTML;

