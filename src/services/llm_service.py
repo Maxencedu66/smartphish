@@ -16,6 +16,8 @@ class EmailInfo(BaseModel):
 def generate_prompt(user_data):
     """Génère un prompt adapté au scénario sélectionné."""
     scenario = user_data["scénario"]
+    expediteur = user_data.get("expéditeur", "Expéditeur inconnu")
+    entreprise = user_data.get("entreprise", "Entreprise inconnue")
 
     prompts = {
         "Départ à la retraite": f"""
@@ -25,7 +27,7 @@ def generate_prompt(user_data):
         
         - **But** : Organiser un repas de départ et demander subtilement un RIB et des coordonnées.
         - **Ton** : Amical et détendu.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -46,7 +48,7 @@ def generate_prompt(user_data):
 
         - **But** : Obtenir un RIB sous prétexte d'une correction de paiement.
         - **Ton** : Professionnel et bienveillant.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -66,8 +68,8 @@ def generate_prompt(user_data):
 
         - **But** : Récupérer des informations personnelles (nom, téléphone, RIB) sous couvert d'une invitation à un événement exclusif.
         - **Ton** : Enthousiaste et exclusif mais professionel et formel.
-        - **Signature** : {user_data['expéditeur']}.
-        - **Entreprise** : '{user_data['entreprise']}'.
+        - **Signature** : {expediteur}.
+        - **Entreprise** : '{entreprise}'.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -75,7 +77,7 @@ def generate_prompt(user_data):
         Exemple : 
         ---
         Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
-        🎉 {user_data['entreprise']} organise un événement exclusif pour ses collaborateurs ! 
+        🎉 {entreprise} organise un événement exclusif pour ses collaborateurs ! 
         Nombre de places limité, **inscrivez-vous vite** en remplissant le sondage avec vos noms, numéro de téléphone et RIB. 
         Lien pour vous inscrire : {'[Evènement exclusif]({{.URL}})'}.
         Ne manquez pas cette opportunité unique !
@@ -91,7 +93,7 @@ def generate_prompt(user_data):
 
         - **But** : Faire croire à une mise à jour système pour obtenir des identifiants.
         - **Ton** : Sérieux et impersonnel.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -99,7 +101,7 @@ def generate_prompt(user_data):
         Exemple : 
         ---
         Bonjour {'{{.FirstName}}'} {'{{.LastName}}'},
-        Dans le cadre de l'amélioration de la sécurité informatique de {user_data['entreprise']}, une **mise à jour de vos accès** est nécessaire.  
+        Dans le cadre de l'amélioration de la sécurité informatique de {entreprise}, une **mise à jour de vos accès** est nécessaire.  
         **Merci de vous connecter ici avec vos identifiants** : {'[Mise à jour des accès]({{.URL}})'} pour procéder à la mise à jour.
         Nous vous remercions pour votre coopération.
         ---
@@ -111,7 +113,7 @@ def generate_prompt(user_data):
         
         - **But** : Organiser un covoiturage et obtenir des coordonnées.
         - **Ton** : Amical et pratique.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -132,7 +134,7 @@ def generate_prompt(user_data):
         
         - **But** : Obtenir des coordonnées sous couvert de distribution de chèques voyage.
         - **Ton** : Formel et professionnel.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -153,7 +155,7 @@ def generate_prompt(user_data):
         
         - **But** : Obtenir des coordonnées sous couvert d'une invitation à un salon professionnel.
         - **Ton** : Convaincant et professionnel.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -176,7 +178,7 @@ def generate_prompt(user_data):
         
         - **But** : Obtenir des coordonnées sous couvert d'une urgence médicale (services d'urgence & police).
         - **Ton** : Sérieux et urgent.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -192,11 +194,11 @@ def generate_prompt(user_data):
         
         "Support émotionnel": f"""
         Rédige un email **bienveillant et empathique** annonçant qu'un collègue a besoin de soutien émotionnel et que le destinataire a été choisi pour l'aider.
-        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées.
+        Le mail doit être **court et clair**. Il doit inciter les destinataires à **répondre rapidement** avec leurs coordonnées (+ adresse mail PERSONNELLE).
         
         - **But** : Obtenir des coordonnées sous couvert de soutien émotionnel.
         - **Ton** : Bienveillant et empathique.
-        - **Signature** : {user_data['expéditeur']}.
+        - **Signature** : {expediteur}.
         - **Langue** : Français.
         - **Destinataire** : {'{{.FirstName}}'} {'{{.LastName}}'}
         - **Faux lien** : {'[texte]({{.URL}})'}
@@ -454,26 +456,37 @@ def extract_html_from_llm(raw_response: str) -> str:
 
 def generate_phishing_landing(user_data):
     scenario = user_data["scénario"]
-    entreprise = user_data.get("entreprise", "")
-    expediteur = user_data.get("expéditeur", "")
+    scenario_prompt = generate_prompt(user_data)
 
     prompt = f"""
-    Génère uniquement le **code HTML complet** (et rien d'autre) d'une page de destination pour le scénario : "{scenario}".
+    Génère uniquement le **code HTML complet** (et rien d'autre) d'un formulaire.
+    C'est un formulaire qui sera ouvert quand la personne cliquera sur le lien dans le mail du scénario suivant :
+    
+    >>> DEBUT DU SCENARIO <<<
+    "{scenario_prompt}".
+    >>> FIN DU SCENARIO <<<
 
     Contraintes :
     - Langue : français
     - Ne commente pas ta réponse.
     - Réponds UNIQUEMENT avec le code HTML.
     - Structure HTML complète et autonome
-    - Formulaire avec `action="{{{{.URL}}}}"`, champs email / mdp / rib selon le besoin
+    - Formulaire avec `action="{'{{.URL}}'}"`, champs correspondants aux informations demandées dans le scénario.
     - Design sobre et crédible (type institutionnel)
+    - Tous les éléments HTML doivent être stylisés en CSS intégré dans le code HTML.
+    - Ne mentionne pas le mail du scénario.
+    - Formulaire non personalisé, aucun noms et aucun nom d'entreprise.
     """
 
     model = get_used_model()
     
-    response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
-    
-    
-    html_code = extract_html_from_llm(response.message.content)
-    print(html_code)
+    valid = False
+    while not valid:
+        response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+        
+        html_code = extract_html_from_llm(response.message.content)
+        
+        valid = '{{.FirstName}}' not in html_code and '{{.LastName}}' not in html_code
+        
+    # print(html_code)
     return html_code
