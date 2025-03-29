@@ -455,7 +455,6 @@ def extract_html_from_llm(raw_response: str) -> str:
 
 
 def generate_phishing_landing(user_data):
-    scenario = user_data["scénario"]
     scenario_prompt = generate_prompt(user_data)
 
     prompt = f"""
@@ -479,14 +478,10 @@ def generate_phishing_landing(user_data):
     """
 
     model = get_used_model()
-    
     valid = False
     while not valid:
         response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
-        
         html_code = extract_html_from_llm(response.message.content)
-        
         valid = '{{.FirstName}}' not in html_code and '{{.LastName}}' not in html_code
         
-    # print(html_code)
     return html_code
