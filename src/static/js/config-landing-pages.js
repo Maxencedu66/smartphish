@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("newRedirectUrl").value = "";
         document.getElementById("newCaptureCredentials").checked = true;
         document.getElementById("newCapturePasswords").checked = false;
+        document.getElementById("newCapturePasswords").disabled = false;
         document.getElementById("importSiteURL").value = "";
         document.getElementById("includeResources").checked = false;
         document.getElementById("previewNewPageFrame").style.display = "none";
@@ -423,8 +424,8 @@ const newCapturePasswords = document.getElementById('newCapturePasswords');
 newCaptureCredentials.addEventListener('change', () => {
     if (newCaptureCredentials.checked) {
         newCapturePasswords.disabled = false;
-        newCapturePasswords.disabled = !newCaptureCredentials.checked;
     } else {
+        newCapturePasswords.checked = false;
         newCapturePasswords.disabled = true;
     }
 });
@@ -435,8 +436,8 @@ const editCapturePasswords = document.getElementById('editCapturePasswords');
 editCaptureCredentials.addEventListener('change', () => {
     if (editCaptureCredentials.checked) {
         editCapturePasswords.disabled = false;
-        editCapturePasswords.disabled = !editCaptureCredentials.checked;
     } else {
+        editCapturePasswords.checked = false;
         editCapturePasswords.disabled = true;
     }
 });
