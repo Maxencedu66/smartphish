@@ -174,10 +174,6 @@ def generate_landing():
         return jsonify({"error": str(e)}), 500
 
 
-@bp.route('/analysis-correction')
-def analysis_correction():
-    return render_template('analysis-correction.html')
-
 @bp.route('/llm-status')
 def llm_status():
     status = get_ollama_status()
