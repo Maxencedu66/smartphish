@@ -16,7 +16,7 @@ URL de phishing :
    - Retirer l'obligation de s'en servir dans la création de campagne.
    - la rendre fonctionnelle autre qu'en local
 
-
+Gérer les images caché pour l'ouverture des mails.
 
 
 Améliorations: 
