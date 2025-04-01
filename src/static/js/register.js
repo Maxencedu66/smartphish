@@ -79,7 +79,7 @@ function registerFromModal() {
         if (data.message === "Inscription réussie") {
             Swal.fire({
                 icon: "success",
-                title: "Inscirption réussie",
+                title: "Inscription réussie",
                 text: "L'utilisateur a été créé avec succès.",
                 timer: 1500,
                 showConfirmButton: false
