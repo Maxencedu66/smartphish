@@ -61,11 +61,20 @@ Avant de lancer l'application, assurez-vous d'avoir installé les éléments sui
 
 ## 🌍 Accéder à SmartPhish
 
-Une fois l’application démarrée, ouvrez votre navigateur et accédez à l’URL suivante :
+Une fois l’application démarrée, ouvrez votre navigateur et accédez à l’adresse suivante :
 
-🔗 **http://127.0.0.1:5000/** *(ou une autre adresse si spécifiée dans `app.py`)*
+🔗 **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)** *(ou une autre adresse si spécifiée dans `app.py`)*
 
-L'interface utilisateur vous permettra de créer et gérer vos campagnes de phishing personnalisées.
+Pour vous connecter à l'interface administrateur, utilisez les identifiants suivants :
+
+| 🔑 Identifiant administrateur |              |
+| ----------------------------- | ------------ |
+| **Nom d'utilisateur :**       | `admin`      |
+| **Mot de passe :**            | `CyberProjet`|
+
+> **Remarque :** En contexte de production (version SaaS), ces identifiants seraient transmis via un canal sécurisé séparé pour garantir leur confidentialité.
+
+Après connexion, vous pourrez accéder à toutes les fonctionnalités de l'application, notamment la création d'autres comptes utilisateurs et la gestion complète de vos campagnes de phishing personnalisées.
 
 ---
 
