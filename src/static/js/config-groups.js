@@ -113,10 +113,20 @@ function addMember(containerId) {
   row.classList.add("member-row", "d-flex", "gap-2", "align-items-center", "mb-2");
   row.innerHTML = `
     <span class="fw-bold" style="width: 20px;">${memberCount}.</span>
-    <input type="email" name="email[]" placeholder="Email" class="form-control" required>
-    <input type="text" name="first_name[]" placeholder="Prénom" class="form-control">
-    <input type="text" name="last_name[]" placeholder="Nom" class="form-control">
-    <input type="text" name="position[]" placeholder="Position" class="form-control">
+    <div class="row w-100">
+      <div class="col-6">
+          <input type="email" name="email[]" placeholder="Email" class="form-control mb-2" required>
+      </div>
+      <div class="col-2">
+          <input type="text" name="first_name[]" placeholder="Prénom" class="form-control mb-2">
+      </div>
+      <div class="col-2">
+          <input type="text" name="last_name[]" placeholder="Nom" class="form-control mb-2">
+      </div>
+      <div class="col-2">
+          <input type="text" name="position[]" placeholder="Position" class="form-control mb-2">
+      </div>
+  </div>
     <button type="button" class="btn btn-sm remove-member">❌</button>
   `;
   container.appendChild(row);
@@ -239,10 +249,21 @@ document.querySelectorAll(".edit-group").forEach(btn => {
             row.classList.add("member-row", "d-flex", "gap-2", "align-items-center", "mb-2");
             row.innerHTML = `
               <span class="fw-bold" style="width: 20px;">${memberCount}.</span>
-              <input type="email" name="email[]" class="form-control" value="${t.email}" required>
-              <input type="text" name="first_name[]" class="form-control" placeholder="Nom" value="${t.first_name || ''}">
-              <input type="text" name="last_name[]" class="form-control" placeholder="Prénom" value="${t.last_name || ''}">
-              <input type="text" name="position[]" class="form-control" placeholder="Position" value="${t.position || ''}">
+              <div class="row w-100">
+                  <div class="col-6">
+                    <input type="email" name="email[]" class="form-control" value="${t.email}" required>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" name="first_name[]" class="form-control" placeholder="Nom" value="${t.first_name || ''}">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" name="last_name[]" class="form-control" placeholder="Prénom" value="${t.last_name || ''}">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" name="position[]" class="form-control" placeholder="Position" value="${t.position || ''}">
+                  </div>
+              </div>
+              
               <button type="button" class="btn btn-sm remove-member">❌</button>
             `;
             container.appendChild(row);
