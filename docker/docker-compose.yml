@@ -1,17 +1,26 @@
-version: '3.8'
-
 services:
   gophish:
-    image: gophish/gophish:latest  # Utilise l'image officielle
-    platform: linux/amd64  # Force l'émulation x86_64 sur Mac M1/M2
+    image: gophish/gophish:latest # Utilise l'image officielle
+    platform: linux/amd64 # Force l'émulation x86_64 sur Mac M1/M2
     container_name: gophish
     ports:
-      - "3333:3333"   # Interface admin (HTTPS)
-      - "80:80"       # Phishing server (HTTP)
+      - "3333:3333" # Interface admin (HTTPS)
+      - "80:80" # Phishing server (HTTP)
     restart: unless-stopped
     environment:
       - ADMIN_LISTEN_URL=0.0.0.0:3333
       - PHISH_LISTEN_URL=0.0.0.0:80
       - USE_TLS=false
     volumes:
-      - ../src/data/smartphish.db:/opt/gophish/gophish.db  # Montage direct du fichier DB
+      - ../src/data/smartphish.db:/opt/gophish/gophish.db # Montage direct du fichier DB
+
+
+  # cve-search:
+  #   build:
+  #     context: cve-search
+  #   container_name: cve-search
+  #   ports:
+  #     - "5000:5000" # Port pour l'API
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./cve-search/data:/data/db # Volume pour la base de données
