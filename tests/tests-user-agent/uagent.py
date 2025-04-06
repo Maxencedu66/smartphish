@@ -1,6 +1,7 @@
 from user_agents import parse
 import requests
 from datetime import datetime
+import last_version as lv
 
 # URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?virtualMatchString=cpe:2.3:a:mozilla:firefox&versionStart=131.0&versionStartType=including&versionEnd=131.0.3&versionEndType=excluding"
 # URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?virtualMatchString=cpe:2.3:a:mozilla:firefox&versionStart=131.0&versionStartType=including&noRejected"
@@ -58,14 +59,51 @@ def cpe_start(cpe):
     return ':'.join(cpe.split(':')[:5])
 
 
+def same_cpe_product(cpe1, cpe2):
+    """
+    Compare CPE products to check if cpe1 and cpe2 are the same product.
+    """
+    # Compare CPE products
+    product1 = ':'.join(cpe1.split(':')[3:4+1])
+    product2 = ':'.join(cpe2.split(':')[3:4+1])
+    # print("Product1:", product1)
+    # print("Product2:", product2)
+    if product1 == product2:
+        return True
+    else:
+        return False
+
+
 def under_cpe_version(cpe1, cpe2):
     """
-    Compare CPE versions to check if cpe1 is under cpe2, including the version. cpe1 <= cpe2
+    Compare CPE versions to check if cpe1 is under cpe2, excluding the version. cpe1 < cpe2
     """
-    # Compare CPE versions
-    version1 = cpe1.split(':')[5].split('.')[0]
-    version2 = cpe2.split(':')[5].split('.')[0]
-    return version1 <= version2
+    try:
+        # print("CPE1:", cpe1)
+        # print("CPE2:", cpe2)
+        if not same_cpe_product(cpe1, cpe2):
+            return False
+        # Compare CPE versions
+        version1big = cpe1.split(':')[5].split('.')[0]
+        version2big = cpe2.split(':')[5].split('.')[0]
+        if version2big == '*':
+            return True
+        version1small = cpe1.split(':')[5].split('.')[1] if len(cpe1.split(':')[5].split('.')) > 1 else '999'
+        version2small = cpe2.split(':')[5].split('.')[1] if len(cpe2.split(':')[5].split('.')) > 1 else '999'
+        version1big = int(version1big) if version1big != '*' and version1big.isdigit() else 999
+        version2big = int(version2big) if version2big != '*' and version2big.isdigit() else 999
+        version1small = int(version1small) if version1small != '*' and version1small.isdigit() else 999
+        version2small = int(version2small) if version2small != '*' and version2small.isdigit() else 999
+        if version1big == version2big:
+            if version1small == version2small:
+                return False
+            else:
+                return version1small < version2small
+        else:
+            return version1big < version2big
+    except Exception as e:
+        print(f"Error comparing CPE versions: {e}")
+        return False
 
 
 def extract_cve_configurations(cve, browser_cpe, os_cpe):
@@ -74,7 +112,7 @@ def extract_cve_configurations(cve, browser_cpe, os_cpe):
     # if cve['id'] != 'CVE-2005-2516':
     #     return all_criteria, True #################################################################################################
     if 'configurations' not in cve:
-        print("No configurations found")
+        # print("No configurations found")
         return all_criteria, True
     # print(cve['configurations'])
     try:
@@ -100,6 +138,9 @@ def extract_cve_configurations(cve, browser_cpe, os_cpe):
                                     if 'versionEndIncluding' in match:
                                         criterion = cpe_start(match['criteria']) + ':' + match['versionEndIncluding'] + ':*:*:*:*:*:*:*'
                                         # print("Criterion with versionEndIncluding:", criterion)
+                                    elif 'versionEndExcluding' in match:
+                                        criterion = cpe_start(match['criteria']) + ':' + match['versionEndExcluding'] + ':*:*:*:*:*:*:*'
+                                        # print("Criterion with versionEndExcluding:", criterion)
                             
                             criteria.append(criterion)
                         except Exception as e:
@@ -120,6 +161,26 @@ def extract_cve_configurations(cve, browser_cpe, os_cpe):
                             # print("Criterion does not match")
                             break
                     all_criteria.append(criteria)
+            else:
+                # print("No operator found")
+                one_match = False
+                for node in config['nodes']:
+                    # print("Node:", node)
+                    for match in node['cpeMatch']:
+                        # print("Match:", match)
+                        criteria = match['criteria']
+                        if 'versionEndIncluding' in match:
+                            criteria = cpe_start(match['criteria']) + ':' + match['versionEndIncluding'] + ':*:*:*:*:*:*:*'
+                        elif 'versionEndExcluding' in match:
+                            criteria = cpe_start(match['criteria']) + ':' + match['versionEndExcluding'] + ':*:*:*:*:*:*:*'
+                        if cpe_start(browser_cpe) == cpe_start(criteria) or cpe_start(os_cpe) == cpe_start(criteria):
+                            # print("Match found")
+                            if under_cpe_version(browser_cpe, criteria) or under_cpe_version(os_cpe, criteria):
+                                # print("Match found with version")
+                                one_match = True
+                if not one_match:
+                    config_corresponds = False
+                    # print("No match found")
             # print('~~~~~~~~')
     except Exception as e:
         print(f"Error processing configurations: {e}")
@@ -138,7 +199,7 @@ def get_cpe(user_agent):
         browser_family = [part for part in browser_family.split() if part != 'ios'][0]
     if browser_family == "opera":
         browser_family = "opera_browser"
-    browser_version = user_agent.browser.version_string.split('.')[0]
+    browser_version = '.'.join(user_agent.browser.version_string.split('.')[:2])
     # print(browser_family, browser_version)
     
     browser_vendor_list = {
@@ -166,7 +227,7 @@ def get_cpe(user_agent):
         os_family = "iphone_os"
     if os_family == "ubuntu":
         os_family = "ubuntu_linux"
-    os_version = user_agent.os.version_string.split('.')[0]
+    os_version = '.'.join(user_agent.os.version_string.split('.')[:2])
     # print(os_family, os_version)
     
     os_vendors_list = {
@@ -187,8 +248,8 @@ def get_cpe(user_agent):
 
 
 def search_cve_by_cpe(browser_cpe, os_cpe):
-    print(f"Browser CPE : {browser_cpe}")
-    print(f"OS CPE      : {os_cpe}")
+    # print(f"Browser CPE : {browser_cpe}")
+    # print(f"OS CPE      : {os_cpe}")
     response = requests.get(get_url(browser_cpe), headers=HEADERS)
     if response.status_code == 200:
         data = response.json()
@@ -203,8 +264,11 @@ def search_cve_by_cpe(browser_cpe, os_cpe):
                 # published : ex "2003-12-31T05:00:00.000"
                 published_date = datetime.strptime(vuln['published'], "%Y-%m-%dT%H:%M:%S.%f")
                 
-                days_since_published = (datetime.now() - published_date).days
-                if days_since_published < 90 or True: # pas un bon critère
+                # days_since_published = (datetime.now() - published_date).days
+                if published_date.year < 2020:
+                    # print("Published date is before 2020")
+                    continue
+                if True: #  days_since_published < 90 or  pas un bon critère
                     all_criteria, config_corresponds = extract_cve_configurations(vuln, browser_cpe, os_cpe)
                     if config_corresponds:
                         specific_match = config_corresponds and len(all_criteria) > 0
@@ -223,24 +287,46 @@ def search_cve_by_cpe(browser_cpe, os_cpe):
         print(f"Error: {response.status_code}")
 
 
-def search_cpe_release_date(cpe):
-    URL = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString={cpe}.0"
-    print(f"URL: {URL}")
-    response = requests.get(URL, headers=HEADERS)
-    if response.status_code == 200:
-        data = response.json()
-        try:
-            for product in data['products']:
-                product = product['cpe']
-                # print(product)
-                if 'created' in product:
-                    release_date = datetime.strptime(product['created'], "%Y-%m-%dT%H:%M:%S.%f")
-                    days_since_release = (datetime.now() - release_date).days
-                    print(f"Release Date: {release_date.strftime('%Y-%m-%d')} - Days since release: {days_since_release}")
-        except Exception as e:
-            print(f"Error processing release date: {e}")
-    else:
-        print(f"Error: {response.status_code}")
+def search_cpe_vulnerable_date(cpe):
+    release_date = None
+    try:
+        URL = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString={cpe}.0"
+        print(f"URL: {URL}")
+        response = requests.get(URL, headers=HEADERS)
+        if response.status_code == 200:
+            data = response.json()
+            try:
+                for product in data['products']:
+                    product = product['cpe']
+                    # print(product)
+                    if 'created' in product:
+                        release_date = datetime.strptime(product['created'], "%Y-%m-%dT%H:%M:%S.%f")
+                        days_since_release = (datetime.now() - release_date).days
+                        # print(f"Release Date: {release_date.strftime('%Y-%m-%d')} - Days since release: {days_since_release}")
+                        print(f"Vulnerable since: {release_date.strftime('%Y-%m-%d')} - Days since vulnerable: {days_since_release}")
+                        return release_date
+            except Exception as e:
+                print(f"Error processing release date: {e}")
+        else:
+            print(f"Error: {response.status_code}")
+    except Exception as e:
+        print(f"Error fetching CPE data: {e}")
+        return release_date
+
+
+def search_user_agent_vulnerable(user_agent_string):
+    browser_cpe, os_cpe = get_cpe(user_agent_string)
+    print(f"Browser CPE : {browser_cpe}")
+    print(f"OS CPE      : {os_cpe}")
+    last_version_browser = lv.get_last_version(browser_cpe)
+    last_version_os = lv.get_last_version(os_cpe)
+    print(f"Last version browser : {last_version_browser} - Is under : {under_cpe_version(browser_cpe, ':'.join(browser_cpe.split(':')[:5]) + ':' + last_version_browser)}")
+    print(f"Last version OS      : {last_version_os} - Is under : {under_cpe_version(os_cpe, ':'.join(os_cpe.split(':')[:5]) + ':' + last_version_os)}")
+    search_cpe_vulnerable_date(browser_cpe)
+    search_cve_by_cpe(browser_cpe, os_cpe)
+    input("Press Enter to continue...")
+    print('\n'*5)
+    print("-" * 50)
 
 
 if __name__ == "__main__":
@@ -253,9 +339,13 @@ if __name__ == "__main__":
     print("-" * 50)
     for user_agent_string in user_agents:
         browser_cpe, os_cpe = get_cpe(user_agent_string)
-        # print(f"Browser CPE : {browser_cpe}")
-        # print(f"OS CPE      : {os_cpe}")
-        search_cpe_release_date(browser_cpe)
+        print(f"Browser CPE : {browser_cpe}")
+        print(f"OS CPE      : {os_cpe}")
+        last_version_browser = lv.get_last_version(browser_cpe)
+        last_version_os = lv.get_last_version(os_cpe)
+        print(f"Last version browser : {last_version_browser} - Is under : {under_cpe_version(browser_cpe, ':'.join(browser_cpe.split(':')[:5]) + ':' + last_version_browser)}")
+        print(f"Last version OS      : {last_version_os} - Is under : {under_cpe_version(os_cpe, ':'.join(os_cpe.split(':')[:5]) + ':' + last_version_os)}")
+        search_cpe_vulnerable_date(browser_cpe)
         search_cve_by_cpe(browser_cpe, os_cpe)
         input("Press Enter to continue...")
         print('\n'*5)
