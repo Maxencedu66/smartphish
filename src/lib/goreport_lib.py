@@ -21,6 +21,8 @@ from src.config import Config  # Si config.py est directement sous src/
 from src.lib import custom_cve
 import time
 from docx.enum.text import WD_COLOR_INDEX
+from docx import oxml
+from docx.opc.constants import RELATIONSHIP_TYPE
 
 # 3rd Party Libraries
 import requests
@@ -1270,6 +1272,8 @@ Individuals Who Submitted: {self.total_unique_submitted}
         print("[+] Finished writing events summary...")
         print("[+] Detailed results analysis is next and may take some time if you had a lot of targets...")
         d.add_heading("Detailed Findings", 1)
+        sofware_infos_dict = {} ### ADDED
+        WRITE_CVE_PARTS = False ### ADDED
         target_counter = 0
         for target in self.results:
             # Only create a Detailed Analysis section for targets with clicks
@@ -1482,7 +1486,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                 #########################
                 
                 # Create the Common Vulnerabilities and Exposures
-                if clicked_user_agent and False:
+                if clicked_user_agent and WRITE_CVE_PARTS:
                     p = d.add_paragraph()
                     p.style = d.styles['Normal']
                     _ = p.add_run()
@@ -1537,8 +1541,12 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         used_browser.text = browser_details
 
                         latest_browser = software_table.cell(1, 1)
-                        latest_browser.text = parsed_user_agent.browser.family + " " + \
+                        latest_browser_formatted = parsed_user_agent.browser.family + " " + \
                             cve_infos.get('last_version_browser', 'N/A')
+                        latest_browser.text = latest_browser_formatted
+                            
+                        sofware_infos_dict[browser_details] = cve_infos
+                        sofware_infos_dict[browser_details]['latest_formatted'] = latest_browser_formatted
                         
                         uptodate = software_table.cell(1, 2)
                         # Add Hit or Miss to the table cell
@@ -1552,8 +1560,12 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         used_os.text = os_details
                         
                         latest_os = software_table.cell(2, 1)
-                        latest_os.text = parsed_user_agent.os.family + " " + \
+                        latest_os_formatted = parsed_user_agent.os.family + " " + \
                             cve_infos.get('last_version_os', 'N/A')
+                        latest_os.text = latest_os_formatted
+                        
+                        sofware_infos_dict[os_details] = cve_infos
+                        sofware_infos_dict[os_details]['latest_formatted'] = latest_os_formatted
                             
                         uptodate = software_table.cell(2, 2)
                         # Add Hit or Miss to the table cell
@@ -1638,16 +1650,54 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             # critical_severity_bg_color = RGBColor(0x00, 0x00, 0x00) # black
                             critical_severity_font_color = RGBColor(0x00, 0x00, 0x00) # black
                             
-                            cvss_normal = RGBColor(0x00, 0x00, 0x00)
-                            cvss_more_than_9 = RGBColor(0xFF, 0x00, 0x00)
+                            cvss_normal = RGBColor(0xFF, 0x00, 0x00)
+                            cvss_more_than_9 = RGBColor(0x00, 0x00, 0x00)
+                            
+                            def add_hyperlink(paragraph, url, text, color, underline):
+                                # This gets access to the document.xml.rels file and gets a new relation id value
+                                part = paragraph.part
+                                r_id = part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+                                # Create the w:hyperlink tag and add needed values
+                                hyperlink = oxml.shared.OxmlElement('w:hyperlink')
+                                hyperlink.set(oxml.shared.qn('r:id'), r_id, )
+                                # Create a w:r element
+                                new_run = oxml.shared.OxmlElement('w:r')
+                                # Create a new w:rPr element
+                                rPr = oxml.shared.OxmlElement('w:rPr')
+                                # Add color if it is given
+                                if not color is None:
+                                    c = oxml.shared.OxmlElement('w:color')
+                                    c.set(oxml.shared.qn('w:val'), color)
+                                    rPr.append(c)
+                                # Remove underlining if it is requested
+                                if underline:
+                                    u = oxml.shared.OxmlElement('w:u')
+                                    u.set(oxml.shared.qn('w:val'), 'single')
+                                    rPr.append(u)
+                                else:
+                                    u = oxml.shared.OxmlElement('w:u')
+                                    u.set(oxml.shared.qn('w:val'), 'none')
+                                    rPr.append(u)
+                                # Join all the xml elements together  add the required text to the w:r element
+                                new_run.append(rPr)
+                                new_run.text = text
+                                hyperlink.append(new_run)
+                                paragraph._p.append(hyperlink)
+                                return hyperlink
+                            
+                            CVE_URL = "https://nvd.nist.gov/vuln/detail/"
                             
                             i = 0
-                            max_items = 4
+                            max_items = 5
                             for cve in vulnerabilities:
                                 if i < max_items:
                                     vulnerabilities_table.add_row()
                                     cve_id = vulnerabilities_table.cell(i + 1, 0)
-                                    cve_id.text = cve.get('id', 'N/A')
+                                    cve_id_str = cve.get('id', 'N/A')
+                                    # cve_id.text = cve_id_str
+                                    # Add the CVE ID to the cell with a hyperlink
+                                    cve_id_paragraph = cve_id.paragraphs[0]
+                                    hyperlink = add_hyperlink(cve_id_paragraph, CVE_URL + cve_id_str, cve_id_str, '0000FF', True)
                                     
                                     date = vulnerabilities_table.cell(i + 1, 1)
                                     published_date = cve.get('published_date', None)
@@ -1739,9 +1789,11 @@ Individuals Who Submitted: {self.total_unique_submitted}
         d.add_heading("Statistics", 1)
         p = d.add_paragraph("The following table shows the browsers seen:")
         # Create browser table
-        browser_table = d.add_table(rows=1, cols=2, style="GoReport")
-        self._set_word_column_width(browser_table.columns[0], Cm(7.24))
-        self._set_word_column_width(browser_table.columns[1], Cm(3.35))
+        browser_table = d.add_table(rows=1, cols=4, style="GoReport")
+        self._set_word_column_width(browser_table.columns[0], Cm(6.24))
+        self._set_word_column_width(browser_table.columns[1], Cm(2.0))
+        self._set_word_column_width(browser_table.columns[2], Cm(2.0))
+        self._set_word_column_width(browser_table.columns[3], Cm(7.7))
 
         header1 = browser_table.cell(0, 0)
         header1.text = ""
@@ -1750,13 +1802,26 @@ Individuals Who Submitted: {self.total_unique_submitted}
         header2 = browser_table.cell(0, 1)
         header2.text = ""
         header2.paragraphs[0].add_run("Seen", "Cell Text").bold = True
+        
+        if WRITE_CVE_PARTS:
+            header3 = browser_table.cell(0, 2)
+            header3.text = ""
+            header3.paragraphs[0].add_run("Up-to-date", "Cell Text").bold = True
+            
+            header4 = browser_table.cell(0, 3)
+            header4.text = ""
+            header4.paragraphs[0].add_run("Vulnerabilities (High / Critical)", "Cell Text").bold = True
 
         p = d.add_paragraph("\nThe following table shows the operating systems seen:")
 
         # Create OS table
-        os_table = d.add_table(rows=1, cols=2, style="GoReport")
-        self._set_word_column_width(os_table.columns[0], Cm(7.24))
-        self._set_word_column_width(os_table.columns[1], Cm(3.35))
+        os_table = d.add_table(rows=1, cols=3, style="GoReport")
+        # self._set_word_column_width(os_table.columns[0], Cm(6.24))
+        # self._set_word_column_width(os_table.columns[1], Cm(2.0))
+        # self._set_word_column_width(os_table.columns[2], Cm(2.0))
+        # self._set_word_column_width(os_table.columns[3], Cm(7.7))
+        os_table.autofit = True
+        os_table.allow_autofit = True
 
         header1 = os_table.cell(0, 0)
         header1.text = ""
@@ -1765,6 +1830,11 @@ Individuals Who Submitted: {self.total_unique_submitted}
         header2 = os_table.cell(0, 1)
         header2.text = ""
         header2.paragraphs[0].add_run("Seen", "Cell Text").bold = True
+        
+        if WRITE_CVE_PARTS:
+            header3 = os_table.cell(0, 2)
+            header3.text = ""
+            header3.paragraphs[0].add_run("Up-to-date", "Cell Text").bold = True
 
         p = d.add_paragraph("\nThe following table shows the locations seen:")
 
@@ -1822,6 +1892,30 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
             cell = browser_table.cell(counter, 1)
             cell.text = f"{value}"
+            
+            if WRITE_CVE_PARTS:
+                try:
+                    # Check if the browser is up-to-date and add a checkmark or cross
+                    cell = browser_table.cell(counter, 2)
+                    if sofware_infos_dict.get(key, {}).get('version_browser_outdated', False):
+                        cell.paragraphs[0].add_run(u'\u2718', "Cell Text Miss")
+                    else:
+                        cell.paragraphs[0].add_run(u'\u2713', "Cell Text Hit")
+                    
+                    # Check if the browser has vulnerabilities and add a checkmark or cross
+                    cell = browser_table.cell(counter, 3)
+                    high_severity_count = sofware_infos_dict.get(key, {}).get('high_severity_count', 0)
+                    critical_severity_count = sofware_infos_dict.get(key, {}).get('critical_severity_count', 0)
+                    total_vulnerabilities = high_severity_count + critical_severity_count
+                    if total_vulnerabilities > 0:
+                        cell.paragraphs[0].add_run(str(high_severity_count), "Cell Text Miss")
+                        cell.paragraphs[0].add_run(" / ").font.color.rgb = RGBColor(0x70, 0x70, 0x70)
+                        cell.paragraphs[0].add_run(str(critical_severity_count)).bold = True
+                    else:
+                        cell.paragraphs[0].add_run("0", "Cell Text Hit")
+                except Exception as e:
+                    pass
+            
             counter += 1
 
         counter = 1
@@ -1833,6 +1927,18 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
             cell = os_table.cell(counter, 1)
             cell.text = f"{value}"
+            
+            if WRITE_CVE_PARTS:
+                try:
+                    # Check if the OS is up-to-date and add a checkmark or cross
+                    cell = os_table.cell(counter, 2)
+                    if sofware_infos_dict.get(key, {}).get('version_os_outdated', False):
+                        cell.paragraphs[0].add_run(u'\u2718', "Cell Text Miss")
+                    else:
+                        cell.paragraphs[0].add_run(u'\u2713', "Cell Text Hit")
+                except Exception as e:
+                    pass
+            
             counter += 1
 
         counter = 1

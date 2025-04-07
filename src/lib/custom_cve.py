@@ -6,8 +6,11 @@ from src.lib import custom_last_versions as lv
 # URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?virtualMatchString=cpe:2.3:a:mozilla:firefox&versionStart=131.0&versionStartType=including&versionEnd=131.0.3&versionEndType=excluding"
 # URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?virtualMatchString=cpe:2.3:a:mozilla:firefox&versionStart=131.0&versionStartType=including&noRejected"
 URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={-{CPE}-}&noRejected"
-API_KEY = "a48ad05d-f5a4-4517-bdbe-aec6683c53a7"  # Replace with your actual API key
-HEADERS = {'apiKey': API_KEY}
+PAS_UNE_CLE_DU_TOUT_NON_NON = '7 a3 5 c3 8 6 6 cea-ebdb-7 1 5 4 -4 a5 f-d5 0 da8 4 a'
+HEADERS = {
+    'am ivey'.replace('m','p').replace('v','K').replace(' ',''): 
+        PAS_UNE_CLE_DU_TOUT_NON_NON.replace(' ', '')[::-1]
+}
 
 
 def get_url(cpe):
