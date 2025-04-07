@@ -13,14 +13,3 @@ services:
       - USE_TLS=false
     volumes:
       - ../src/data/smartphish.db:/opt/gophish/gophish.db # Montage direct du fichier DB
-
-
-  # cve-search:
-  #   build:
-  #     context: cve-search
-  #   container_name: cve-search
-  #   ports:
-  #     - "5000:5000" # Port pour l'API
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./cve-search/data:/data/db # Volume pour la base de données

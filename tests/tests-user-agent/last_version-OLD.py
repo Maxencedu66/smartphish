@@ -21,6 +21,8 @@ cpe_to_page = {
 }
 
 
+raise Exception("OLD FILE")
+
 def get_cpe_name(cpe):
     # cpe = "cpe:2.3:a:mozilla:firefox:119"
     # Split the CPE string into its components
@@ -44,8 +46,8 @@ def get_last_version(cpe):
         response = requests.get(get_url(cpe))
         if response.status_code != 200:
             raise Exception("Failed to fetch the page")
-        with open('page.html', 'w', encoding='utf-8') as f:
-            f.write(response.text)
+        # with open('page.html', 'w', encoding='utf-8') as f:
+        #     f.write(response.text)
         
         # Find the line number where there is the text "Latest version"
         lines = response.text.split('\n')

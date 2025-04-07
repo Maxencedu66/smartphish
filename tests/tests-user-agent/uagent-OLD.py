@@ -9,6 +9,8 @@ URL = "https://services.nvd.nist.gov/rest/json/cves/2.0?cpeName={-{CPE}-}&noReje
 API_KEY = "a48ad05d-f5a4-4517-bdbe-aec6683c53a7"  # Replace with your actual API key
 HEADERS = {'apiKey': API_KEY}
 
+raise Exception("OLD FILE")
+
 
 def get_url(cpe):
     return URL.replace("{-{CPE}-}", cpe)
@@ -250,48 +252,64 @@ def get_cpe(user_agent):
 def search_cve_by_cpe(browser_cpe, os_cpe):
     # print(f"Browser CPE : {browser_cpe}")
     # print(f"OS CPE      : {os_cpe}")
-    response = requests.get(get_url(browser_cpe), headers=HEADERS)
-    if response.status_code == 200:
-        data = response.json()
-        # print(data)
-        try:
-            for vuln in data['vulnerabilities']:
-                vuln = vuln['cve']
-                # print(vuln)
-                # input("Press Enter to continue...")
-                # print("Vuln Status: ", vuln['vulnStatus'], vuln['id'])
-                
-                # published : ex "2003-12-31T05:00:00.000"
-                published_date = datetime.strptime(vuln['published'], "%Y-%m-%dT%H:%M:%S.%f")
-                
-                # days_since_published = (datetime.now() - published_date).days
-                if published_date.year < 2020:
-                    # print("Published date is before 2020")
-                    continue
-                if True: #  days_since_published < 90 or  pas un bon critère
-                    all_criteria, config_corresponds = extract_cve_configurations(vuln, browser_cpe, os_cpe)
-                    if config_corresponds:
-                        specific_match = config_corresponds and len(all_criteria) > 0
-                        cve_id, description, highest_score, highest_severity = extract_cve_data(vuln)
-                        if highest_score > 8 or highest_severity in ['HIGH', 'CRITICAL'] or (specific_match and highest_score > 6.5):
-                            # print(f"Published Date: {published_date.strftime('%Y-%m-%d')}")
-                            specific_match_str = " - >>> Specific match" if specific_match else ""
-                            print(f"{cve_id} {published_date.strftime('%Y-%m-%d')} - Score: {highest_score}, Severity: {highest_severity}{specific_match_str}")
-                            # print(f"Config corresponds: {config_corresponds}")
-                            # print(f"Configurations: {all_criteria}")
-                # # quit()
-                # print("#" * 40)
-        except Exception as e:
-            print(f"Error processing vulnerabilities: {e}")
-    else:
-        print(f"Error: {response.status_code}")
+    vulnerabilities = []
+    try:
+        response = requests.get(get_url(browser_cpe), headers=HEADERS)
+        if response.status_code == 200:
+            data = response.json()
+            # print(data)
+            try:
+                for vuln in data['vulnerabilities']:
+                    vuln = vuln['cve']
+                    # print(vuln)
+                    # input("Press Enter to continue...")
+                    # print("Vuln Status: ", vuln['vulnStatus'], vuln['id'])
+                    
+                    # published : ex "2003-12-31T05:00:00.000"
+                    published_date = datetime.strptime(vuln['published'], "%Y-%m-%dT%H:%M:%S.%f")
+                    
+                    # days_since_published = (datetime.now() - published_date).days
+                    if published_date.year < 2020:
+                        # print("Published date is before 2020")
+                        continue
+                    if True: #  days_since_published < 90 or  pas un bon critère
+                        all_criteria, config_corresponds = extract_cve_configurations(vuln, browser_cpe, os_cpe)
+                        if config_corresponds:
+                            specific_match = config_corresponds and len(all_criteria) > 0
+                            cve_id, description, highest_score, highest_severity = extract_cve_data(vuln)
+                            if highest_score > 8 or highest_severity in ['HIGH', 'CRITICAL'] or (specific_match and highest_score > 6.5):
+                                # print(f"Published Date: {published_date.strftime('%Y-%m-%d')}")
+                                # specific_match_str = " - >>> Specific match" if specific_match else ""
+                                # print(f"{cve_id} {published_date.strftime('%Y-%m-%d')} - Score: {highest_score}, Severity: {highest_severity}{specific_match_str}")
+                                vulnerabilities.append({
+                                    'id': cve_id,
+                                    'published_date': published_date,
+                                    'description': description,
+                                    'highest_score': highest_score,
+                                    'highest_severity': highest_severity,
+                                    'specific_match': specific_match,
+                                })
+                                # print(f"Config corresponds: {config_corresponds}")
+                                # print(f"Configurations: {all_criteria}")
+                    # # quit()
+                    # print("#" * 40)
+            except Exception as e:
+                print(f"Error processing vulnerabilities: {e}")
+                return vulnerabilities
+        else:
+            print(f"Error: {response.status_code}")
+            return vulnerabilities
+    except Exception as e:
+        print(f"Error fetching CVE data: {e}")
+        return vulnerabilities
+    return vulnerabilities
 
 
 def search_cpe_vulnerable_date(cpe):
     release_date = None
     try:
-        URL = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString={cpe}.0"
-        print(f"URL: {URL}")
+        URL = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString={cpe}"
+        # print(f"URL: {URL}")
         response = requests.get(URL, headers=HEADERS)
         if response.status_code == 200:
             data = response.json()
@@ -303,30 +321,67 @@ def search_cpe_vulnerable_date(cpe):
                         release_date = datetime.strptime(product['created'], "%Y-%m-%dT%H:%M:%S.%f")
                         days_since_release = (datetime.now() - release_date).days
                         # print(f"Release Date: {release_date.strftime('%Y-%m-%d')} - Days since release: {days_since_release}")
-                        print(f"Vulnerable since: {release_date.strftime('%Y-%m-%d')} - Days since vulnerable: {days_since_release}")
+                        # print(f"Vulnerable since: {release_date.strftime('%Y-%m-%d')} - Days since vulnerable: {days_since_release}")
                         return release_date
             except Exception as e:
                 print(f"Error processing release date: {e}")
+                return release_date
         else:
             print(f"Error: {response.status_code}")
+            return release_date
     except Exception as e:
         print(f"Error fetching CPE data: {e}")
         return release_date
 
 
-def search_user_agent_vulnerable(user_agent_string):
+def search_user_agent_vulnerable(user_agent_string, verbose=False):
     browser_cpe, os_cpe = get_cpe(user_agent_string)
-    print(f"Browser CPE : {browser_cpe}")
-    print(f"OS CPE      : {os_cpe}")
+    if verbose: print(f"Browser CPE          : {browser_cpe}")
+    if verbose: print(f"OS CPE               : {os_cpe}")
     last_version_browser = lv.get_last_version(browser_cpe)
     last_version_os = lv.get_last_version(os_cpe)
-    print(f"Last version browser : {last_version_browser} - Is under : {under_cpe_version(browser_cpe, ':'.join(browser_cpe.split(':')[:5]) + ':' + last_version_browser)}")
-    print(f"Last version OS      : {last_version_os} - Is under : {under_cpe_version(os_cpe, ':'.join(os_cpe.split(':')[:5]) + ':' + last_version_os)}")
-    search_cpe_vulnerable_date(browser_cpe)
-    search_cve_by_cpe(browser_cpe, os_cpe)
-    input("Press Enter to continue...")
-    print('\n'*5)
-    print("-" * 50)
+    version_browser_outdated = under_cpe_version(browser_cpe, ':'.join(browser_cpe.split(':')[:5]) + ':' + last_version_browser)
+    version_os_outdated = under_cpe_version(os_cpe, ':'.join(os_cpe.split(':')[:5]) + ':' + last_version_os)
+    if verbose: print(f"Last version browser : {last_version_browser} - Is outdated : {version_browser_outdated}")
+    if verbose: print(f"Last version OS      : {last_version_os} - Is outdated : {version_os_outdated}")
+    vulnerable_date_browser = search_cpe_vulnerable_date(browser_cpe)
+    vulnerable_date_os = search_cpe_vulnerable_date(os_cpe)
+    if verbose: print(f"Browser vulnerable since : {vulnerable_date_browser.strftime('%Y-%m-%d') if vulnerable_date_browser else '/'}")
+    if verbose: print(f"OS vulnerable since      : {vulnerable_date_os.strftime('%Y-%m-%d') if vulnerable_date_os else '/'}")
+    vulnerabilities = search_cve_by_cpe(browser_cpe, os_cpe)[::-1]
+    if verbose: print(f"Vulnerabilities      :")
+    i = 0
+    max_vuln_print = 5
+    for vuln in vulnerabilities:
+        if i > max_vuln_print:
+            if verbose: print(f"+ {len(vulnerabilities) - max_vuln_print} more vulnerabilities")
+            break
+        if verbose: print(f"  - {vuln['id']} - {vuln['published_date'].strftime('%Y-%m-%d')} - Score: {vuln['highest_score']}, Severity: {vuln['highest_severity']}")
+        if vuln['specific_match']:
+            if verbose: print(f"    - Specific match")
+            if verbose: print(f"    - Description: {vuln['description']}")
+        i += 1
+    
+    high_severity_count = sum(1 for vuln in vulnerabilities if vuln['highest_severity'] == 'HIGH')
+    critical_severity_count = sum(1 for vuln in vulnerabilities if vuln['highest_severity'] == 'CRITICAL')
+        
+    # input("Press Enter to continue...")
+    if verbose: print('\n'*5)
+    if verbose: print("-" * 50)
+    
+    return {
+        'browser_cpe': browser_cpe,
+        'os_cpe': os_cpe,
+        'last_version_browser': last_version_browser,
+        'last_version_os': last_version_os,
+        'version_browser_outdated': version_browser_outdated,
+        'version_os_outdated': version_os_outdated,
+        'vulnerable_date_browser': vulnerable_date_browser,
+        'vulnerable_date_os': vulnerable_date_os,
+        'vulnerabilities': vulnerabilities,
+        'high_severity_count': high_severity_count,
+        'critical_severity_count': critical_severity_count,
+    }
 
 
 if __name__ == "__main__":
@@ -336,20 +391,38 @@ if __name__ == "__main__":
     user_agents = [ua.strip() for ua in user_agents if not ua.startswith('---')]
     
     # Print cpe strings for each user agent
-    print("-" * 50)
+    print("- " * 25)
     for user_agent_string in user_agents:
-        browser_cpe, os_cpe = get_cpe(user_agent_string)
-        print(f"Browser CPE : {browser_cpe}")
-        print(f"OS CPE      : {os_cpe}")
-        last_version_browser = lv.get_last_version(browser_cpe)
-        last_version_os = lv.get_last_version(os_cpe)
-        print(f"Last version browser : {last_version_browser} - Is under : {under_cpe_version(browser_cpe, ':'.join(browser_cpe.split(':')[:5]) + ':' + last_version_browser)}")
-        print(f"Last version OS      : {last_version_os} - Is under : {under_cpe_version(os_cpe, ':'.join(os_cpe.split(':')[:5]) + ':' + last_version_os)}")
-        search_cpe_vulnerable_date(browser_cpe)
-        search_cve_by_cpe(browser_cpe, os_cpe)
-        input("Press Enter to continue...")
-        print('\n'*5)
+        infos = search_user_agent_vulnerable(user_agent_string, verbose=False)
+        
+        print(f"User agent: {user_agent_string}")
+        print(f"Browser CPE: {infos['browser_cpe']}")
+        print(f"OS CPE: {infos['os_cpe']}")
+        print(f"Last version browser: {infos['last_version_browser']}, Is outdated: {infos['version_browser_outdated']}")
+        print(f"Last version OS: {infos['last_version_os']}, Is outdated: {infos['version_os_outdated']}")
+        # if infos['vulnerable_date']:
+        #     print(f"Vulnerable since: {infos['vulnerable_date'].strftime('%Y-%m-%d')} ({(datetime.now() - infos['vulnerable_date']).days} days)")
+        if infos['vulnerable_date_browser']:
+            print(f"Browser vulnerable since: {infos['vulnerable_date_browser'].strftime('%Y-%m-%d')} ({(datetime.now() - infos['vulnerable_date_browser']).days} days)")
+        if infos['vulnerable_date_os']:
+            print(f"OS vulnerable since: {infos['vulnerable_date_os'].strftime('%Y-%m-%d')} ({(datetime.now() - infos['vulnerable_date_os']).days} days)")
+        
+        print(f"Vulnerabilities:")
+        i = 0
+        for vuln in infos['vulnerabilities']:
+            print(f"  - {vuln['id']} - {vuln['published_date'].strftime('%Y-%m-%d')} - Score: {vuln['highest_score']}, Severity: {vuln['highest_severity']}")
+            if vuln['specific_match']:
+                print(f"    - Specific match")
+                print(f"    - Description: {vuln['description']}")
+            i += 1
+            if i > 5:
+                print(f"+ {len(infos['vulnerabilities']) - 5} more vulnerabilities")
+                break
+        print(f"High severity vulnerabilities: {infos['high_severity_count']}")
+        print(f"Critical severity vulnerabilities: {infos['critical_severity_count']}")
         print("-" * 50)
+        
+        input("Press Enter to continue...")
     
     quit()
     

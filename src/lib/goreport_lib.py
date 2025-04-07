@@ -18,6 +18,10 @@ import json
 from src.services.gophish_service import *
 from src.config import Config  # Si config.py est directement sous src/
 
+from src.lib import custom_cve
+import time
+from docx.enum.text import WD_COLOR_INDEX
+
 # 3rd Party Libraries
 import requests
 import xlsxwriter
@@ -1280,10 +1284,14 @@ Individuals Who Submitted: {self.total_unique_submitted}
                     position = f"({target.position})"
                 d.add_heading(f"{target.first_name} {target.last_name} {position}", 2)
                 p = d.add_paragraph(target.email)
-                p = d.add_paragraph()
+                # p = d.add_paragraph()
                 # Save a spot to record the email sent date and time in the report
                 email_sent_run = p.add_run()
                 # Go through all events to find events for this target
+                ### ADDED
+                clicked_user_agent = None
+                ### END ADDED
+                previous_category = False
                 for event in self.timeline:
                     if event.message == "Email Sent" and event.email == target.email:
                         # Parse the timestamp into separate date and time variables
@@ -1293,12 +1301,17 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         sent_time = temp[1].split('.')[0]
                         # Record the email sent date and time in the run created earlier
                         email_sent_run.text = f"Email sent on {sent_date} at {sent_time}"
-
+                        previous_category = True
                     if event.message == "Email Opened" and event.email == target.email:
                         if opened_counter == 1:
                             # Create the Email Opened/Previewed table
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
+                            if previous_category:
+                                _ = p.add_run()
+                                _.text = "\n"
+                            else:
+                                previous_category = True
                             run = p.add_run("Email Previews")
                             run.bold = True
 
@@ -1322,6 +1335,11 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             # Create the Clicked Link table
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
+                            if previous_category:
+                                _ = p.add_run()
+                                _.text = "\n"
+                            else:
+                                previous_category = True
                             run = p.add_run("Email Link Clicked")
                             run.bold = True
 
@@ -1371,6 +1389,8 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         browser = clicked_table.cell(clicked_counter, 3)
                         browser.text = browser_details
                         self.browsers.append(browser_details)
+                        
+                        clicked_user_agent = event.details['browser']['user-agent']
 
                         op_sys = clicked_table.cell(clicked_counter, 4)
                         os_details = user_agent.os.family + " " + user_agent.os.version_string
@@ -1384,6 +1404,11 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             # Create the Submitted Data table
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
+                            if previous_category:
+                                _ = p.add_run()
+                                _.text = "\n"
+                            else:
+                                previous_category = True
                             run = p.add_run("Data Captured")
                             run.bold = True
 
@@ -1451,6 +1476,254 @@ Individuals Who Submitted: {self.total_unique_submitted}
                                 submitted_data += f"{key}:{str(value).strip('[').strip(']')}   "
                         data.text = f"{submitted_data}"
                         submitted_counter += 1
+                        
+                #########################
+                ##### DEBUT CUSTOM ######
+                #########################
+                
+                # Create the Common Vulnerabilities and Exposures
+                if clicked_user_agent and True:
+                    p = d.add_paragraph()
+                    p.style = d.styles['Normal']
+                    _ = p.add_run()
+                    _.text = "\n"
+                    run = p.add_run("Common Vulnerabilities and Exposures")
+                    run.bold = True
+
+                    try:
+                        software_table = d.add_table(rows=2, cols=3, style="GoReport")
+                        software_table.autofit = True
+                        software_table.allow_autofit = True
+
+                        header1 = software_table.cell(0, 0)
+                        header1.text = ""
+                        header1.paragraphs[0].add_run("Browser / OS used", "Cell Text").bold = True
+
+                        header2 = software_table.cell(0, 1)
+                        header2.text = ""
+                        header2.paragraphs[0].add_run("Latest versions", "Cell Text").bold = True
+
+                        header3 = software_table.cell(0, 2)
+                        header3.text = ""
+                        header3.paragraphs[0].add_run("Is up-to-date", "Cell Text").bold = True
+
+                        cve_infos = {
+                            'browser_cpe': None,
+                            'os_cpe': None,
+                            'last_version_browser': None,
+                            'last_version_os': None,
+                            'version_browser_outdated': None,
+                            'version_os_outdated': None,
+                            'vulnerable_date_browser': None,
+                            'vulnerable_date_os': None,
+                            'vulnerabilities': None,
+                            'high_severity_count': None,
+                            'critical_severity_count': None,
+                        }
+                        try:
+                            cve_infos = custom_cve.search_user_agent_vulnerable(clicked_user_agent)
+                            # fake_ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/119.0 Mobile/15E148 Safari/605.1.15"
+                            # cve_infos = custom_cve.search_user_agent_vulnerable([fake_ua, clicked_user_agent][target_counter % 2])
+                        except Exception as e:
+                            pass
+                        
+                        software_table.add_row()
+                        software_table.format.fit = 'auto'
+                        used_browser = software_table.cell(1, 0)
+                        # Parse the user-agent string for browser and OS details
+                        parsed_user_agent = parse(clicked_user_agent)
+                        browser_details = parsed_user_agent.browser.family + " " + \
+                            parsed_user_agent.browser.version_string
+                        used_browser.text = browser_details
+
+                        latest_browser = software_table.cell(1, 1)
+                        latest_browser.text = parsed_user_agent.browser.family + " " + \
+                            cve_infos.get('last_version_browser', 'N/A')
+                        
+                        uptodate = software_table.cell(1, 2)
+                        # Add Hit or Miss to the table cell
+                        if cve_infos.get('version_browser_outdated', False):
+                            uptodate.paragraphs[0].add_run(u'\u2718', "Cell Text Miss")
+                        else:
+                            uptodate.paragraphs[0].add_run(u'\u2713', "Cell Text Hit")
+                        
+                        used_os = software_table.cell(2, 0)
+                        os_details = parsed_user_agent.os.family + " " + parsed_user_agent.os.version_string
+                        used_os.text = os_details
+                        
+                        latest_os = software_table.cell(2, 1)
+                        latest_os.text = parsed_user_agent.os.family + " " + \
+                            cve_infos.get('last_version_os', 'N/A')
+                            
+                        uptodate = software_table.cell(2, 2)
+                        # Add Hit or Miss to the table cell
+                        if cve_infos.get('version_os_outdated', False):
+                            uptodate.paragraphs[0].add_run(u'\u2718', "Cell Text Miss")
+                        else:
+                            uptodate.paragraphs[0].add_run(u'\u2713', "Cell Text Hit")
+                        
+                        p = d.add_paragraph()
+                        # p.style = d.styles['Normal']
+                        # run = p.add_run("\n")
+                        
+                        one_vulnerable = False
+                        
+                        # If browser is vulnerable, add a text 'Browser is vulnerable since ..'
+                        vulnerable_date = cve_infos.get('vulnerable_date_browser', False)
+                        # from datetime import timedelta
+                        # vulnerable_date = datetime.now() - timedelta(days=43)
+                        if vulnerable_date:
+                            p = d.add_paragraph()
+                            p.style = d.styles['Normal']
+                            run = p.add_run(f"Browser is vulnerable since ")
+                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} days)")
+                            run.bold = True
+                            one_vulnerable = True
+                        
+                        # If OS is vulnerable, add a text 'OS is vulnerable since ..'
+                        vulnerable_date = cve_infos.get('vulnerable_date_os', False)
+                        # vulnerable_date = datetime.now() - timedelta(days=345)
+                        if vulnerable_date:
+                            p = d.add_paragraph()
+                            p.style = d.styles['Normal']
+                            run = p.add_run(f"OS is vulnerable since ")
+                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} days)")
+                            run.bold = True
+                            one_vulnerable = True
+                        
+                        if one_vulnerable:
+                            run = p.add_run("\n")
+                        
+                        # Show a list of the X first vulnerabilities in a table
+                        # p = d.add_paragraph()
+                        # p.style = d.styles['Normal']
+                        # run = p.add_run("Vulnerabilities")
+                        # run.bold = True
+                        
+                        vulnerabilities = cve_infos.get('vulnerabilities', [])
+                        
+                        if len(vulnerabilities) > 0:
+                            vulnerabilities_table = d.add_table(rows=1, cols=4, style="GoReport")
+                            vulnerabilities_table.autofit = True
+                            vulnerabilities_table.allow_autofit = True
+                            
+                            header1 = vulnerabilities_table.cell(0, 0)
+                            header1.text = ""
+                            header1.paragraphs[0].add_run("CVE ID", "Cell Text").bold = True
+                            
+                            header2 = vulnerabilities_table.cell(0, 1)
+                            header2.text = ""
+                            header2.paragraphs[0].add_run("Date", "Cell Text").bold = True
+                            
+                            header3 = vulnerabilities_table.cell(0, 2)
+                            header3.text = ""
+                            header3.paragraphs[0].add_run("CVSS Score", "Cell Text").bold = True
+                            
+                            header4 = vulnerabilities_table.cell(0, 3)
+                            header4.text = ""
+                            header4.paragraphs[0].add_run("Severity", "Cell Text").bold = True
+                            
+                            # template : vulnerabiliy = 
+                            # {
+                            #     'id': cve_id,
+                            #     'published_date': published_date,
+                            #     'description': description,
+                            #     'highest_score': highest_score,
+                            #     'highest_severity': highest_severity,
+                            #     'specific_match': specific_match,
+                            # }
+                            
+                            # high_severity_bg_color = RGBColor(0xF7, 0x80, 0x70) # red
+                            high_severity_font_color = RGBColor(0xFF, 0x00, 0x00) # red
+                            # critical_severity_bg_color = RGBColor(0x00, 0x00, 0x00) # black
+                            critical_severity_font_color = RGBColor(0x00, 0x00, 0x00) # black
+                            
+                            cvss_normal = RGBColor(0x00, 0x00, 0x00)
+                            cvss_more_than_9 = RGBColor(0xFF, 0x00, 0x00)
+                            
+                            i = 0
+                            max_items = 4
+                            for cve in vulnerabilities:
+                                if i < max_items:
+                                    vulnerabilities_table.add_row()
+                                    cve_id = vulnerabilities_table.cell(i + 1, 0)
+                                    cve_id.text = cve.get('id', 'N/A')
+                                    
+                                    date = vulnerabilities_table.cell(i + 1, 1)
+                                    published_date = cve.get('published_date', None)
+                                    if published_date:
+                                        published_date = published_date.strftime('%Y-%m-%d')
+                                    else:
+                                        published_date = "N/A"
+                                    date.text = published_date
+                                    
+                                    cvss_score = vulnerabilities_table.cell(i + 1, 2)
+                                    cvss_score_float = float(cve.get('highest_score', -1.0))
+                                    cvss_score_str = str(cvss_score_float)
+                                    run = cvss_score.paragraphs[0].add_run(cvss_score_str)
+                                    if cvss_score_float > 9.0:
+                                        run.font.color.rgb = cvss_more_than_9
+                                        run.bold = True
+                                    else:
+                                        run.font.color.rgb = cvss_normal
+                                        run.bold = True
+                                    
+                                    severity = vulnerabilities_table.cell(i + 1, 3)
+                                    severity_str = cve.get('highest_severity', 'N/A')
+                                    run = severity.paragraphs[0].add_run(severity_str)
+                                    if severity_str.lower() == "high":
+                                        run.font.color.rgb = high_severity_font_color
+                                        run.bold = True
+                                        # severity.paragraphs[0].runs[0].font.highlight_color = WD_COLOR_INDEX.RED  # Red background
+                                    elif severity_str.lower() == "critical":
+                                        run.font.color.rgb = critical_severity_font_color
+                                        run.bold = True
+                                else:
+                                    # Add a '+ XX more' line
+                                    vulnerabilities_table.add_row()
+                                    cve_id = vulnerabilities_table.cell(i + 1, 0)
+                                    run = cve_id.paragraphs[0].add_run(f"+ {len(cve_infos.get('vulnerabilities', [])) - max_items} more")
+                                    run.bold = True
+                                    run.italic = True
+                                    break
+                                i += 1
+                            
+                            # Add the total of high and critical vulnerabilities
+                            p = d.add_paragraph()
+                            p.style = d.styles['Normal']
+                            run = p.add_run("\n")
+                            
+                            high_severity_count = cve_infos.get('high_severity_count', 0)
+                            critical_severity_count = cve_infos.get('critical_severity_count', 0)
+                            
+                            run = p.add_run(f"{high_severity_count}")
+                            run.bold = True
+                            run = p.add_run(f" HIGH severity vulnerabilities found")
+                            
+                            p = d.add_paragraph()
+                            p.style = d.styles['Normal']
+                            run = p.add_run(f"{critical_severity_count}")
+                            run.bold = True
+                            run = p.add_run(f" CRITICAL severity vulnerabilities found")
+                        else:
+                            p = d.add_paragraph()
+                            p.style = d.styles['Normal']
+                            run = p.add_run("No vulnerabilities found")
+                            
+                        time.sleep(2.5) # Sleep to avoid rate limit on CVE API
+                        
+                    except Exception as e:
+                        print(f"[!] Error while writing CVE : {e}")
+                        p = d.add_paragraph()
+                        p.style = d.styles['Normal']
+                        run = p.add_run("No vulnerabilities found")
+                        # run.bold = True
+                    
+                    
+                ##########################
+                ###### FIN CUSTOM ########
+                ##########################    
+                        
                 target_counter += 1
                 print(f"[+] Processed detailed analysis for {target_counter} of {self.total_targets}.")
 
