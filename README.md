@@ -32,7 +32,7 @@ Avant de lancer l'application, assurez-vous d'avoir installé les éléments sui
 ### 🔧 Étapes d'installation
 
 1. **Cloner le projet et accéder au répertoire** :
-   ```bash
+```bash
    git clone https://github.com/Maxencedu66/smartphish.git
    cd smartphish
    ```
@@ -84,6 +84,8 @@ Après connexion, vous pourrez accéder à toutes les fonctionnalités de l'appl
 - Génération automatique des emails grâce à un modèle **LLM** (*Mistral via Ollama*).
 - Personnalisation avancée des messages pour une meilleure simulation des attaques.
 - Tableau de bord interactif pour suivre les résultats et performances des campagnes.
+- Génération de rapports détaillés sur les résultats des campagnes.
+- Intégration d'un module de recherche de CVE pour enrichir les rapports.
 - Déploiement simplifié grâce à Docker.
 
 ---
@@ -94,7 +96,7 @@ Après connexion, vous pourrez accéder à toutes les fonctionnalités de l'appl
 
 ```plaintext
 smartphish/
-│-- app.py                    # Point d’entrée de l’application Flask
+│-- app.py                     # Point d’entrée de l’application Flask
 │-- requirements.txt           # Liste des dépendances Python
 │-- Dockerfile                 # Fichier Docker (optionnel)
 │-- README.md                  # Documentation du projet
@@ -104,32 +106,42 @@ smartphish/
 │   ├── routes/                # Routes Flask pour GoPhish, LLM et UI
 │   │   ├── gophish_routes.py  # Routes liées à GoPhish
 │   │   ├── llm_routes.py      # Routes liées à l'IA (LLM)
-│   │   ├── frontend_routes.py # Routes pour le frontend
+│   │   └── frontend_routes.py # Routes pour le frontend
 │   │
 │   ├── services/              # Logique métier et interaction avec les API
 │   │   ├── gophish_service.py # Gestion des interactions avec GoPhish
-│   │   ├── llm_service.py     # Intégration avec Ollama et le LLM
+│   │   └── llm_service.py     # Intégration avec Ollama et le LLM
 │   │
 │   ├── templates/             # Fichiers HTML pour le frontend
 │   │   ├── index.html         # Page d’accueil de l'application
-│   │   ├── dashboard.html     # Interface de gestion des campagnes
+│   │   └── dashboard.html     # Interface de gestion des campagnes
 │   │
 │   ├── static/                # Fichiers CSS, JavaScript et assets
 │   │   ├── css/               # Feuilles de style CSS
 │   │   ├── js/                # Scripts JavaScript
-│   │   ├── images/            # Images et logos
+│   │   └── images/            # Images et logos
 │   │
-│   ├── database/              # Scripts et fichiers liés à la base de données
-│   │   ├── smartphish.db      # Base de données SQLite
+│   ├── data/                  # Scripts et fichiers liés à la base de données
+│   │   └── smartphish.db      # Base de données SQLite
 │   │
-│   ├── config.py              # Configuration de l'application
+│   │── lib/                   # Bibliothèques et modules
+│   │   ├── goreport_lib.py    # Bibliothèque pour la génération de rapports
+│   │   └── custom_cve.py      # Script de recherche de CVE (développé en interne)
+│   │
+│   │── reports/               # Dossier contenant les rapports générés
+│   │   └── rapport_...4.docx  # Exemple de rapport généré
+│   │
+│   └── config.py              # Configuration de l'application
+│
+│-- docker/                    # Dossier pour le déploiement Docker
+│   ├── gophish-data/          # Données de GoPhish
+│   └── docker-compose.yml     # Fichier Docker Compose pour le déploiement
 │
 │-- tests/                     # Tests unitaires et fonctionnels
 │   ├── test_api.py            # Tests pour l'API
-│   ├── test_services.py       # Tests pour les services
+│   └── test_services.py       # Tests pour les services
 │
-│-- logs/                      # Dossier contenant les logs d'exécution (optionnel)
-│-- docker-compose.yml         # Fichier Docker Compose pour le déploiement
+└-- logs/                      # Dossier contenant les logs d'exécution (optionnel)
 ```
 
 ---
@@ -137,7 +149,7 @@ smartphish/
 ## 🛠 Dépannage
 
 ### Problème de connexion avec Ollama ?
-Assurez-vous que **Ollama** est bien actif avant de démarrer l’application et que vous avez bien téléchargé le modèle Mistral.
+Assurez-vous que **Ollama** est bien actif avant de démarrer l’application et que vous avez bien téléchargé le modèle Mistral. Si le problème persiste, essayez de re-sélectionner le modèle à utiliser dans l'onglet "Paramètres du LLM" de l'application.
 
 ### Problème avec le lancement ?
 Pensez bien à démarrer docker avant de lancer l'application et lors de la fermeture de SmartPhish, faire Ctrl + C dans le terminal pour arrêter proprement le docker et SmartPhish.
@@ -148,7 +160,7 @@ Pensez bien à démarrer docker avant de lancer l'application et lors de la ferm
 
 - **Maxence Bouchadel** (Chef de projet, Backend, IA)
 - **Thomas Jeanjacquot** (Secrétaire, API & Backend)
-- **Maël Cainjo Regeard** (Intégration IA)
+- **Maël Cainjo Regeard** (Intégration IA & CVE)
 - **Dylan Fournier** (Frontend et liaison backend)
 - **Valentin Choquet** (Frontend)
 
