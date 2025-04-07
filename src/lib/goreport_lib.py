@@ -1482,7 +1482,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                 #########################
                 
                 # Create the Common Vulnerabilities and Exposures
-                if clicked_user_agent and True:
+                if clicked_user_agent and False:
                     p = d.add_paragraph()
                     p.style = d.styles['Normal']
                     _ = p.add_run()
