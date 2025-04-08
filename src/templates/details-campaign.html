@@ -6,7 +6,6 @@
 <div class="container-fluid">
 <div class="vh-100">
     <div class="d-flex align-items-center">
-        <img src="{{ url_for('static', filename='img/report.png') }}" alt="details" class="icon-header">
         <h2>Détails de la campagne - </h2>
         <span class="text-primary fw-bold ms-2"> </span>
         <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">

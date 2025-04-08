@@ -1,32 +1,67 @@
 {% extends "index.html" %}
 
-{% block title %}Home - SmartPhish{% endblock %}
+{% block title %}Suivi des campagnes - SmartPhish{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js"></script>
+{% endblock %}
 
 {% block content %}
-<h2>Bienvenue sur SmartPhish</h2>
-<!-- <p>Sélectionnez un élément du menu pour afficher son contenu.</p> -->
 
-<div style="margin-top: 20px;"></div>
+<body>
 
-<div class="container m-0 p-0 w-100 mw-100">
-    <div class="row">
-        <div class="col min-vw-60">
-            <div class="alert alert-secondary" role="alert" style="max-width: 800px;">
-                <span class={{"red-circle" if active_campaigns_length}}></span> <b>{{ active_campaigns_length }}</b> campagne{{"s"
-                if active_campaigns_length!=1}} active{{"s" if active_campaigns_length!=1}}
-                <a href="/follow-campaign" class="alert-link position-absolute end-0" style="margin-right: 20px;">Suivre les
-                    campagnes</a>
-            </div>
-            <a class="btn btn-success m-auto" href="/new-campaign" role="button">
-                <img style="width: 20px; vertical-align: sub;" src="{{ url_for('static', filename='img/add-icon.png') }}"></img>
-                Nouvelle campagne
-            </a>
-        </div>
-        <div class="col d-none d-xl-block">
-            <img src="{{ url_for('static', filename='img/with_logo_white.png') }}" style="right: 0px; max-height: 70%; max-width: 100%;"></img>
-        </div>
+<div class="container mt-5">
+
+  <div class="text-center mb-4" data-intro="Bienvenue sur SmartPhish ! Suivez ce guide pas à pas pour lancer votre première campagne." data-step="1">
+    <h1 class="display-5 fw-bold">Bienvenue sur <span class="text-primary">SmartPhish</span></h1>
+    <p class="lead">
+      SmartPhish est la solution idéale pour créer, envoyer et analyser des campagnes de phishing simulées afin de sensibiliser vos collaborateurs.
+    </p>
+  </div>
+
+  <div class="text-end mb-3">
+    <button class="btn btn-outline-secondary btn-sm" onclick="startSmartphishTutorial();">
+      <i class="fas fa-question-circle me-1"></i> Démarrer le tutoriel
+    </button>
+  </div>
+
+  <div class="alert alert-info position-relative mx-auto mb-4" style="max-width: 800px;" data-intro="Voici un aperçu rapide des campagnes actives." data-step="2">
+    <span class="{{ 'red-circle' if active_campaigns_length }}"></span>
+    <strong>{{ active_campaigns_length }}</strong> campagne{{ 's' if active_campaigns_length != 1 }} active{{ 's' if active_campaigns_length != 1 }}
+    <a href="/follow-campaign" class="alert-link position-absolute end-0 me-3" data-intro="Enfin, suivez les résultats de vos campagnes ici." data-step="9">
+      Suivi des campagnes
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-center mb-5" data-intro="Une fois tout prêt, cliquez ici pour lancer votre première campagne !" data-step="8">
+    <a href="{{ url_for('frontend.new_campaign_page') }}" class="btn btn-lg btn-primary shadow-sm px-4 py-2">
+      <i class="fas fa-rocket me-2"></i> Lancer une nouvelle campagne
+    </a>
+  </div>
+
+  <div class="card mb-4 mx-auto" style="max-width: 800px;">
+    <div class="card-body">
+      <h5 class="card-title">Lancer une campagne en quelques étapes simples</h5>
+      <p class="text-muted">Voici un guide très simple pour créer et envoyer votre première campagne de sensibilisation :</p>
+      <ol class="ps-3">
+        <li>Écrivez le mail que vous souhaitez envoyer dans <strong><a href="/config-emails" style="text-decoration: none; color: gray;">Modèles d'email</a></strong>.</li>
+        <li>Créez une fausse page (facultatif) vers laquelle vos contacts seront redirigés, dans la section <strong><a href="/config-landing-pages" style="text-decoration: none; color: gray;">Landing pages</a></strong>.</li>
+        <li>Ajoutez un groupe de personnes que vous souhaitez sensibiliser dans <strong><a href="/config-groups" style="text-decoration: none; color: gray;">Groupes</a></strong>.</li>
+        <li>Indiquez l’adresse que vous utiliserez pour envoyer vos e-mails dans <strong><a href="/config-smtp" style="text-decoration: none; color: gray;">Profil SMTP</a></strong>.</li>
+        <li>Une fois tout prêt, allez sur <strong><a href="/new-campaign" style="text-decoration: none; color: gray;">Nouvelle campagne</a></strong> pour lancer votre campagne.</li>
+        <li>Vous pouvez ensuite suivre les résultats dans <strong><a href="/follow-campaign" style="text-decoration: none; color: gray;">Suivi des campagnes</a></strong>.</li>
+        <li><em>(Optionnel) Si vous souhaitez que le mail soit généré automatiquement, vous pouvez configurer l’intelligence artificielle dans <strong><a href="/llm-settings" style="text-decoration: none; color: gray;">Paramètres du LLM</a></strong>.</em></li>
+      </ol>
     </div>
+  </div>
+  
+  
+  
+
 </div>
+
+<script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 
 
 {% endblock %}
