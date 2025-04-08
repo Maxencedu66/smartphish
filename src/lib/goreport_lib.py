@@ -1273,7 +1273,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
         print("[+] Detailed results analysis is next and may take some time if you had a lot of targets...")
         d.add_heading("Detailed Findings", 1)
         sofware_infos_dict = {} ### ADDED
-        WRITE_CVE_PARTS = False ### ADDED
+        WRITE_CVE_PARTS = True ### ADDED
         target_counter = 0
         for target in self.results:
             # Only create a Detailed Analysis section for targets with clicks
@@ -1304,7 +1304,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         sent_date = temp[0]
                         sent_time = temp[1].split('.')[0]
                         # Record the email sent date and time in the run created earlier
-                        email_sent_run.text = f"Email sent on {sent_date} at {sent_time}"
+                        email_sent_run.text = f" - Email sent on {sent_date} at {sent_time}"
                         previous_category = True
                     if event.message == "Email Opened" and event.email == target.email:
                         if opened_counter == 1:
@@ -1532,7 +1532,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             pass
                         
                         software_table.add_row()
-                        software_table.format.fit = 'auto'
+                        # software_table.format.fit = 'auto'
                         used_browser = software_table.cell(1, 0)
                         # Parse the user-agent string for browser and OS details
                         parsed_user_agent = parse(clicked_user_agent)
