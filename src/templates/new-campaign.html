@@ -2,7 +2,10 @@
 {% block title %}Create a New Campaign - SmartPhish{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-bullseye"></i>🚀 Créer une nouvelle campagne</h2>
+<div class="header-icon-title mb-4">
+  <img src="{{ url_for('static', filename='img/send-mail.png') }}" alt="Créer une nouvelle campagne" class="icon-header">
+  <h2>Créer une nouvelle campagne</h2>
+</div>
 
 <div class="card shadow-sm">
   <div class="card-body">
@@ -68,7 +71,7 @@
         </div>
       </div>
 
-      <button type="button" class="btn btn-success w-100 py-2" onclick="submitCampaign()" id="submitBtn">🚀 Lancer la campagne</button>
+      <button type="button" class="btn btn-success w-100 py-2" onclick="submitCampaign()" id="submitBtn">Lancer la campagne</button>
     </form>
   </div>
 </div>

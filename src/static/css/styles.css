@@ -371,3 +371,38 @@ main {
     box-shadow: none;
 }
 
+
+
+/* Icon */
+.menu-item {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 8px;
+}
+
+.icon-header {
+    width: 35px;
+    height: 35px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.icon-header-h3 {
+    width: 40px;
+    height: 40px;
+    margin-top: 11px;
+    margin-bottom: 11px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.header-icon-title {
+    display: flex;   
+    align-items: center;
+    gap: 10px;
+}

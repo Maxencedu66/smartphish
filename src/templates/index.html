@@ -24,17 +24,52 @@
 
     <aside>
         <ul>
-            <li><a class="menu-link {% if request.path == '/' %}active{% endif %}" href="/">🏠 Accueil</a></li>
-            <li><a class="menu-link {% if request.path == '/new-campaign' %}active{% endif %}" href="/new-campaign">📩 Nouvelle campagne</a></li>
-            <li><a class="menu-link {% if request.path == '/follow-campaign' %}active{% endif %}" href="/follow-campaign">📊 Suivi des campagnes</a></li>
-            <li><a class="menu-link {% if request.path == '/config-groups' %}active{% endif %}" href="/config-groups">📌 Configuration</a></li>
+            <li><a class="menu-link {% if request.path == '/' %}active{% endif %}" href="/"> 
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/home.png') }}" alt="Accueil" class="icon"> 
+                    <span>Accueil</span>
+                </div>
+            </a></li>
+            <li><a class="menu-link {% if request.path == '/new-campaign' %}active{% endif %}" href="/new-campaign">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/send-mail.png') }}" alt="campaign" class="icon"> 
+                    <span>Nouvelle Campagne</span>
+                </div>
+            </a></li>
+            <li><a class="menu-link {% if request.path == '/follow-campaign' %}active{% endif %}" href="/follow-campaign">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/bar-chart.png') }}" alt="suivi" class="icon"> 
+                    <span>Suivi des campagnes</span>
+                </div>
+            </a></li>
+            <li><a class="menu-link {% if request.path == '/config-groups' %}active{% endif %}" href="/config-groups">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/setting.png') }}" alt="config" class="icon"> 
+                    <span>Configuration</span>
+                </div>
+            </a></li>
             <!-- <li><a class="menu-link {% if request.path == '/groups' %}active{% endif %}" href="/groups">👥  Liste Groupe</a></li> -->
             <!-- <li><a class="menu-link {% if request.path == '/gen-mail' %}active{% endif %}" href="/gen-mail">🔍 Génération mail IA</a></li> -->
-            <li><a class="menu-link {% if request.path == '/llm-status' %}active{% endif %}" href="/llm-status">🤖 Statut du LLM</a></li>
+            <li><a class="menu-link {% if request.path == '/llm-status' %}active{% endif %}" href="/llm-status">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/robot.png') }}" alt="statut" class="icon"> 
+                    <span>Statut du LLM</span>
+                </div>
+            </a></li>
             <!-- <li><a class="menu-link {% if request.path == '/llm-training' %}active{% endif %}" href="/llm-training">📡 Entrainement du LLM</a></li> -->
-            <li><a class="menu-link {% if request.path == '/llm-settings' %}active{% endif %}" href="/llm-settings">⚙️ Paramètres du LLM</a></li>
+            <li><a class="menu-link {% if request.path == '/llm-settings' %}active{% endif %}" href="/llm-settings">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/settings.png') }}" alt="settings" class="icon"> 
+                    <span>Paramètres du LLM</span>
+                </div>
+            </a></li>
             {% if session.role == 'admin' %}
-                <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">👥 Création de compte</a></li>
+                <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">
+                    <div class="menu-item">
+                        <img src="{{ url_for('static', filename='img/teamwork.png') }}" alt="team" class="icon"> 
+                        <span>Création de compte</span>
+                    </div>
+                </a></li>
             {% endif %}
         /ul>
     </aside>

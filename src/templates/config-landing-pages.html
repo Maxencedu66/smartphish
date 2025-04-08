@@ -2,7 +2,10 @@
 {% block title %}Configuration Landing Pages - SmartPhish{% endblock %}
 
 {% block content %}
-<h2>⚙️ Configuration</h2>
+<div class="header-icon-title mb-4">
+    <img src="{{ url_for('static', filename='img/setting.png') }}" alt="Config" class="icon-header">
+    <h2>Configuration</h2>
+</div>
 
 <ul class="nav nav-tabs">
     <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_groups') }}">Groupes</a></li>
@@ -11,7 +14,10 @@
     <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a></li>
 </ul>
 
-<h3 style="margin-top: 11px;">📄 Gestion des Pages de destination</h3>
+<div class="header-icon-title">
+    <img src="{{ url_for('static', filename='img/link.png') }}" alt="Page destination" class="icon-header-h3">
+    <h3>Gestion des Pages de destination</h3>
+</div>
 
 <!-- Bouton pour ouvrir le modal de création -->
 <div class="mb-3">

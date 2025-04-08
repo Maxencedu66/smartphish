@@ -15,3 +15,18 @@ function toggleView() {
         codeView.classList.remove("d-none");
     }
 }
+
+function toggleValue(element) {
+    const mode = element.getAttribute("data-mode");
+    const value = element.getAttribute("data-value");
+    const percentage = element.getAttribute("data-percentage");
+    const circleNumber = element.querySelector(".circle-number");
+
+    if (mode === "value") {
+        circleNumber.textContent = percentage + "%";
+        element.setAttribute("data-mode", "percentage");
+    } else {
+        circleNumber.textContent = value;
+        element.setAttribute("data-mode", "value");
+    }
+}

@@ -6,7 +6,9 @@
 <div class="container-fluid">
 <div class="vh-100">
     <div class="d-flex align-items-center">
-        <h2 class="me-2">📜 Détails de la campagne -</h2>
+        <img src="{{ url_for('static', filename='img/report.png') }}" alt="details" class="icon-header">
+        <h2>Détails de la campagne - </h2>
+        <span class="text-primary fw-bold ms-2"> </span>
         <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
             {% if campaign.status == "Completed" %}
                 Complétée
@@ -50,6 +52,10 @@
         {% for label, value in stats.items() %}
             {% if label != "Emails envoyés" %}
                 {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
+                {% set formatted_percentage = percentage|round(1) %}
+                {% if formatted_percentage == 100.0 %}
+                    {% set formatted_percentage = 100 %}
+                {% endif %}
                 {% set color_class = 'border-blue' %}
                 {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
                 {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
@@ -57,7 +63,7 @@
                 {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
 
                 <div class="col-6 col-md-3 d-flex flex-column align-items-center mb-4">
-                    <div class="circle-stat {{ color_class }}">
+                    <div class="circle-stat {{ color_class }}" data-value="{{value}}" data-percentage="{{ formatted_percentage }}" data-mode="value" onclick="toggleValue(this)">
                         <h3 class="circle-number">{{ value }}</h3>
                     </div>
                     <h5 class="mt-2">{{ label }}</h5>

@@ -2,7 +2,10 @@
 {% block title %}Configuration Groups - SmartPhish{% endblock %}
 
 {% block content %}
-<h2>⚙️ Configuration</h2>
+<div class="header-icon-title mb-4">
+  <img src="{{ url_for('static', filename='img/setting.png') }}" alt="Config" class="icon-header">
+  <h2>Configuration</h2>
+</div>
 
 <ul class="nav nav-tabs">
     <li class="nav-item">
@@ -23,7 +26,10 @@
 
 <div id="groups" class="tab-pane fade show active">
 
-    <h3 style="margin-top: 11px;">👥 Groupes</h2>
+    <div class="header-icon-title">
+      <img src="{{ url_for('static', filename='img/group.png') }}" alt="Group" class="icon-header-h3">
+      <h3>Groupes</h3>
+    </div>
   
     <!-- Button to open "New Group" modal -->
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newGroupModal">
