@@ -37,6 +37,11 @@ def extract_cve_data(cve):
         all_metrics = cve['metrics']
         highest_score = 0
         highest_severity = ""
+        impacts = {
+            'confidentiality_impact': '',
+            'integrity_impact': '',
+            'impact_score': 0,
+        }
         for metric in all_metrics:
             for elem in all_metrics[metric]:
                 if 'cvssData' in elem:
@@ -49,13 +54,17 @@ def extract_cve_data(cve):
                             if elem['cvssData']['baseScore'] > highest_score:
                                 highest_score = elem['cvssData']['baseScore']
                                 highest_severity = elem['baseSeverity']
+                        impacts['confidentiality_impact'] = elem['cvssData']['confidentialityImpact']
+                        impacts['integrity_impact'] = elem['cvssData']['integrityImpact']
+                        impacts['impact_score'] = elem['impactScore']
+                        # print(description, elem)
                     except Exception as e:
                         print(f"Error extracting CVSS data: {e}")
                         print(f"Element: {elem}")
     except Exception as e:
         print(f"Error processing CVE data: {e}")
         return cve_id, description, highest_score, highest_severity
-    return cve_id, description, highest_score, highest_severity
+    return cve_id, description, highest_score, highest_severity, impacts
 
 
 def cpe_start(cpe):
@@ -232,6 +241,8 @@ def get_cpe(user_agent):
         os_family = "ubuntu_linux"
     os_version = '.'.join(user_agent.os.version_string.split('.')[:2])
     # print(os_family, os_version)
+    if os_version == '':
+        os_version = '*'
     
     os_vendors_list = {
         'windows': 'microsoft',
@@ -246,7 +257,7 @@ def get_cpe(user_agent):
     
     os_vendor = os_vendors_list.get(os_family, '*')
     os_cpe = f"cpe:2.3:o:{os_vendor}:{os_family}:{os_version}"#:*:*:*:*:*:*:*:*"
-    # print(cpe_os)
+    # print(os_cpe)
     return browser_cpe, os_cpe
 
 
@@ -277,7 +288,7 @@ def search_cve_by_cpe(browser_cpe, os_cpe):
                         all_criteria, config_corresponds = extract_cve_configurations(vuln, browser_cpe, os_cpe)
                         if config_corresponds:
                             specific_match = config_corresponds and len(all_criteria) > 0
-                            cve_id, description, highest_score, highest_severity = extract_cve_data(vuln)
+                            cve_id, description, highest_score, highest_severity, impacts = extract_cve_data(vuln)
                             if highest_score > 8 or highest_severity in ['HIGH', 'CRITICAL'] or (specific_match and highest_score > 6.5):
                                 # print(f"Published Date: {published_date.strftime('%Y-%m-%d')}")
                                 # specific_match_str = " - >>> Specific match" if specific_match else ""
@@ -289,6 +300,7 @@ def search_cve_by_cpe(browser_cpe, os_cpe):
                                     'highest_score': highest_score,
                                     'highest_severity': highest_severity,
                                     'specific_match': specific_match,
+                                    'impacts': impacts,
                                 })
                                 # print(f"Config corresponds: {config_corresponds}")
                                 # print(f"Configurations: {all_criteria}")
@@ -309,6 +321,8 @@ def search_cve_by_cpe(browser_cpe, os_cpe):
 def search_cpe_vulnerable_date(cpe):
     release_date = None
     try:
+        if cpe.split(':')[5] == '*':
+            return release_date
         URL = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?cpeMatchString={cpe}"
         # print(f"URL: {URL}")
         response = requests.get(URL, headers=HEADERS)
@@ -376,6 +390,11 @@ def search_user_agent_vulnerable(user_agent_string, verbose=False):
     
     high_severity_count = sum(1 for vuln in vulnerabilities if vuln['highest_severity'] == 'HIGH')
     critical_severity_count = sum(1 for vuln in vulnerabilities if vuln['highest_severity'] == 'CRITICAL')
+    
+    most_impactful_vuln = highest_impactful_vuln(vulnerabilities)
+    if most_impactful_vuln:
+        if verbose: print(f"Most impactful vulnerability: {most_impactful_vuln['id']} - {most_impactful_vuln['published_date'].strftime('%Y-%m-%d')} - Score: {most_impactful_vuln['highest_score']}, Severity: {most_impactful_vuln['highest_severity']}")
+        if verbose: print(f"Description: {most_impactful_vuln['description']}")
         
     # input("Press Enter to continue...")
     if verbose: print('\n'*5)
@@ -393,14 +412,49 @@ def search_user_agent_vulnerable(user_agent_string, verbose=False):
         'vulnerabilities': vulnerabilities,
         'high_severity_count': high_severity_count,
         'critical_severity_count': critical_severity_count,
+        'most_impactful_vuln': most_impactful_vuln,
     }
 
 
+def highest_impactful_vuln(all_vulnerabilities):
+    """
+    Find the highest impactful vulnerability in the list.
+    Takes in account the impact_score, confidentiality_impact and integrity_impact.
+    """
+    vulnerabilities = [vuln for vuln in all_vulnerabilities]
+    most_impactful_vuln = None
+    if len(vulnerabilities) == 0:
+        return most_impactful_vuln
+    try:
+        # # First, sort the vulnerabilities by highest_score
+        # vulnerabilities.sort(key=lambda x: x['highest_score'], reverse=True)
+        # most_impactful_vuln = vulnerabilities[0]
+        # Then, sort the vulnerabilities by impact_score
+        vulnerabilities.sort(key=lambda x: x['impacts']['impact_score'], reverse=True)
+        most_impactful_vuln = vulnerabilities[0]
+        vulnerabilities = [vuln for vuln in vulnerabilities if vuln['impacts']['impact_score'] >= 5]
+        # If the confidentiality_impact and integrity_impact are not 'HIGH', check the next one
+        while len(vulnerabilities) > 0:
+            vuln = vulnerabilities.pop(0)
+            if vuln['impacts']['confidentiality_impact'] == 'HIGH' and vuln['impacts']['integrity_impact'] == 'HIGH':
+                most_impactful_vuln = vuln
+                break
+        if len(vulnerabilities) > 0:
+            most_impactful_vuln = vulnerabilities[0]
+        return most_impactful_vuln
+    except Exception as e:
+        print(f"Error finding most dangerous vulnerability: {e}")
+        return most_impactful_vuln
+
+
 if __name__ == "__main__":
+    # import custom_last_versions as lv
+    
     # Load user agents from file
     with open("user-agents-samples.txt", "r") as f:
         user_agents = f.readlines()
     user_agents = [ua.strip() for ua in user_agents if not ua.startswith('---')]
+    # user_agents = ["Mozilla/5.0 (iPhone; CPU iPhone OS 17_7_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/119.0 Mobile/15E148 Safari/605.1.15"]
     
     # Print cpe strings for each user agent
     print("- " * 25)
@@ -423,15 +477,19 @@ if __name__ == "__main__":
         i = 0
         for vuln in infos['vulnerabilities']:
             print(f"  - {vuln['id']} - {vuln['published_date'].strftime('%Y-%m-%d')} - Score: {vuln['highest_score']}, Severity: {vuln['highest_severity']}")
-            if vuln['specific_match']:
-                print(f"    - Specific match")
-                print(f"    - Description: {vuln['description']}")
+            # print(f"Description: {vuln['description']}")
             i += 1
             if i > 5:
                 print(f"+ {len(infos['vulnerabilities']) - 5} more vulnerabilities")
                 break
         print(f"High severity vulnerabilities: {infos['high_severity_count']}")
         print(f"Critical severity vulnerabilities: {infos['critical_severity_count']}")
+        
+        # Find the highest severity vulnerability
+        if infos['most_impactful_vuln']:
+            print(f"Most impactful vulnerability: {infos['most_impactful_vuln']['id']} - {infos['most_impactful_vuln']['published_date'].strftime('%Y-%m-%d')} - Score: {infos['most_impactful_vuln']['highest_score']}, Severity: {infos['most_impactful_vuln']['highest_severity']}")
+            print(f"Description: {infos['most_impactful_vuln']['description']}")
+        
         print("-" * 50)
         
         input("Press Enter to continue...")
