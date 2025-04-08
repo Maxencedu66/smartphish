@@ -3,6 +3,7 @@
 {% block title %}Paramètres du LLM - SmartPhish{% endblock %}
 
 {% block content %}
+
 <div class="header-icon-title mb-4">
     <img src="{{ url_for('static', filename='img/settings.png') }}" alt="settings" class="icon-header">
     <h2>Paramètres du LLM</h2>
@@ -10,7 +11,7 @@
 
 <!-- <p>Contenu de la section paramètres du LLM.</p> -->
 
-<h5 style="margin-top: 20px; margin-bottom: 13px;">Modèle conversationnel</h5>
+<h4 style="margin-top: 20px; margin-bottom: 13px;">Modèle conversationnel</h4>
 
 {% for model in models %}
 <div class="form-check mt-2">
