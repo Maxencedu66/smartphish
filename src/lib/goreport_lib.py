@@ -1523,6 +1523,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             'vulnerabilities': None,
                             'high_severity_count': None,
                             'critical_severity_count': None,
+                            'most_impactful_vuln': None,
                         }
                         try:
                             cve_infos = custom_cve.search_user_agent_vulnerable(clicked_user_agent)
@@ -1643,6 +1644,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             #     'highest_score': highest_score,
                             #     'highest_severity': highest_severity,
                             #     'specific_match': specific_match,
+                            #     'impacts': impacts,
                             # }
                             
                             # high_severity_bg_color = RGBColor(0xF7, 0x80, 0x70) # red
@@ -1746,15 +1748,35 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             high_severity_count = cve_infos.get('high_severity_count', 0)
                             critical_severity_count = cve_infos.get('critical_severity_count', 0)
                             
-                            run = p.add_run(f"{high_severity_count}")
-                            run.bold = True
-                            run = p.add_run(f" HIGH severity vulnerabilities found")
+                            if high_severity_count > 0:
+                                run = p.add_run(f"{high_severity_count}")
+                                run.bold = True
+                                run = p.add_run(f" HIGH severity vulnerabilities found")
                             
-                            p = d.add_paragraph()
-                            p.style = d.styles['Normal']
-                            run = p.add_run(f"{critical_severity_count}")
-                            run.bold = True
-                            run = p.add_run(f" CRITICAL severity vulnerabilities found")
+                            if critical_severity_count > 0:
+                                p = d.add_paragraph()
+                                p.style = d.styles['Normal']
+                                run = p.add_run(f"{critical_severity_count}")
+                                run.bold = True
+                                run = p.add_run(f" CRITICAL severity vulnerabilities found")
+                            
+                            if high_severity_count > 0 or critical_severity_count > 0:
+                                run = p.add_run("\n")
+                            
+                            # Add a paragraph with the most impactful vulnerability
+                            most_impactful_vuln = cve_infos.get('most_impactful_vuln', None)
+                            if most_impactful_vuln is not None:
+                                p = d.add_paragraph()
+                                p.style = d.styles['Normal']
+                                run = p.add_run("Most impactful vulnerability description (")
+                                run.bold = True
+                                hyperlink = add_hyperlink(p, CVE_URL + most_impactful_vuln['id'], most_impactful_vuln['id'], '0000FF', True)
+                                run = p.add_run(") :\n")
+                                run.bold = True
+                                run = p.add_run('"')
+                                run = p.add_run(most_impactful_vuln['description'])
+                                run.italic = True
+                                run = p.add_run('"')
                         else:
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
