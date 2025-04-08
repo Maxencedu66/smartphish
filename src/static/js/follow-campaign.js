@@ -76,7 +76,18 @@ function handleReport(campaignId, btnElement) {
         }
 
         updateDownloadButton(campaignId);
-        Swal.fire("Rapport généré", "Vous pouvez maintenant le télécharger.", "success");
+        // Swal.fire("Rapport généré", "Vous pouvez maintenant le télécharger.", "success");
+        Swal.fire({
+            title: "Rapport généré",
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonText: "Télécharger le rapport",
+            cancelButtonText: "OK"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open(`/download-report/${campaignId}`, "_blank");
+            }
+        });
     })
     .catch(err => {
         Swal.close();
@@ -104,7 +115,18 @@ function regenerateReport(campaignId) {
         }
 
         updateDownloadButton(campaignId);
-        Swal.fire("Nouveau rapport généré", "Téléchargement disponible.", "success");
+        // Swal.fire("Nouveau rapport généré", "Téléchargement disponible.", "success");
+        Swal.fire({
+            title: "Nouveau rapport généré",
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonText: "Télécharger le rapport",
+            cancelButtonText: "OK"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open(`/download-report/${campaignId}`, "_blank");
+            }
+        });
     })
     .catch(err => {
         Swal.close();

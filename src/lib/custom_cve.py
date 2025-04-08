@@ -416,11 +416,12 @@ def search_user_agent_vulnerable(user_agent_string, verbose=False):
     }
 
 
-def highest_impactful_vuln(vulnerabilities):
+def highest_impactful_vuln(all_vulnerabilities):
     """
     Find the highest impactful vulnerability in the list.
     Takes in account the impact_score, confidentiality_impact and integrity_impact.
     """
+    vulnerabilities = [vuln for vuln in all_vulnerabilities]
     most_impactful_vuln = None
     if len(vulnerabilities) == 0:
         return most_impactful_vuln

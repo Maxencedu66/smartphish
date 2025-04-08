@@ -1748,20 +1748,23 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             high_severity_count = cve_infos.get('high_severity_count', 0)
                             critical_severity_count = cve_infos.get('critical_severity_count', 0)
                             
-                            if high_severity_count > 0:
-                                run = p.add_run(f"{high_severity_count}")
-                                run.bold = True
-                                run = p.add_run(f" HIGH severity vulnerabilities found")
-                            
-                            if critical_severity_count > 0:
-                                p = d.add_paragraph()
-                                p.style = d.styles['Normal']
-                                run = p.add_run(f"{critical_severity_count}")
-                                run.bold = True
-                                run = p.add_run(f" CRITICAL severity vulnerabilities found")
-                            
                             if high_severity_count > 0 or critical_severity_count > 0:
-                                run = p.add_run("\n")
+                                run = p.add_run("Summary :\n")
+                                run.bold = True
+
+                                run = p.add_run(f"- ")
+                                run = p.add_run(f"{high_severity_count} ")
+                                run.bold = True
+                                run = p.add_run(f'HIGH')
+                                run.italic = True
+                                run = p.add_run(f' severity vulnerabilities found\n')
+
+                                run = p.add_run(f"- ")
+                                run = p.add_run(f"{critical_severity_count} ")
+                                run.bold = True
+                                run = p.add_run(f'CRITICAL')
+                                run.italic = True
+                                run = p.add_run(f' severity vulnerabilities found')
                             
                             # Add a paragraph with the most impactful vulnerability
                             most_impactful_vuln = cve_infos.get('most_impactful_vuln', None)
