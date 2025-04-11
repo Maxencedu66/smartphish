@@ -68,6 +68,8 @@ function validateEmailTemplateForm(nameId, subjectId, textId) {
     return true;
 }
 
+
+
 // View full HTML
 function toggleEditFullHtmlView() {
     const textarea = document.getElementById("editFullHtmlTextarea");
@@ -101,40 +103,53 @@ function toggleFullHtmlView() {
 let isSourceView = false;
 
 function toggleSource() {
-    const editorContainer = document.getElementById("htmlEditor");
-    const htmlTextarea = document.getElementById("manualHtmlView");
+    const quillEditor = document.querySelector('#quillEditor .ql-editor');
+    const quillToolbar = document.querySelector('#quillEditor').previousElementSibling;
 
     if (!isSourceView) {
-        // Passer en mode HTML brut
-        htmlTextarea.value = quill.root.innerHTML.trim();
-        htmlTextarea.style.display = "block";
-        editorContainer.querySelector(".ql-editor").style.display = "none";
+        const html = quill.root.innerHTML.trim();
+        quillEditor.innerText = html;
+        quillEditor.setAttribute('contenteditable', true); 
+        quillEditor.classList.add('code-mode');
+        disableQuillToolbar(quillToolbar);
+        quill.keyboard.bindings = {};
     } else {
-        // Repasser en mode WYSIWYG
-        quill.root.innerHTML = htmlTextarea.value.trim();
-        htmlTextarea.style.display = "none";
-        editorContainer.querySelector(".ql-editor").style.display = "block";
+        const rawCode = quillEditor.innerText;
+        quill.root.innerHTML = rawCode;
+        quillEditor.setAttribute('contenteditable', true);
+        quillEditor.classList.remove('code-mode');
+        enableQuillToolbar(quillToolbar);
+        quill.keyboard.bindings = Quill.import('modules/keyboard').DEFAULTS.bindings;
     }
 
     isSourceView = !isSourceView;
 }
 
-function toggleEditSource() {
-    const quillContainer = document.getElementById("editQuillEditor");
-    const htmlTextarea = document.getElementById("editManualHtmlView");
+let isEditSourceView = false;
 
-    if (quillContainer.style.display === "none") {
-        // Revenir à l'éditeur visuel
-        quillContainer.style.display = "block";
-        htmlTextarea.style.display = "none";
-        editQuill.root.innerHTML = htmlTextarea.value;
+function toggleEditSource() {
+    const quillEditor = document.querySelector('#editQuillEditor .ql-editor');
+    const quillToolbar = document.querySelector('#editQuillEditor').previousElementSibling;
+
+    if (!isEditSourceView) {
+        const html = editQuill.root.innerHTML.trim();
+        quillEditor.innerText = html;
+        quillEditor.setAttribute('contenteditable', true);
+        quillEditor.classList.add('code-mode');
+        disableQuillToolbar(quillToolbar);
+        editQuill.keyboard.bindings = {};
     } else {
-        // Passer à la vue code
-        htmlTextarea.value = editQuill.root.innerHTML;
-        quillContainer.style.display = "none";
-        htmlTextarea.style.display = "block";
+        const rawCode = quillEditor.innerText;
+        editQuill.root.innerHTML = rawCode;
+        quillEditor.setAttribute('contenteditable', true);
+        quillEditor.classList.remove('code-mode');
+        enableQuillToolbar(quillToolbar);
+        editQuill.keyboard.bindings = Quill.import('modules/keyboard').DEFAULTS.bindings;
     }
+
+    isEditSourceView = !isEditSourceView;
 }
+
 
 
 let quill;
@@ -145,12 +160,25 @@ document.addEventListener("DOMContentLoaded", function() {
     quill = new Quill('#quillEditor', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                [{ header: [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'link'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['clean']
-            ]
+            toolbar :  [
+                ['bold', 'italic', 'underline', 'strike'],      
+                ['blockquote', 'code-block'],
+                ['link'],
+              
+                [{ 'header': 1 }, { 'header': 2 }],             
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],   
+                [{ 'indent': '-1'}, { 'indent': '+1' }],       
+                [{ 'direction': 'rtl' }],                     
+              
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              
+                [{ 'color': [] }, { 'background': [] }],      
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+              
+                ['clean']                                    
+              ]
         }
     });
 
@@ -176,12 +204,26 @@ document.addEventListener("DOMContentLoaded", function() {
     editQuill = new Quill('#editQuillEditor', {
         theme: 'snow',
         modules: {
-            toolbar: [
-                [{ header: [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'link'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['clean']
-            ]
+            toolbar :  [
+                ['bold', 'italic', 'underline', 'strike'],       
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video', 'formula'],
+              
+                [{ 'header': 1 }, { 'header': 2 }],             
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],    
+                [{ 'indent': '-1'}, { 'indent': '+1' }],        
+                [{ 'direction': 'rtl' }],                       
+              
+                [{ 'size': ['small', false, 'large', 'huge'] }],  
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              
+                [{ 'color': [] }, { 'background': [] }],     
+                [{ 'font': [] }],
+                [{ 'align': [] }],
+              
+                ['clean']                                   
+              ]
         }
     });
 
@@ -388,7 +430,10 @@ function generateAIEmail() {
         // Remplir les champs de l'IA avec l'email généré et afficher le résultat
         document.getElementById("aiGeneratedSubject").value = data.object;
         document.getElementById("aiGeneratedContent").value = data.content;
-        document.getElementById("aiGeneratedHtml").srcdoc = data.html;
+        document.getElementById("aiGeneratedHtmlTextarea").value = data.html;
+        document.getElementById("aiGeneratedHtmlTextarea").style.display = "block";
+        document.getElementById("aiGeneratedHtmlPreview").style.display = "none";
+
         document.getElementById("aiResult").style.display = "block";
 
         // Ajuste la hauteur du textarea pour le contenu généré
@@ -413,6 +458,7 @@ function generateAIEmail() {
 
 // Fonction pour soumettre le nouveau template
 function submitNewEmailTemplate() {
+    forceQuillToViewMode();
     const name = document.getElementById("newTemplateName").value;
     let subject, text;
     let method;
@@ -431,11 +477,11 @@ function submitNewEmailTemplate() {
 
     if (document.getElementById("aiMethod").checked) {
         subject = document.getElementById("aiGeneratedSubject").value;
-        text = document.getElementById("aiGeneratedContent").value;
+        text = document.getElementById("aiGeneratedHtmlTextarea").value.trim();
     } else if (document.getElementById("manualMethod").checked) {
         subject = document.getElementById("newEmailSubject").value;
         if (document.getElementById("htmlFormat").checked) {
-            text = quill.root.innerHTML;
+            text = quill.root.innerHTML.trim();
             method = "quillEditor";
         } else if (document.getElementById("textFormat").checked) {
             text = document.getElementById("newEmailText").value;
@@ -462,8 +508,9 @@ function submitNewEmailTemplate() {
         name: name,
         subject: subject
     };
+
     
-    if (document.getElementById("fullHtmlFormat").checked || document.getElementById("htmlFormat").checked) {
+    if (document.getElementById("fullHtmlFormat").checked || document.getElementById("htmlFormat").checked || document.getElementById("aiMethod").checked) {
         data.html = text;
     } else {
         data.text = text;
@@ -516,8 +563,8 @@ function validateEditEmailTemplateForm() {
         plaintext = editQuill.getText().trim();
     } else if (document.getElementById("editTextFormat").checked) {
         plaintext = document.getElementById("editEmailText").value.trim();
-    } else if (document.getElementById("fullHtmlFormat").checked) {
-        plaintext = document.getElementById("fullHtmlTextarea").value.trim();
+    } else if (document.getElementById("editFullHtmlFormat").checked) {
+        plaintext = document.getElementById("editFullHtmlFormat").value.trim();
     }
      else {
         Swal.fire({
@@ -543,6 +590,8 @@ function validateEditEmailTemplateForm() {
 
 // Fonction pour soumettre la modification d'un template
 function submitEditedEmailTemplate() {
+    forceEditQuillToViewMode();
+
     const templateId = document.getElementById("editTemplateId").value;
     const name = document.getElementById("editTemplateName").value.trim();
     const subject = document.getElementById("editEmailSubject").value.trim();
@@ -569,6 +618,7 @@ function submitEditedEmailTemplate() {
 
     if (editHtmlFormat && editHtmlFormat.checked) {
         text = editQuill.root.innerHTML.trim();
+        
     } else if (editTextFormat && editTextFormat.checked) {
         text = document.getElementById("editEmailText").value.trim();
     } else if (editFullHtmlFormat && editFullHtmlFormat.checked) {
@@ -631,4 +681,47 @@ function submitEditedEmailTemplate() {
             confirmButtonColor: "#d33"
         });
     });
+}
+
+
+function disableQuillToolbar(toolbar) {
+    toolbar.querySelectorAll('button, .ql-picker, .ql-picker-options span').forEach(el => {
+        el.setAttribute('disabled', true);
+        el.classList.add('disabled-toolbar');
+    });
+}
+
+function enableQuillToolbar(toolbar) {
+    toolbar.querySelectorAll('button, .ql-picker, .ql-picker-options span').forEach(el => {
+        el.removeAttribute('disabled');
+        el.classList.remove('disabled-toolbar');
+    });
+}
+
+
+function toggleAIGeneratedView() {
+    const textarea = document.getElementById("aiGeneratedHtmlTextarea");
+    const preview = document.getElementById("aiGeneratedHtmlPreview");
+
+    if (textarea.style.display !== "none") {
+        preview.srcdoc = textarea.value;
+        textarea.style.display = "none";
+        preview.style.display = "block";
+    } else {
+        textarea.style.display = "block";
+        preview.style.display = "none";
+    }
+}
+
+
+function forceQuillToViewMode() {
+    if (isSourceView) {
+        toggleSource();  
+    }
+}
+
+function forceEditQuillToViewMode() {
+    if (isEditSourceView) {
+        toggleEditSource(); 
+    }
 }

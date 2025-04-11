@@ -25,28 +25,33 @@ document.addEventListener("DOMContentLoaded", function() {
     const aiSection = document.getElementById("aiFields");
 
     document.querySelectorAll('input[name="creationMethod"]').forEach(radio => {
-        radio.addEventListener("change", function() {
+        radio.addEventListener("change", function () {
+            const aiSection = document.getElementById("aiFields");
+            const manualSection = document.getElementById("manualFields");
+            const importSection = document.getElementById("importFields");
+    
+            // Réinitialisation commune
+            document.getElementById("aiGeneratedLandingHTML").value = "";
+            document.getElementById("previewAIALandingFrame").style.display = "none";
+            document.getElementById("newLandingPageHTML").value = "";
+            document.getElementById("previewNewPageFrame").style.display = "none";
+    
             if (this.value === "ai") {
-                // Réinitialiser les champs du mode manuel/import
-                document.getElementById("newLandingPageHTML").value = "";
-                document.getElementById("previewNewPageFrame").style.display = "none";
-                // Réinitialiser les champs du mode IA
-                document.getElementById("aiGeneratedLandingHTML").value = "";
-                document.getElementById("previewAIALandingFrame").style.display = "none";
                 aiSection.style.display = "block";
                 manualSection.style.display = "none";
-            } else {
-                // Réinitialiser les champs du mode IA
-                document.getElementById("aiGeneratedLandingHTML").value = "";
-                document.getElementById("previewAIALandingFrame").style.display = "none";
-                // Réinitialiser les champs du mode manuel/import
-                document.getElementById("newLandingPageHTML").value = "";
-                document.getElementById("previewNewPageFrame").style.display = "none";
+                importSection.style.display = "none";
+            } else if (this.value === "import") {
+                aiSection.style.display = "none";
+                manualSection.style.display = "none";
+                importSection.style.display = "block";
+            } else if (this.value === "manual") {
                 aiSection.style.display = "none";
                 manualSection.style.display = "block";
+                importSection.style.display = "none";
             }
         });
     });
+    
 
     // Réinitialiser complètement le modal de création à l'ouverture
     document.getElementById('newLandingPageModal').addEventListener('show.bs.modal', function () {
@@ -63,11 +68,15 @@ document.addEventListener("DOMContentLoaded", function() {
         // Réinitialiser la sélection de la méthode
         document.getElementById("manualMethod").checked = true;
         document.getElementById("aiMethod").checked = false;
+        const toggleSwitch = document.getElementById("toggleViewSwitch").checked = false;
+        document.getElementById("toggleViewSwitchIA").checked = false;
         manualSection.style.display = "block";
         aiSection.style.display = "none";
         // Réinitialiser les champs IA
         document.getElementById("aiGeneratedLandingHTML").value = "";
         document.getElementById("previewAIALandingFrame").style.display = "none";
+        document.getElementById("aiGeneratedLandingHTML").style.display = "block";
+        document.getElementById("toggleViewSwitchIA").checked = false;
     });
 });
 
@@ -224,7 +233,7 @@ function submitNewLandingPage() {
         if (response.error) {
             Swal.fire({ icon: "error", title: "Erreur", text: response.error, confirmButtonColor: "#d33" });
         } else {
-            Swal.fire({ icon: "success", title: "Créée !", text: "La page a été ajoutée.", confirmButtonColor: "#28a745" })
+            Swal.fire({ icon: "success", title: "Succès", text: "La page a été ajoutée.", confirmButtonColor: "#28a745" })
             .then(() => { location.reload(); });
         }
     })
@@ -340,8 +349,9 @@ function generateAILanding() {
         } else {
             // Remplir le textarea du mode IA avec le code généré
             const htmlTextarea = document.getElementById("aiGeneratedLandingHTML");
-            document.getElementById("newLandingPageName").value = `LP - ${scenario}`;
+            // document.getElementById("newLandingPageName").value = `LP - ${scenario}`;
             htmlTextarea.value = data.html;
+            document.getElementById("aiGeneratedLandingContainer").style.display = "block";
             // Mettre à jour l'aperçu si visible
             const previewFrame = document.getElementById("previewAIALandingFrame");
             if (previewFrame.style.display === "block") {
@@ -399,6 +409,11 @@ function importSite() {
                 finalHTML = finalHTML.replace(/<base[^>]*>/gi, '');
             }
             document.getElementById("newLandingPageHTML").value = finalHTML;
+
+            const successBox = document.getElementById("importSuccessBox");
+            successBox.innerText = `✅ Site "${url}" importé avec succès !`;
+            successBox.style.display = "block";
+
             Swal.fire({
                 icon: "success",
                 title: "Site importé avec succès !",
@@ -412,7 +427,7 @@ function importSite() {
         Swal.fire({
             icon: "error",
             title: "Erreur serveur",
-            text: "Une erreur s'est produite lors de l'import du site.",
+            text: "Une erreur s'est produite lors de l'import du site. Assurez-vous que l'URL commence bien par https:// et qu'elle est accessible.",
             confirmButtonColor: "#d33"
         });
     });
@@ -439,5 +454,50 @@ editCaptureCredentials.addEventListener('change', () => {
     } else {
         editCapturePasswords.checked = false;
         editCapturePasswords.disabled = true;
+    }
+});
+
+
+function previewImportedSite() {
+    const html = document.getElementById("newLandingPageHTML").value.trim();
+    const previewFrame = document.getElementById("importPreviewFrame");
+
+    if (!html) {
+        Swal.fire({
+            icon: "warning",
+            title: "Aucun contenu",
+            text: "Veuillez importer un site ou coller du HTML avant d'afficher un aperçu.",
+            confirmButtonColor: "#f39c12"
+        });
+        return;
+    }
+
+    previewFrame.srcdoc = html;
+    previewFrame.style.display = "block";
+}
+
+// Afficher ou masquer l'aperçu du site importé
+document.getElementById("toggleImportedPreviewBtn").addEventListener("click", () => {
+    const iframe = document.getElementById("importPreviewFrame");
+    const html = document.getElementById("newLandingPageHTML").value.trim();
+    const btn = document.getElementById("toggleImportedPreviewBtn");
+
+    if (!html) {
+        Swal.fire({
+            icon: "warning",
+            title: "Aucun contenu",
+            text: "Veuillez importer un site ou coller du HTML avant d'afficher un aperçu.",
+            confirmButtonColor: "#f39c12"
+        });
+        return;
+    }
+
+    if (iframe.style.display === "none") {
+        iframe.srcdoc = html;
+        iframe.style.display = "block";
+        btn.textContent = "Masquer le site importé";
+    } else {
+        iframe.style.display = "none";
+        btn.textContent = "Afficher le site importé";
     }
 });

@@ -47,7 +47,7 @@
 
 <!-- ========== MODAL: CRÉER UNE NOUVELLE LANDING PAGE ========== -->
 <div class="modal fade modal-lg" id="newLandingPageModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">Créer une Page de Destination</h5>
@@ -63,27 +63,22 @@
                 <div class="mb-3">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="creationMethod" id="manualMethod" value="manual" checked>
-                        <label class="form-check-label" for="manualMethod">Manuel / Import</label>
+                        <label class="form-check-label" for="manualMethod">Manuel</label>
                     </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="creationMethod" id="importMethod" value="import">
+                        <label class="form-check-label" for="importMethod">Import</label>
+                    </div>
+
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="creationMethod" id="aiMethod" value="ai">
                         <label class="form-check-label" for="aiMethod">Génération IA</label>
                     </div>
                 </div>
 
-                <!-- Section manuelle/import -->
+                <!-- Section manuelle -->
                 <div id="manualFields">
-                    <div class="border p-2 mb-3">
-                        <h6 class="mb-2">Importer un site</h6>
-                        <label for="importSiteURL" class="form-label"><strong>URL du site :</strong></label>
-                        <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" id="includeResources">
-                            <label class="form-check-label" for="includeResources">Inclure les ressources (&lt;base&gt;)</label>
-                        </div>
-                        <button class="btn btn-info btn-sm mt-2" type="button" onclick="importSite()">Importer</button>
-                    </div>
-
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label for="newLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
                         <div class="form-check form-switch">
@@ -97,6 +92,31 @@
                     <iframe id="previewNewPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                 </div>
 
+                <!-- Section Import -->
+                <div id="importFields" style="display: none;">
+                    <div class="border p-2 mb-3">
+                        <h6 class="mb-2">Importer un site</h6>
+                        <label for="importSiteURL" class="form-label"><strong>URL du site :</strong></label>
+                        <input type="text" id="importSiteURL" class="form-control" placeholder="http://example.com">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="includeResources">
+                            <label class="form-check-label" for="includeResources">Inclure les ressources (&lt;base&gt;)</label>
+                        </div>
+
+                        <div id="importSuccessBox" class="alert alert-success py-2 px-3 mb-2" style="display: none;">
+                            <!-- Message dynamique ici -->
+                        </div>
+                        
+                        <button class="btn btn-info btn-sm mt-2" type="button" onclick="importSite()">Importer</button>                 
+                        <button class="btn btn-outline-dark btn-sm mt-2" type="button" id="toggleImportedPreviewBtn">
+                            Afficher le site importé
+                        </button>
+                        
+                        <iframe id="importPreviewFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;" class="mt-2"></iframe>
+
+                    </div>    
+                </div>
+                
                 <!-- Section IA -->
                 <div id="aiFields" style="display:none;">
                     <label for="landingScenario" class="form-label"><strong>Scénario :</strong></label>
@@ -116,23 +136,24 @@
                     <button class="btn btn-primary btn-sm mb-3" onclick="generateAILanding()">Générer par IA</button>
 
                     <!-- Toggle pour IA : Code / Vue -->
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label for="toggleViewSwitchIA" class="form-label"><strong>Aperçu / Code source</strong></label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="toggleViewSwitchIA" onchange="togglePreviewIA('aiGeneratedLandingHTML', 'previewAIALandingFrame')">
-                            <label class="form-check-label" for="toggleViewSwitchIA">
-                                <span id="toggleLabelIA">Code</span> / <span>Vue</span>
-                            </label>
+                    <div style="display:none;" id="aiGeneratedLandingContainer">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="toggleViewSwitchIA" class="form-label"><strong>Aperçu / Code source</strong></label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggleViewSwitchIA" onchange="togglePreviewIA('aiGeneratedLandingHTML', 'previewAIALandingFrame')">
+                                <label class="form-check-label" for="toggleViewSwitchIA">
+                                    <span id="toggleLabelIA">Code</span> / <span>Vue</span>
+                                </label>
+                            </div>
                         </div>
+                        <textarea id="aiGeneratedLandingHTML" class="form-control" rows="6" placeholder="Le code généré par IA apparaîtra ici..."></textarea>
+                        <iframe id="previewAIALandingFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                     </div>
-                    <textarea id="aiGeneratedLandingHTML" class="form-control" rows="6" placeholder="Le code généré par IA apparaîtra ici..."></textarea>
-                    <iframe id="previewAIALandingFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;"></iframe>
                 </div>
-
                 <!-- Options communes -->
                 <label for="newCaptureCredentials" class="form-label mt-2"><strong>Capture des données :</strong></label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="newCaptureCredentials">
+                    <input class="form-check-input" type="checkbox" id="newCaptureCredentials" checked>
                     <label class="form-check-label" for="newCaptureCredentials">
                         Activer la capture des données
                     </label>
@@ -156,7 +177,7 @@
 
 <!-- ========== MODAL: ÉDITER UNE LANDING PAGE ========== -->
 <div class="modal fade" id="editLandingPageModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">Modifier une Page de destination</h5>
@@ -166,8 +187,17 @@
                 <input type="hidden" id="editLandingPageId">
                 <label for="editLandingPageName" class="form-label"><strong>Nom :</strong></label>
                 <input type="text" id="editLandingPageName" class="form-control mb-3" placeholder="Nom de la page...">
-                <label for="editLandingPageHTML" class="form-label"><strong>HTML :</strong></label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="editLandingPageHTML" class="form-label"><strong>Aperçu / Code source</strong></label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="toggleViewSwitchEdit" onchange="togglePreview('editLandingPageHTML', 'previewEditPageFrame')">
+                        <label class="form-check-label" for="toggleViewSwitchEdit">
+                            <span id="toggleLabelEdit">Code</span> / <span>Vue</span>
+                        </label>
+                    </div>
+                </div>
                 <textarea id="editLandingPageHTML" class="form-control" rows="5" placeholder="Modifiez le code HTML ici..."></textarea>
+                <iframe id="previewEditPageFrame" style="display:none; width:100%; height:300px; border:1px solid #ccc;" class="mt-2"></iframe>
                 <div class="form-check mt-2">
                     <input class="form-check-input" type="checkbox" id="editCaptureCredentials">
                     <label class="form-check-label" for="editCaptureCredentials">Activer la capture des données</label>
