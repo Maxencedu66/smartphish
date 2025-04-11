@@ -1,20 +1,25 @@
 function toggleView() {
     const toggle = document.getElementById("toggleView").checked;
     const codeView = document.getElementById("codeView");
-    const htmlPreview = document.getElementById("htmlPreview");
+    const htmlPreviewFrame = document.getElementById("htmlPreviewFrame");
 
     if (toggle) {
         // Affichage "vue"
         const rawHtml = codeView.textContent || codeView.innerText;
-        htmlPreview.innerHTML = rawHtml;
-        htmlPreview.classList.remove("d-none");
+        htmlPreviewFrame.classList.remove("d-none");
         codeView.classList.add("d-none");
+
+        const iframeDoc = htmlPreviewFrame.contentDocument || htmlPreviewFrame.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(rawHtml);
+        iframeDoc.close();
     } else {
         // Affichage "code"
-        htmlPreview.classList.add("d-none");
+        htmlPreviewFrame.classList.add("d-none");
         codeView.classList.remove("d-none");
     }
 }
+
 
 function toggleValue(element) {
     const mode = element.getAttribute("data-mode");
