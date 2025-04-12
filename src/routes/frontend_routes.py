@@ -250,8 +250,12 @@ def generate_report(campaign_id):
 
     campaigns = get_campaigns()
     campaign = next((c for c in campaigns if c["id"] == campaign_id), None)
-    if not campaign or campaign["status"] != "Completed":
-        return jsonify({"error": "Campagne invalide ou non terminée"}), 400
+    if not campaign:
+        return jsonify({"error": "Campagne invalide"}), 400
+
+    # Si la campagne est terminée, on force la régénération
+    if campaign["status"] == "Completed":
+        force = True
 
     try:
         path = generate_docx_with_goreport(campaign_id, force=force)
@@ -263,6 +267,7 @@ def generate_report(campaign_id):
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @bp.route('/report-exists/<int:campaign_id>')
 def report_exists(campaign_id):

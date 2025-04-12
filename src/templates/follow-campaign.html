@@ -14,7 +14,7 @@
                 <th>Identifiant</th>
                 <th>Nom</th>
                 <th>Date de création</th>
-                <th>Status</th>
+                <th>Statut</th>
                 <th class="text-end">Actions</th>
             </tr>
         </thead>
@@ -32,18 +32,22 @@
                     {% endif %}
                 </td>
                 <td class="text-end d-flex gap-2 justify-content-end flex-wrap align-items-center">
+                    <!-- Bouton Voir les détails -->
                     <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
+                    
+                    <!-- Bouton Supprimer -->
                     <button class="btn btn-danger" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
-
-                    {% if campaign.status == "In progress" %}
-                        <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
-                    {% else %}
-                        <div class="d-flex align-items-center gap-1">
-                            <button id="report-btn-{{ campaign.id }}" class="btn btn-secondary">Chargement...</button>
-                            <button id="retry-btn-{{ campaign.id }}" class="btn btn-light border d-none" onclick="regenerateReport('{{ campaign.id }}')" title="Régénérer le rapport">
-                            </button>
-                        </div>
+                    
+                    <!-- Bouton Terminer (affiché uniquement si la campagne n'est pas complétée) -->
+                    {% if campaign.status != "Completed" %}
+                    <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
                     {% endif %}
+                    
+                    <!-- Bouton Générer le rapport -->
+                    <div class="d-flex align-items-center gap-1">
+                        <button id="report-btn-{{ campaign.id }}" class="btn btn-secondary">Chargement...</button>
+                        <button id="retry-btn-{{ campaign.id }}" class="btn btn-light border d-none" onclick="regenerateReport('{{ campaign.id }}')" title="Régénérer le rapport"></button>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
