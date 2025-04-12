@@ -9,11 +9,13 @@ from io import BytesIO
 from fpdf import FPDF
 import subprocess
 import tempfile
+import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from src.services.gophish_service import get_templates
 from src.services.report_service import *
 from functools import wraps
+from src.lib.custom_cve import search_user_agent_vulnerable
 
 bp = Blueprint('frontend', __name__, static_folder='../static', template_folder='../templates')
 
@@ -125,6 +127,40 @@ def details_campaign(campaign_id):
                 continue
 
     return render_template("details-campaign.html", campaign=campaign, stats=stats, submissions=submissions)
+
+
+@bp.route("/campaign/<int:campaign_id>/cve")
+def get_campaign_cve(campaign_id):
+    import json
+    # Récupère la campagne via ta fonction existante
+    campaign = get_campaign(campaign_id)
+
+    timeline = campaign.get("timeline", [])
+    if not timeline:
+        timeline = get_campaign_events(campaign_id)
+
+    results = {}
+    for event in timeline:
+        email = event.get("email")
+        user_agent = None
+        details = event.get("details")
+        if details and details.strip():
+            try:
+                details_obj = json.loads(details)
+                user_agent = details_obj.get("browser", {}).get("user-agent")
+            except Exception as e:
+                print("DEBUG - Erreur de parsing des details pour l'événement:", event, e)
+        
+        if email and user_agent:
+            vuln_info = search_user_agent_vulnerable(user_agent)
+            if email not in results:
+                results[email] = vuln_info
+    return jsonify(results)
+
+
+
+
+
 
 
 
@@ -239,6 +275,8 @@ def report_exists(campaign_id):
 def download_report(campaign_id):
 
     return download_report_styled(campaign_id)
+
+
 
 
 # ------------------------------------------------------

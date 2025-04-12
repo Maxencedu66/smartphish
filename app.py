@@ -3,6 +3,8 @@ import signal
 import sys
 import os
 from src import create_app
+from src.lib.custom_cve import search_user_agent_vulnerable
+
 
 # Définir le chemin du fichier `docker-compose.yml`
 DOCKER_COMPOSE_PATH = os.path.join(os.path.dirname(__file__), "docker/docker-compose.yml")
@@ -37,6 +39,8 @@ def stop_docker():
     print("\n🛑 Fermeture de l'application, arrêt de Docker...")
     subprocess.run(DOCKER_COMPOSE_CMD + ["-f", DOCKER_COMPOSE_PATH, "down"], check=True)
     sys.exit(0)
+    
+
 
 # Capture des signaux pour arrêter Docker proprement quand Flask est fermé
 signal.signal(signal.SIGINT, lambda sig, frame: stop_docker())  # CTRL+C
