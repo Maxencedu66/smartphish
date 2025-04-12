@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This is the GoReport class. GoReport handles everything from connecting to the target Gophish
-server to pulling campaign information and reporting the results.
+Il s'agit de la classe GoReport. GoReport se charge de la connexion au serveur Gophish cible, de la récupération des informations de campagne et de la génération du rapport.
 """
 
 # Standard Libraries
@@ -450,14 +449,14 @@ class Goreport(object):
         self.cam_template_name = self.template.name
         self.cam_template_attachments = self.template.attachments
         if self.cam_template_attachments == []:
-            self.cam_template_attachments = "None Used"
+            self.cam_template_attachments = "Non utilisé"
 
         # Collect the landing page information
         self.page = self.campaign.page
         self.cam_page_name = self.page.name
         self.cam_redirect_url = self.page.redirect_url
         if self.cam_redirect_url == "":
-            self.cam_redirect_url = "Not Used"
+            self.cam_redirect_url = "Non utilisé"
         self.cam_capturing_passwords = self.page.capture_passwords
         self.cam_capturing_credentials = self.page.capture_credentials
 
@@ -1122,88 +1121,88 @@ class Goreport(object):
         cell_text_miss_font.color.rgb = RGBColor(0xFF, 0x00, 0x00)
 
         # Write a campaign summary at the top of the report
-        d.add_heading("Executive Summary", 1)
+        d.add_heading("Résumé Exécutif", 1)
         p = d.add_paragraph()
-        run = p.add_run(f"Campaign Results For: {self.cam_name}")
+        run = p.add_run(f"Résultats de la campagne pour: {self.cam_name}")
         run.bold = True
         # Runs are basically "runs" of text and must be aligned like we want
         # them aligned in the report -- thus they are pushed left
         if self.cam_status == "Completed":
-            completed_status = f"Completed:\t{self.completed_date.split('T')[1].split('.')[0]} on {self.completed_date.split('T')[0]}"
+            completed_status = f"{self.completed_date.split('T')[1].split('.')[0]} le {self.completed_date.split('T')[0]}"
         else:
-            completed_status = "Still Active"
+            completed_status = "En cours"
         p.add_run(f"""
-Status: {self.cam_status}
-Created: {self.created_date.split('T')[1].split('.')[0]} on {self.created_date.split('T')[0]}
-Started: {self.launch_date.split('T')[1].split('.')[0]} on {self.launch_date.split('T')[0]}
-Completed: {completed_status}
+Statut: {self.cam_status}
+Créé à: {self.created_date.split('T')[1].split('.')[0]} le {self.created_date.split('T')[0]}
+Début à: {self.launch_date.split('T')[1].split('.')[0]} le {self.launch_date.split('T')[0]}
+Terminé à: {completed_status}
 
 """)
         if self.cam_status == "Completed":
             print()
 
         # Write the campaign details -- email details and template settings
-        run = p.add_run("Campaign Details")
+        run = p.add_run("Détails de la campagne")
         run.bold = True
         p.add_run(f"""
-From: {self.cam_from_address}
-Subject: {self.cam_subject_line}
-Phish URL: {self.cam_url}
-Redirect URL: {self.cam_redirect_url}
-Attachment(s): {self.cam_template_attachments}
-Captured Credentials: {self.cam_capturing_credentials}
-Stored Passwords: {self.cam_capturing_passwords}
+De: {self.cam_from_address}
+Objet: {self.cam_subject_line}
+URL de phishing: {self.cam_url}
+URL de redirection: {self.cam_redirect_url}
+Pièce(s) jointe(s): {self.cam_template_attachments}
+Identifiants capturés: {"Oui" if self.cam_capturing_credentials else "Non"}
+Mots de passe stockés: {"Oui" if self.cam_capturing_passwords else "Non"}
 
 """)
 
         # Write a high level summary for stats
-        run = p.add_run("High Level Results")
+        run = p.add_run("Résultats Globaux")
         run.bold = True
         p.add_run(f"""
-Total Targets: {self.total_targets}
+Nombre total de destinataires: {self.total_targets}
 
-The following totals indicate how many events of each type Gophish recorded:
-Total Open Events: {self.total_opened}
-Total Click Events: {self.total_clicked}
-Total Report Events: {self.total_reported}
-Total Submitted Data Events: {self.total_submitted}
+Les résultats suivants indiquent le nombre d'événements de chaque type enregistrés par Gophish:
+Total d'événements d'ouverture: {self.total_opened}
+Total d'événements de clic: {self.total_clicked}
+Total d'événements de signalement: {self.total_reported}
+Total d'événements de soumission de données: {self.total_submitted}
 
-The following totals indicate how many targets participated in each event type:
-Individuals Who Opened: {self.total_unique_opened}
-Individuals Who Clicked: {self.total_unique_clicked}
-Individuals Who Reported: {self.total_unique_reported}
-Individuals Who Submitted: {self.total_unique_submitted}
+Les totaux suivants indiquent le nombre de destinataires ayant participé à chaque type d'événement:
+Personnes ayant ouvert: {self.total_unique_opened}
+Personnes ayant cliqué: {self.total_unique_clicked}
+Personnes ayant signalé l'email: {self.total_unique_reported}
+Personnes ayant soumis des données: {self.total_unique_submitted}
 
 """)
         d.add_page_break()
 
         print("[+] Finished writing high level summary...")
         # End of the campaign summary and beginning of the event summary
-        d.add_heading("Summary of Events", 1)
-        d.add_paragraph("The following table summarizes who opened and clicked on emails sent in this campaign.")
+        d.add_heading("Résumé des Événements", 1)
+        d.add_paragraph("Le tableau suivant résume qui a ouvert et cliqué sur les emails envoyés dans cette campagne.")
 
         # Create a table to hold the event summary results
         table = d.add_table(rows=len(self.campaign_results_summary) + 1, cols=7, style="GoReport")
 
         header0 = table.cell(0, 0)
         header0.text = ""
-        header0.paragraphs[0].add_run("Email Address", "Cell Text").bold = True
+        header0.paragraphs[0].add_run("Adresse email", "Cell Text").bold = True
 
         header1 = table.cell(0, 1)
         header1.text = ""
-        header1.paragraphs[0].add_run("Open", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("Ouvert", "Cell Text").bold = True
 
         header2 = table.cell(0, 2)
         header2.text = ""
-        header2.paragraphs[0].add_run("Click", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Clic", "Cell Text").bold = True
 
         header3 = table.cell(0, 3)
         header3.text = ""
-        header3.paragraphs[0].add_run("Data", "Cell Text").bold = True
+        header3.paragraphs[0].add_run("Données", "Cell Text").bold = True
 
         header4 = table.cell(0, 4)
         header4.text = ""
-        header4.paragraphs[0].add_run("Report", "Cell Text").bold = True
+        header4.paragraphs[0].add_run("Signalement", "Cell Text").bold = True
 
         header5 = table.cell(0, 5)
         header5.text = ""
@@ -1211,7 +1210,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header6 = table.cell(0, 6)
         header6.text = ""
-        header6.paragraphs[0].add_run("Browser", "Cell Text").bold = True
+        header6.paragraphs[0].add_run("Navigateur", "Cell Text").bold = True
 
         # Sort campaign summary by each dict's email entry and then create results table
         target_counter = 0
@@ -1271,7 +1270,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
         # End of the event summary and beginning of the detailed results
         print("[+] Finished writing events summary...")
         print("[+] Detailed results analysis is next and may take some time if you had a lot of targets...")
-        d.add_heading("Detailed Findings", 1)
+        d.add_heading("Analyse Détaillée", 1)
         sofware_infos_dict = {} ### ADDED
         WRITE_CVE_PARTS = True ### ADDED
         target_counter = 0
@@ -1304,7 +1303,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         sent_date = temp[0]
                         sent_time = temp[1].split('.')[0]
                         # Record the email sent date and time in the run created earlier
-                        email_sent_run.text = f" - Email sent on {sent_date} at {sent_time}"
+                        email_sent_run.text = f" - Email envoyé le {sent_date} à {sent_time}"
                         previous_category = True
                     if event.message == "Email Opened" and event.email == target.email:
                         if opened_counter == 1:
@@ -1316,7 +1315,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                                 _.text = "\n"
                             else:
                                 previous_category = True
-                            run = p.add_run("Email Previews")
+                            run = p.add_run("Aperçu des courriels")
                             run.bold = True
 
                             opened_table = d.add_table(rows=1, cols=1, style="GoReport")
@@ -1325,7 +1324,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                             header1 = opened_table.cell(0, 0)
                             header1.text = ""
-                            header1.paragraphs[0].add_run("Time", "Cell Text").bold = True
+                            header1.paragraphs[0].add_run("Heure", "Cell Text").bold = True
 
                         # Begin by adding a row to the table and inserting timestamp
                         opened_table.add_row()
@@ -1344,7 +1343,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                                 _.text = "\n"
                             else:
                                 previous_category = True
-                            run = p.add_run("Email Link Clicked")
+                            run = p.add_run("Lien de l'email cliqué")
                             run.bold = True
 
                             clicked_table = d.add_table(rows=1, cols=5, style="GoReport")
@@ -1353,7 +1352,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                             header1 = clicked_table.cell(0, 0)
                             header1.text = ""
-                            header1.paragraphs[0].add_run("Time", "Cell Text").bold = True
+                            header1.paragraphs[0].add_run("Heure", "Cell Text").bold = True
 
                             header2 = clicked_table.cell(0, 1)
                             header2.text = ""
@@ -1361,15 +1360,15 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                             header3 = clicked_table.cell(0, 2)
                             header3.text = ""
-                            header3.paragraphs[0].add_run("Location", "Cell Text").bold = True
+                            header3.paragraphs[0].add_run("Localisation", "Cell Text").bold = True
 
                             header4 = clicked_table.cell(0, 3)
                             header4.text = ""
-                            header4.paragraphs[0].add_run("Browser", "Cell Text").bold = True
+                            header4.paragraphs[0].add_run("Navigateur", "Cell Text").bold = True
 
                             header5 = clicked_table.cell(0, 4)
                             header5.text = ""
-                            header5.paragraphs[0].add_run("Operating System",
+                            header5.paragraphs[0].add_run("Système d'exploitation (OS)",
                                                           "Cell Text").bold = True
 
                         clicked_table.add_row()
@@ -1413,7 +1412,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                                 _.text = "\n"
                             else:
                                 previous_category = True
-                            run = p.add_run("Data Captured")
+                            run = p.add_run("Données capturées")
                             run.bold = True
 
                             submitted_table = d.add_table(rows=1, cols=6, style="GoReport")
@@ -1422,7 +1421,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                             header1 = submitted_table.cell(0, 0)
                             header1.text = ""
-                            header1.paragraphs[0].add_run("Time", "Cell Text").bold = True
+                            header1.paragraphs[0].add_run("Heure", "Cell Text").bold = True
 
                             header2 = submitted_table.cell(0, 1)
                             header2.text = ""
@@ -1430,20 +1429,20 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                             header3 = submitted_table.cell(0, 2)
                             header3.text = ""
-                            header3.paragraphs[0].add_run("Location", "Cell Text").bold = True
+                            header3.paragraphs[0].add_run("Localisation", "Cell Text").bold = True
 
                             header4 = submitted_table.cell(0, 3)
                             header4.text = ""
-                            header4.paragraphs[0].add_run("Browser", "Cell Text").bold = True
+                            header4.paragraphs[0].add_run("Navigateur", "Cell Text").bold = True
 
                             header5 = submitted_table.cell(0, 4)
                             header5.text = ""
-                            header5.paragraphs[0].add_run("Operating System",
+                            header5.paragraphs[0].add_run("Système d'exploitation (OS)",
                                                           "Cell Text").bold = True
 
                             header6 = submitted_table.cell(0, 5)
                             header6.text = ""
-                            header6.paragraphs[0].add_run("Data Captured",
+                            header6.paragraphs[0].add_run("Données capturées",
                                                           "Cell Text").bold = True
 
                         submitted_table.add_row()
@@ -1491,7 +1490,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                     p.style = d.styles['Normal']
                     _ = p.add_run()
                     _.text = "\n"
-                    run = p.add_run("Common Vulnerabilities and Exposures")
+                    run = p.add_run("Vulnérabilités et Expositions Courantes (CVE)")
                     run.bold = True
 
                     try:
@@ -1501,15 +1500,15 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
                         header1 = software_table.cell(0, 0)
                         header1.text = ""
-                        header1.paragraphs[0].add_run("Browser / OS used", "Cell Text").bold = True
+                        header1.paragraphs[0].add_run("Navigateur / OS utilisé", "Cell Text").bold = True
 
                         header2 = software_table.cell(0, 1)
                         header2.text = ""
-                        header2.paragraphs[0].add_run("Latest versions", "Cell Text").bold = True
+                        header2.paragraphs[0].add_run("Dernières versions", "Cell Text").bold = True
 
                         header3 = software_table.cell(0, 2)
                         header3.text = ""
-                        header3.paragraphs[0].add_run("Is up-to-date", "Cell Text").bold = True
+                        header3.paragraphs[0].add_run("À jour", "Cell Text").bold = True
 
                         cve_infos = {
                             'browser_cpe': None,
@@ -1588,8 +1587,8 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         if vulnerable_date:
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
-                            run = p.add_run(f"Browser is vulnerable since ")
-                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} days)")
+                            run = p.add_run(f"Le navigateur est vulnérable depuis ")
+                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} jours)")
                             run.bold = True
                             one_vulnerable = True
                         
@@ -1599,8 +1598,8 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         if vulnerable_date:
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
-                            run = p.add_run(f"OS is vulnerable since ")
-                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} days)")
+                            run = p.add_run(f"Le système d'exploitation est vulnérable depuis ")
+                            run = p.add_run(f"{vulnerable_date.strftime('%Y-%m-%d')} ({(datetime.now() - vulnerable_date).days} jours)")
                             run.bold = True
                             one_vulnerable = True
                         
@@ -1634,7 +1633,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             
                             header4 = vulnerabilities_table.cell(0, 3)
                             header4.text = ""
-                            header4.paragraphs[0].add_run("Severity", "Cell Text").bold = True
+                            header4.paragraphs[0].add_run("Gravité", "Cell Text").bold = True
                             
                             # template : vulnerabiliy = 
                             # {
@@ -1734,7 +1733,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                                     # Add a '+ XX more' line
                                     vulnerabilities_table.add_row()
                                     cve_id = vulnerabilities_table.cell(i + 1, 0)
-                                    run = cve_id.paragraphs[0].add_run(f"+ {len(cve_infos.get('vulnerabilities', [])) - max_items} more")
+                                    run = cve_id.paragraphs[0].add_run(f"+ {len(cve_infos.get('vulnerabilities', [])) - max_items} autres")
                                     run.bold = True
                                     run.italic = True
                                     break
@@ -1749,29 +1748,29 @@ Individuals Who Submitted: {self.total_unique_submitted}
                             critical_severity_count = cve_infos.get('critical_severity_count', 0)
                             
                             if high_severity_count > 0 or critical_severity_count > 0:
-                                run = p.add_run("Summary :\n")
+                                run = p.add_run("Résumé :\n")
                                 run.bold = True
 
                                 run = p.add_run(f"- ")
                                 run = p.add_run(f"{high_severity_count} ")
                                 run.bold = True
-                                run = p.add_run(f'HIGH')
+                                run = p.add_run(f' vulnérabilités ')
+                                run = p.add_run(f'ÉLEVÉE \n')
                                 run.italic = True
-                                run = p.add_run(f' severity vulnerabilities found\n')
 
                                 run = p.add_run(f"- ")
                                 run = p.add_run(f"{critical_severity_count} ")
                                 run.bold = True
-                                run = p.add_run(f'CRITICAL')
+                                run = p.add_run(f' vulnérabilités ')
+                                run = p.add_run(f'CRITIQUE \n')
                                 run.italic = True
-                                run = p.add_run(f' severity vulnerabilities found')
                             
                             # Add a paragraph with the most impactful vulnerability
                             most_impactful_vuln = cve_infos.get('most_impactful_vuln', None)
                             if most_impactful_vuln is not None:
                                 p = d.add_paragraph()
                                 p.style = d.styles['Normal']
-                                run = p.add_run("Most impactful vulnerability description (")
+                                run = p.add_run("Description de la vulnérabilité ayant le plus d'impact (")
                                 run.bold = True
                                 hyperlink = add_hyperlink(p, CVE_URL + most_impactful_vuln['id'], most_impactful_vuln['id'], '0000FF', True)
                                 run = p.add_run(") :\n")
@@ -1783,7 +1782,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         else:
                             p = d.add_paragraph()
                             p.style = d.styles['Normal']
-                            run = p.add_run("No vulnerabilities found")
+                            run = p.add_run("Aucune vulnérabilité n'a été trouvée")
                             
                         time.sleep(2.5) # Sleep to avoid rate limit on CVE API
                         
@@ -1791,7 +1790,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
                         print(f"[!] Error while writing CVE : {e}")
                         p = d.add_paragraph()
                         p.style = d.styles['Normal']
-                        run = p.add_run("No vulnerabilities found")
+                        run = p.add_run("Aucune vulnérabilité n'a été trouvée")
                         # run.bold = True
                     
                     
@@ -1812,7 +1811,7 @@ Individuals Who Submitted: {self.total_unique_submitted}
         print("[+] Finished writing Detailed Analysis section...")
         # End of the detailed results and the beginning of browser, location, and OS stats
         d.add_heading("Statistics", 1)
-        p = d.add_paragraph("The following table shows the browsers seen:")
+        p = d.add_paragraph("Le tableau suivant présente les navigateurs observés :")
         # Create browser table
         browser_table = d.add_table(rows=1, cols=4, style="GoReport")
         self._set_word_column_width(browser_table.columns[0], Cm(6.24))
@@ -1822,22 +1821,22 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header1 = browser_table.cell(0, 0)
         header1.text = ""
-        header1.paragraphs[0].add_run("Browser", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("Navigateur", "Cell Text").bold = True
 
         header2 = browser_table.cell(0, 1)
         header2.text = ""
-        header2.paragraphs[0].add_run("Seen", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Vu", "Cell Text").bold = True
         
         if WRITE_CVE_PARTS:
             header3 = browser_table.cell(0, 2)
             header3.text = ""
-            header3.paragraphs[0].add_run("Up-to-date", "Cell Text").bold = True
+            header3.paragraphs[0].add_run("À jour", "Cell Text").bold = True
             
             header4 = browser_table.cell(0, 3)
             header4.text = ""
-            header4.paragraphs[0].add_run("Vulnerabilities (High / Critical)", "Cell Text").bold = True
+            header4.paragraphs[0].add_run("Vulnérabilités (High / Critical)", "Cell Text").bold = True
 
-        p = d.add_paragraph("\nThe following table shows the operating systems seen:")
+        p = d.add_paragraph("\nLe tableau suivant présente les systèmes d'exploitation observés :")
 
         # Create OS table
         os_table = d.add_table(rows=1, cols=3, style="GoReport")
@@ -1850,18 +1849,18 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header1 = os_table.cell(0, 0)
         header1.text = ""
-        header1.paragraphs[0].add_run("Operating System", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("OS", "Cell Text").bold = True
 
         header2 = os_table.cell(0, 1)
         header2.text = ""
-        header2.paragraphs[0].add_run("Seen", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Vu", "Cell Text").bold = True
         
         if WRITE_CVE_PARTS:
             header3 = os_table.cell(0, 2)
             header3.text = ""
-            header3.paragraphs[0].add_run("Up-to-date", "Cell Text").bold = True
+            header3.paragraphs[0].add_run("À jour", "Cell Text").bold = True
 
-        p = d.add_paragraph("\nThe following table shows the locations seen:")
+        p = d.add_paragraph("\nLe tableau suivant présente les localisations observées :")
 
         # Create geo IP table
         location_table = d.add_table(rows=1, cols=2, style="GoReport")
@@ -1870,13 +1869,13 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header1 = location_table.cell(0, 0)
         header1.text = ""
-        header1.paragraphs[0].add_run("Location", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("Localisation", "Cell Text").bold = True
 
         header2 = location_table.cell(0, 1)
         header2.text = ""
-        header2.paragraphs[0].add_run("Visits", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Visites", "Cell Text").bold = True
 
-        p = d.add_paragraph("\nThe following table shows the IP addresses captured:")
+        p = d.add_paragraph("\nLe tableau suivant présente les adresses IP capturées :")
 
         # Create IP address table
         ip_add_table = d.add_table(rows=1, cols=2, style="GoReport")
@@ -1885,13 +1884,13 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header1 = ip_add_table.cell(0, 0)
         header1.text = ""
-        header1.paragraphs[0].add_run("IP Address", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("Adresse IP", "Cell Text").bold = True
 
         header2 = ip_add_table.cell(0, 1)
         header2.text = ""
-        header2.paragraphs[0].add_run("Seen", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Vu", "Cell Text").bold = True
 
-        p = d.add_paragraph("\nThe following table shows the IP addresses matched with geolocation data:")
+        p = d.add_paragraph("\nLe tableau suivant présente les adresses IP correspondant aux données de géolocalisation :")
 
         # Create IP address and location table
         ip_loc_table = d.add_table(rows=1, cols=2, style="GoReport")
@@ -1900,11 +1899,11 @@ Individuals Who Submitted: {self.total_unique_submitted}
 
         header1 = ip_loc_table.cell(0, 0)
         header1.text = ""
-        header1.paragraphs[0].add_run("IP Address", "Cell Text").bold = True
+        header1.paragraphs[0].add_run("Adresse IP", "Cell Text").bold = True
 
         header2 = ip_loc_table.cell(0, 1)
         header2.text = ""
-        header2.paragraphs[0].add_run("Location", "Cell Text").bold = True
+        header2.paragraphs[0].add_run("Localisation", "Cell Text").bold = True
 
         # Counters are used here again to track rows
         counter = 1

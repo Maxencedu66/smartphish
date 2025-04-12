@@ -63,18 +63,25 @@ def generate_docx_with_goreport(campaign_id, force=False):
     print(f"📄 Rapport trouvé : {latest_file}")
 
     # Génération du texte d'analyse via l'IA
-    ai_text = generate_ai_analysis(campaign_id)
+    ai_data = generate_ai_analysis(campaign_id)
     # Ouvrir le document généré pour y ajouter le rapport d'analyse
     document = Document(str(latest_file))
+        # Texte d’analyse via IA
+
+
     document.add_page_break()
     document.add_heading("Analyse de la campagne", level=1)
-    # Découper le texte généré en sections
-    sections = split_ai_text_into_sections(ai_text)
-    for title, content in sections:
-        document.add_heading(title, level=2)
-        p = document.add_paragraph(content)
-        p.style.font.size = Pt(11)
-    
+
+    document.add_heading("Analyse des résultats généraux", level=2)
+    document.add_paragraph(ai_data.analyse)
+
+    document.add_heading("Recommandations", level=2)
+    for i, reco in enumerate(ai_data.recommandations, 1):
+        document.add_paragraph(f"{i}. {reco.titre.upper()}\n   {reco.explication}")
+
+    document.add_heading("Conclusion", level=2)
+    document.add_paragraph(ai_data.conclusion)
+
     # Sauvegarder le document final
     document.save(str(latest_file))
     
@@ -85,54 +92,6 @@ def generate_docx_with_goreport(campaign_id, force=False):
         download_name=latest_file.name,
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-
-
-def split_ai_text_into_sections(text):
-    """
-    Découpe un texte généré par IA en sections reconnaissables.
-    Nettoie le texte des caractères * typiques du markdown.
-    Reconnaît les titres avec ou sans mise en forme Markdown.
-    Retourne une liste de tuples (titre, contenu).
-    """
-
-    # 🔹 Nettoyage Markdown : suppression des étoiles
-    text = re.sub(r'\*+', '', text)
-
-    # 🔹 Titres attendus (analyse détaillée supprimée)
-    TITRE_SECTIONS = {
-        "analyse des résultats généraux": "Analyse des résultats généraux",
-        "recommandations": "Recommandations",
-        "conclusion": "Conclusion"
-    }
-
-    # 🔹 Pattern regex : détecte les titres seuls sur une ligne
-    pattern = re.compile(
-        r'^\s*(Analyse des résultats généraux|Recommandations|Conclusion)\s*$',
-        re.IGNORECASE | re.MULTILINE
-    )
-
-    matches = list(pattern.finditer(text))
-    sections = []
-
-    if not matches:
-        return [("Analyse complète", text.strip())]
-
-    for i, match in enumerate(matches):
-        titre_brut = match.group(1).strip().lower()
-        titre_normalisé = TITRE_SECTIONS.get(titre_brut, titre_brut.title())
-        start = match.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
-        contenu = text[start:end].strip()
-        if contenu:
-            sections.append((titre_normalisé, contenu))
-
-    # 🔹 Ajout de sections manquantes avec contenu vide
-    titres_extraits = [t for t, _ in sections]
-    for titre_attendu in TITRE_SECTIONS.values():
-        if titre_attendu not in titres_extraits:
-            sections.append((titre_attendu, ""))
-
-    return sections
 
 
 def download_report_styled(campaign_id):

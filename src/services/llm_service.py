@@ -9,6 +9,17 @@ from src.config import Config
 import re
 
 
+class Recommandation(BaseModel):
+    titre: str
+    explication: str
+
+class AnalyseAI(BaseModel):
+    analyse: str
+    recommandations: list[Recommandation]
+    conclusion: str
+
+
+
 class EmailInfo(BaseModel):
   objet_mail: str
   contenu_mail: str
@@ -407,35 +418,37 @@ def generate_ai_analysis(campaign_id):
     cam_date = goreport.launch_date.split("T")[0] if goreport.launch_date else "inconnue"
 
     # Construction du prompt pour l'IA
-    prompt = f"""Tu es un expert en cybersécurité. Rédige les 4 sections suivantes en te basant sur les résultats réels de la campagne de phishing suivante :
+    prompt = f"""
+Tu es un expert en cybersécurité. Une entreprise a lancé une campagne de phishing simulée pour sensibiliser ses employés.
+L'objectif est que **les employés ne tombent pas dans le piège** et **ne soumettent aucune donnée**.
 
-- Nom de la campagne : {cam_name}
+Génère un rapport synthétique au format JSON structuré comme suit :
+{{
+  "analyse": "Analyse globale de la campagne, en français",
+  "recommandations": [
+    {{
+      "titre": "Titre de la recommandation",
+      "explication": "Conseil concret pour éviter de tomber dans un piège de phishing"
+    }},
+    ...
+  ],
+  "conclusion": "Message final de sensibilisation"
+}}
+
+Contexte de la campagne :
+- Nom : {cam_name}
 - Date : {cam_date}
-
 - Nombre de destinataires : {total}
 - Emails ouverts : {opened}
 - Clics sur les liens : {clicked}
 - Données soumises : {submitted}
 - Emails signalés : {reported}
 
-1. Analyse des résultats généraux : Résume l'efficacité de la campagne et les statistiques obtenues.
-2. Recommandations : Donne 3 conseils sous forme de liste à puce pour éviter de se faire avoir par une attaque de phishing.
-3. Conclusion : Message final de sensibilisation, synthétique et professionnel.
-
 ⚠️ Contraintes :
-- Pas de Markdown, balises HTML ni caractères spéciaux (**, #, etc.).
-- Texte clair, professionnel, structuré et en français uniquement.
-- Utilise une mise en page lisible avec des titres bien visibles (ex : Titre sur une ligne seule, saut de ligne avant/après).
-- Recommandations sous forme de liste numérotée, avec un saut de ligne entre chaque point.
-
-Exemple pour les recommandations :
-1. TITRE DE LA RECOMMANDATION
-   Explication...
-
-2. TITRE DE LA RECOMMANDATION
-   Explication...
-
-Rends le texte fluide, aéré et facile à lire pour une insertion directe dans un document Word.
+- Langue : français uniquement
+- Ne retourne que l’objet JSON sans explication ni commentaire
+- Les recommandations doivent être utiles aux employés pour **ne pas se faire piéger**
+- Aucune recommandation ne doit viser à améliorer une attaque de phishing
 """
     # Récupération du modèle utilisé
     used_model = get_used_model()
@@ -443,9 +456,15 @@ Rends le texte fluide, aéré et facile à lire pour une insertion directe dans 
         raise Exception("Aucun modèle n'est actuellement utilisé.")
 
     # Appel à l'IA via Ollama (ici modèle "mistral")
-    response = ollama.chat(model=used_model, messages=[{"role": "user", "content": prompt}])
-    texte = response.message.content.strip()
-    return texte
+    response = ollama.chat(
+    model=used_model,
+    messages=[{"role": "user", "content": prompt}],
+    format=AnalyseAI.model_json_schema(),  # Contraint la sortie JSON
+    options={"temperature": 0.5}
+)
+    data = AnalyseAI.model_validate_json(response.message.content)
+    return data  # tu peux aussi return data.model_dump() si tu veux un dict
+
 
 
 
