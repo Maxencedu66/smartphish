@@ -81,7 +81,7 @@ function handleReport(campaignId, btnElement) {
             title: "Rapport généré",
             icon: "success",
             showCancelButton: true,
-            confirmButtonText: "Télécharger le rapport",
+            confirmButtonText: "Télécharger",
             cancelButtonText: "OK"
         }).then((result) => {
             if (result.isConfirmed) {
@@ -120,7 +120,7 @@ function regenerateReport(campaignId) {
             title: "Nouveau rapport généré",
             icon: "success",
             showCancelButton: true,
-            confirmButtonText: "Télécharger le rapport",
+            confirmButtonText: "Télécharger",
             cancelButtonText: "OK"
         }).then((result) => {
             if (result.isConfirmed) {
@@ -137,16 +137,25 @@ function regenerateReport(campaignId) {
 
 function updateDownloadButton(campaignId) {
     const btn = document.getElementById(`report-btn-${campaignId}`);
-    btn.innerText = "Télécharger le rapport";
-    btn.classList.remove("btn-secondary");
-    btn.classList.add("btn-success");
-    btn.onclick = () => {
-        window.open(`/download-report/${campaignId}`, "_blank");
-    };
+    if (btn) {
+        btn.innerText = "Télécharger";
+        btn.className = "btn btn-success btn-sm";
+        btn.onclick = () => {
+            window.open(`/download-report/${campaignId}`, "_blank");
+        };
+    }
 
     const retryBtn = document.getElementById(`retry-btn-${campaignId}`);
-    if (retryBtn) retryBtn.classList.remove("d-none");
+    if (retryBtn) {
+        retryBtn.classList.remove("d-none");
+        retryBtn.className = "btn btn-info btn-sm";
+        retryBtn.innerText = "Régénérer";
+        retryBtn.onclick = () => regenerateReport(campaignId);
+    }
 }
+
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[id^='report-btn-']").forEach(btn => {

@@ -32,19 +32,20 @@
                     {% endif %}
                 </td>
                 <td class="text-end d-flex gap-2 justify-content-end flex-wrap align-items-center">
-                    <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">Voir les détails</a>
-                    <button class="btn btn-danger" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
-
+                    
                     {% if campaign.status == "In progress" %}
-                        <button class="btn btn-success" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
+                        <button class="btn btn-success btn-sm" onclick="completeCampaign('{{ campaign.id }}')">Terminer</button>
                     {% else %}
-                        <div class="d-flex align-items-center gap-1">
-                            <button id="report-btn-{{ campaign.id }}" class="btn btn-secondary">Chargement...</button>
-                            <button id="retry-btn-{{ campaign.id }}" class="btn btn-light border d-none" onclick="regenerateReport('{{ campaign.id }}')" title="Régénérer le rapport">
-                            </button>
-                        </div>
+                        <button id="report-btn-{{ campaign.id }}" class="btn btn-info btn-sm">Chargement...</button>
+                        <button id="retry-btn-{{ campaign.id }}" class="btn btn-info btn-sm d-none" onclick="regenerateReport('{{ campaign.id }}')">
+                            Régénérer
+                        </button>
                     {% endif %}
+
+                    <a href="{{ url_for('frontend.details_campaign', campaign_id=campaign.id) }}" class="btn btn-primary btn-sm">Voir les détails</a>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCampaign('{{ campaign.id }}')">Supprimer</button>
                 </td>
+                
             </tr>
             {% endfor %}
         </tbody>
