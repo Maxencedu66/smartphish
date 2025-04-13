@@ -139,7 +139,7 @@ function updateDownloadButton(campaignId) {
     const btn = document.getElementById(`report-btn-${campaignId}`);
     if (btn) {
         btn.innerText = "Télécharger";
-        btn.className = "btn btn-success btn-sm";
+        btn.className = "btn btn-success";
         btn.onclick = () => {
             window.open(`/download-report/${campaignId}`, "_blank");
         };
@@ -148,7 +148,7 @@ function updateDownloadButton(campaignId) {
     const retryBtn = document.getElementById(`retry-btn-${campaignId}`);
     if (retryBtn) {
         retryBtn.classList.remove("d-none");
-        retryBtn.className = "btn btn-info btn-sm";
+        retryBtn.className = "btn btn-info";
         retryBtn.innerText = "Régénérer";
         retryBtn.onclick = () => regenerateReport(campaignId);
     }
