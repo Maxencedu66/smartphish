@@ -13,11 +13,11 @@
     <li class="nav-item"><a class="nav-link" href="{{ url_for('frontend.config_smtp') }}">Profil d'envoi</a></li>
 </ul>
 
-<div class="header-icon-title">
+<div class="header-icon-title m-1">
     <h3>Gestion des modèles d'e-mails</h3>
 </div>
 
-<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newEmailTemplateModal">➕ Nouveau Modèles</button>
+<button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newEmailTemplateModal"><i class="bi bi-plus-circle me-2"></i>Nouveau Modèles</button>
 
 <div class="table-responsive">
     <table class="table table-hover table-striped">
@@ -302,7 +302,6 @@
     </div>
 </div>
 
-<!-- Quill CDN -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 

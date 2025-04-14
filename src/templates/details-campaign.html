@@ -4,80 +4,80 @@
 
 {% block content %}
 <div class="container-fluid">
-<div class="vh-100">
-    <div class="d-flex align-items-center">
-        <h2>Détails de la campagne - </h2>
-        <span class="text-primary fw-bold ms-2"> </span>
-        <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
-            {% if campaign.status == "Completed" %}
-                Complétée
-            {% else %}
-                En cours
-            {% endif %}
-        </span>
-    </div>
-    
-    
-    <!-- Informations Générales -->
-    <div class="row mt-4 text-center">
-        <div class="col-md-6">
-            <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
-                <h6 class="text-uppercase font-weight-bold">📌 Nom de la campagne</h6>
-                <p class="campaign-text text-primary">{{ campaign.name }}</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
-                <h6 class="text-uppercase font-weight-bold">📅 Date de création</h6>
-                <p>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <hr class="my-4">
-    <!-- 📤 Card principale pour le nombre total d'emails envoyés -->
-    <div class="container mt-4 d-flex justify-content-center">
-        <div class="card shadow p-3 fixed-card-email">
-            <h6 class="text-uppercase font-weight-bold text-center">📤 Emails envoyés</h6>
-            <h3 class="text-primary text-center">{{ campaign.results | length }}</h3>
-            </p>
-        </div>
-    </div>
-
-    <!-- Affichage des Statistiques -->
-    <div class="row mt-4 text-center d-flex justify-content-center">
-        {% set total_sent = stats["Emails envoyés"] %}
-
-        {% for label, value in stats.items() %}
-            {% if label != "Emails envoyés" %}
-                {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
-                {% set formatted_percentage = percentage|round(1) %}
-                {% if formatted_percentage == 100.0 %}
-                    {% set formatted_percentage = 100 %}
+    <div class="mb-5">
+        <div class="d-flex align-items-center">
+            <h2>Détails de la campagne - </h2>
+            <span class="text-primary fw-bold ms-2"> </span>
+            <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
+                {% if campaign.status == "Completed" %}
+                    Complétée
+                {% else %}
+                    En cours
                 {% endif %}
-                {% set color_class = 'border-blue' %}
-                {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
-                {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
-                {% if percentage > 60 %} {% set color_class = 'border-orange' %} {% endif %}
-                {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
-
-                <div class="col-6 col-md-3 d-flex flex-column align-items-center mb-4">
-                    <div class="circle-stat {{ color_class }}" data-value="{{value}}" data-percentage="{{ formatted_percentage }}" data-mode="value" onclick="toggleValue(this)">
-                        <h3 class="circle-number">{{ value }}</h3>
-                    </div>
-                    <h5 class="mt-2">{{ label }}</h5>
+            </span>
+        </div>
+        
+        
+        <!-- Informations Générales -->
+        <div class="row mt-4 text-center">
+            <div class="col-md-6">
+                <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
+                    <h6 class="text-uppercase font-weight-bold">📌 Nom de la campagne</h6>
+                    <p class="campaign-text text-primary">{{ campaign.name }}</p>
                 </div>
-            {% endif %}
-        {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow p-3 bg-light fixed-card d-flex flex-column">
+                    <h6 class="text-uppercase font-weight-bold">📅 Date de création</h6>
+                    <p>{{ campaign.created_date[:10] }} {{ campaign.created_date[11:16] }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        <!-- 📤 Card principale pour le nombre total d'emails envoyés -->
+        <div class="container mt-4 d-flex justify-content-center">
+            <div class="card shadow p-3 fixed-card-email">
+                <h6 class="text-uppercase font-weight-bold text-center">📤 Emails envoyés</h6>
+                <h3 class="text-primary text-center">{{ campaign.results | length }}</h3>
+                </p>
+            </div>
+        </div>
+
+        <!-- Affichage des Statistiques -->
+        <div class="row mt-4 text-center d-flex justify-content-center">
+            {% set total_sent = stats["Emails envoyés"] %}
+
+            {% for label, value in stats.items() %}
+                {% if label != "Emails envoyés" %}
+                    {% set percentage = (value / total_sent * 100) if total_sent > 0 else 0 %}
+                    {% set formatted_percentage = percentage|round(1) %}
+                    {% if formatted_percentage == 100.0 %}
+                        {% set formatted_percentage = 100 %}
+                    {% endif %}
+                    {% set color_class = 'border-blue' %}
+                    {% if percentage > 20 %} {% set color_class = 'border-green' %} {% endif %}
+                    {% if percentage > 40 %} {% set color_class = 'border-yellow' %} {% endif %}
+                    {% if percentage > 60 %} {% set color_class = 'border-orange' %} {% endif %}
+                    {% if percentage > 80 %} {% set color_class = 'border-red' %} {% endif %}
+
+                    <div class="col-6 col-md-3 d-flex flex-column align-items-center mb-4">
+                        <div class="circle-stat {{ color_class }}" data-value="{{value}}" data-percentage="{{ formatted_percentage }}" data-mode="value" onclick="toggleValue(this)">
+                            <h3 class="circle-number">{{ value }}</h3>
+                        </div>
+                        <h5 class="mt-2">{{ label }}</h5>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+
     </div>
-
-
-</div>
 </div>
 
 
 
-<div class="accordion" id="detailsAccordion">
+<div class="accordion mt-5" id="detailsAccordion">
     <!-- Apercu Mail --> 
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingMail">
@@ -116,79 +116,82 @@
     </div>
 
     <!-- Résultats envois -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingResults">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResults" aria-expanded="false" aria-controls="collapseResults">
-            Résultats des envois
-        </button>
-    </h2>
-    <div id="collapseResults" class="accordion-collapse collapse" aria-labelledby="headingResults">
-        <div class="accordion-body">
-            <div class="table-responsive">
-                <!-- Tableau des résultats -->
-                <table class="table table-sm table-details">
-                    <thead>
-                        <tr>
-                            <th class="th-details">Email</th>
-                            <th class="th-details">Prénom</th>
-                            <th class="th-details">Nom</th>
-                            <th class="th-details">IP</th>
-                            <th class="th-details">Date d'envoi</th>
-                            <th class="th-details">Dernière modification</th>
-                            <th class="th-details">Statut</th>
-                            <th class="th-details">Détails</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in campaign.results %}
-                        <tr data-email="{{ result.email }}">
-                            <td class="td-details">{{ result.email }}</td>
-                            <td class="td-details">{{ result.first_name }}</td>
-                            <td class="td-details">{{ result.last_name }}</td>
-                            <td class="td-details">{{ result.ip }}</td>
-                            <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }}</td>
-                            <td class="td-details">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
-                            <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
-                                {{ result.status }}
-                            </td>
-                            <td class="td-details">
-                                <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#detail-{{ loop.index }}" aria-expanded="false" aria-controls="detail-{{ loop.index }}">
-                                    Détail
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="collapse" id="detail-{{ loop.index }}">
-                            <td colspan="8">
-                                <div class="row">
-                                    <!-- Colonne des données soumises -->
-                                    <div class="col-md-6">
-                                        <h6>Données soumises :</h6>
-                                        {% if result.email in submissions %}
-                                        <ul>
-                                            {% for key, value in submissions[result.email].items() %}
-                                                <li><strong>{{ key }}:</strong> {{ value[0] }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% else %}
-                                            <p>Aucune donnée soumise.</p>
-                                        {% endif %}
-                                    </div>
-                                    <!-- Colonne des informations CVE -->
-                                    <div class="col-md-6 cve-detail" data-email="{{ result.email }}">
-                                        <h6>Informations CVE :</h6>
-                                        <div>
-                                            <p>Chargement des données CVE...</p>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingResults">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResults" aria-expanded="false" aria-controls="collapseResults">
+                Résultats des envois
+            </button>
+        </h2>
+        <div id="collapseResults" class="accordion-collapse collapse" aria-labelledby="headingResults">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <!-- Tableau des résultats -->
+                    <table class="table table-sm table-details">
+                        <thead>
+                            <tr>
+                                <th class="th-details">Email</th>
+                                <th class="th-details">Prénom</th>
+                                <th class="th-details">Nom</th>
+                                <th class="th-details">IP</th>
+                                <th class="th-details">Date d'envoi</th>
+                                <th class="th-details">Dernière modification</th>
+                                <th class="th-details">Statut</th>
+                                <th class="th-details">Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in campaign.results %}
+                            <tr data-email="{{ result.email }}">
+                                <td class="td-details">{{ result.email }}</td>
+                                <td class="td-details">{{ result.first_name }}</td>
+                                <td class="td-details">{{ result.last_name }}</td>
+                                <td class="td-details">{{ result.ip }}</td>
+                                <td class="td-details">{{ result.send_date[:10] }} {{ result.send_date[11:16] }}</td>
+                                <td class="td-details">{{ result.modified_date[:10] }} {{ result.modified_date[11:16] }}</td>
+                                <td class="td-details {% if result.status == 'Error' %}text-danger{% else %}text-success{% endif %}">
+                                    {{ result.status }}
+                                </td>
+                                <td class="td-details">
+                                    <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#detail-{{ loop.index }}" aria-expanded="false" aria-controls="detail-{{ loop.index }}">
+                                        Détail
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="collapse" id="detail-{{ loop.index }}">
+                                <td colspan="8">
+                                    <div class="mt-3">
+                                        <!-- Bloc : Données soumises -->
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold">Données soumises :</h6>
+                                            {% if result.email in submissions %}
+                                                <ul class="mb-0">
+                                                    {% for key, value in submissions[result.email].items() %}
+                                                        <li><strong>{{ key }}:</strong> {{ value[0] }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% else %}
+                                                <p>Aucune donnée soumise.</p>
+                                            {% endif %}
+                                        </div>
+                                    
+                                        <!-- Bloc : Informations techniques CVE -->
+                                        <div class="info-cve" data-email="{{ result.email }}">
+                                            <h6 class="fw-bold mt-4">Informations techniques :</h6>
+                                            <div>
+                                                <p>Chargement des données CVE...</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                    
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+    </div>  
 
 
     <!-- Informations SMTP -->
@@ -256,8 +259,7 @@
     <a href="{{ url_for('frontend.follow_campaign') }}" class="btn btn-warning mt-3">Retour aux campagnes</a>
 </div>
 <script>
-    // Cette variable globale sera accessible dans ton fichier JS externe
-    window.CAMPAIGN_ID = {{ campaign.id }};
+    window.CAMPAIGN_ID = '{{ campaign.id }}';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

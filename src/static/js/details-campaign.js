@@ -51,23 +51,38 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             console.log("Données CVE reçues :", data);
             // Pour chaque bloc de détails CVE dans la vue, on met à jour son contenu en fonction de l'email associé
-            document.querySelectorAll(".cve-detail").forEach(el => {
+            document.querySelectorAll(".info-cve").forEach(el => {
                 const email = el.getAttribute("data-email");
                 if (data[email]) {
                     let vuln = data[email];
                     let html = "";
+                    const cleanCPE = str => str ? str.substring(10) : "Inconnu";
+
                     if (vuln && vuln.vulnerabilities && vuln.vulnerabilities.length > 0) {
-                        html += `<p><strong>Navigateur :</strong> ${vuln.browser_cpe}</p>
-                                 <p><strong>OS :</strong> ${vuln.os_cpe}</p>
-                                 <p><strong>Version navigateur à jour :</strong> ${vuln.version_browser_outdated ? "❌ Non" : "✅ Oui"}</p>
-                                 <p><strong>Version OS à jour :</strong> ${vuln.version_os_outdated ? "❌ Non" : "✅ Oui"}</p>
-                                 <h6>🔎 CVE détectées :</h6>
-                                 <ul>
-                                     ${vuln.vulnerabilities.slice(0, 5).map(v => `
-                                         <li><strong>${v.id}</strong> – ${v.highest_severity} (${v.highest_score})<br>
-                                         <em>${v.description}</em></li>
-                                     `).join("")}
-                                 </ul>`;
+                        html += `
+                            <p><strong>Navigateur :</strong> ${cleanCPE(vuln.browser_cpe)}</p>
+                            <p><strong>OS :</strong> ${cleanCPE(vuln.os_cpe)}</p>
+                            <p><strong>Version navigateur à jour :</strong>
+                                <span class="px-2 py-1 rounded border 
+                                    ${vuln.version_browser_outdated ? 'border-danger bg-danger-subtle text-danger' : 'border-success bg-success-subtle text-success'}">
+                                    ${vuln.version_browser_outdated ? "Non" : "Oui"}
+                                </span>
+                            </p>
+
+                            <p><strong>Version OS à jour :</strong>
+                                <span class="px-2 py-1 rounded border 
+                                    ${vuln.version_os_outdated ? 'border-danger bg-danger-subtle text-danger' : 'border-success bg-success-subtle text-success'}">
+                                    ${vuln.version_os_outdated ? "Non" : "Oui"}
+                                </span>
+                            </p>
+                            <h6 class="mt-3"><strong>CVE détectées :</strong></h6>
+                            <ul>
+                                ${vuln.vulnerabilities.slice(0, 5).map(v => `
+                                    <li><strong>${v.id}</strong> – ${v.highest_severity} (${v.highest_score})<br>
+                                    <em>${v.description}</em></li>
+                                `).join("")}
+                            </ul>
+                        `;
                     } else {
                         html += "<p>Aucune vulnérabilité critique détectée.</p>";
                     }
@@ -79,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(err => {
             console.error("Erreur lors de la récupération des données CVE :", err);
-            document.querySelectorAll(".cve-detail").forEach(el => {
+            document.querySelectorAll(".info-cve").forEach(el => {
                 el.innerHTML = "<p>Erreur lors du chargement des données CVE.</p>";
             });
         });
