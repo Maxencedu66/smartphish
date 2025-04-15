@@ -4,9 +4,9 @@ SmartPhish est une solution innovante qui utilise l'intelligence artificielle po
 
 ---
 
-## 🚀 Installation et Lancement
+## Installation et Lancement
 
-### 📌 Prérequis
+### Prérequis
 
 Avant de lancer l'application, assurez-vous d'avoir installé les éléments suivants :
 
@@ -59,7 +59,7 @@ Avant de lancer l'application, assurez-vous d'avoir installé les éléments sui
    ```
 ---
 
-## 🌍 Accéder à SmartPhish
+## Accéder à SmartPhish
 
 Une fois l’application démarrée, ouvrez votre navigateur et accédez à l’adresse suivante :
 
@@ -78,21 +78,21 @@ Après connexion, vous pourrez accéder à toutes les fonctionnalités de l'appl
 
 ---
 
-## ⚙️ Fonctionnalités principales
+## Fonctionnalités principales
 
 - Création et gestion des campagnes de phishing via **GoPhish**.
 - Génération automatique des emails grâce à un modèle **LLM** (*Mistral via Ollama*).
 - Personnalisation avancée des messages pour une meilleure simulation des attaques.
-- Tableau de bord interactif pour suivre les résultats et performances des campagnes.
+- Tableau de bord interactif pour suivre les résultats et performances des campagnes et afficher les principales CVE.
 - Génération de rapports détaillés sur les résultats des campagnes.
 - Intégration d'un module de recherche de CVE pour enrichir les rapports.
 - Déploiement simplifié grâce à Docker.
 
 ---
 
-# 📂 Arborescence du projet SmartPhish
+# Arborescence du projet SmartPhish
 
-## 🏗️ Structure des fichiers
+## Structure des fichiers
 
 ```plaintext
 smartphish/
@@ -146,17 +146,18 @@ smartphish/
 
 ---
 
-## 🛠 Dépannage
+## Dépannage
 
 ### Problème de connexion avec Ollama ?
 Assurez-vous que **Ollama** est bien actif avant de démarrer l’application et que vous avez bien téléchargé le modèle Mistral. Si le problème persiste, essayez de re-sélectionner le modèle à utiliser dans l'onglet "Paramètres du LLM" de l'application.
+Lors du changement de modèle, veuillez bien attendre la fin de son téléchargement, peut-être plus ou moins long en fonction de la taille du modèle et de votre connexion.
 
 ### Problème avec le lancement ?
 Pensez bien à démarrer docker avant de lancer l'application et lors de la fermeture de SmartPhish, faire Ctrl + C dans le terminal pour arrêter proprement le docker et SmartPhish.
 
 ---
 
-## 🏆 Contributeurs
+## Contributeurs
 
 - **Maxence Bouchadel** (Chef de projet, Backend, IA)
 - **Thomas Jeanjacquot** (Secrétaire, API & Backend)
@@ -167,7 +168,7 @@ Pensez bien à démarrer docker avant de lancer l'application et lors de la ferm
 
 ---
 
-## 📜 Licence
+## Licence
 
 ### 🔹 Licence de GoPhish
 Le logiciel **GoPhish** est sous licence **MIT**, ce qui signifie qu'il peut être utilisé, modifié et distribué librement, y compris pour des **usages commerciaux**. Son code source étant open-source, nous avons pu l'intégrer à **SmartPhish** sans restriction.
