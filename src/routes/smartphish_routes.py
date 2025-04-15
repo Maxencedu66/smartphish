@@ -54,6 +54,8 @@ def complete_campaign_route(campaign_id):
 
 
 
+
+
 #------------------------------
 # Routes pour la gestion des groupes
 # ------------------------------
@@ -87,6 +89,9 @@ def delete_gophish_group(group_id):
 
 
 
+
+
+
 #------------------------------
 # Routes pour la gestion des sendings profiles
 # ------------------------------
@@ -117,6 +122,12 @@ def update_sending_profile_route(profile_id):
 @smartphish_bp.route('/sending_profiles/<int:profile_id>', methods=['DELETE'])
 def delete_sending_profile_route(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+
+
+
+
+
 
 #------------------------------
 # Routes pour la gestion des landing pages

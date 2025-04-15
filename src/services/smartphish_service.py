@@ -10,6 +10,9 @@ HEADERS = {
     "Authorization": f"Bearer {Config.GOPHISH_API_KEY}"
 }
 
+
+
+
 # ---------------------------
 #  Fonctions pour la gestion des Campagnes
 # ---------------------------
@@ -52,9 +55,7 @@ def create_campaign(data):
         "send_by_date": data.get("send_by_date", None)
     }
 
-    #print(" Données envoyées à GoPhish :", campaign_data)
     response = requests.post(url, json=campaign_data, headers=HEADERS, verify=False)
-    #print(" Réponse brute de GoPhish :", response.status_code, response.text)
 
     try:
         result = response.json()
@@ -143,6 +144,8 @@ def complete_campaign(campaign_id):
 
 
 
+
+
 # ---------------------------
 #  Fonctions pour les Groupes
 # ---------------------------
@@ -198,6 +201,12 @@ def delete_group(group_id):
             "status_code": response.status_code,
             "content": response.text
         }
+
+
+
+
+
+
 
 # ---------------------------
 #  Fonctions pour les Templates de Mail
@@ -281,6 +290,10 @@ def delete_template(template_id):
         }
 
         
+   
+   
+   
+   
         
 # ---------------------------
 #  Fonctions pour les Sending Profiles (Profils SMTP)
@@ -327,6 +340,12 @@ def delete_sending_profile(profile_id):
         return response.json()
     except requests.exceptions.JSONDecodeError:
         return {"error": "Réponse invalide de GoPhish", "status_code": response.status_code, "content": response.text}
+
+
+
+
+
+
 
 
 # ---------------------------

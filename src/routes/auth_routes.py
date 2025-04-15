@@ -108,7 +108,7 @@ def update_user(username):
     role_slug = data.get("role", "user")
 
     try:
-        # 🔍 Récupération de tous les utilisateurs
+        # Récupération de tous les utilisateurs
         response = requests.get(f"{Config.GOPHISH_API_URL}/api/users/", headers=HEADERS, verify=False)
         if response.status_code != 200:
             return jsonify({"error": "Impossible de récupérer les utilisateurs"}), 500
@@ -118,14 +118,14 @@ def update_user(username):
         if not user:
             return jsonify({"error": "Utilisateur introuvable"}), 404
 
-        user_id = user["id"]  # ✅ c’est cet ID qu’il faut utiliser dans l’URL
+        user_id = user["id"]  # c’est cet ID qu’il faut utiliser dans l’URL
         payload = {
             "username": new_username,
             "password": password,
             "role": role_slug
         }
 
-        print(f"🔧 Modification utilisateur ID={user_id} ➜ {payload}")
+        print(f" Modification utilisateur ID={user_id} ➜ {payload}")
 
         update_response = requests.put(
             f"{Config.GOPHISH_API_URL}/api/users/{user_id}",

@@ -439,5 +439,5 @@ main {
 
   input.form-control.is-valid.thick-border {
     border-width: 3px;
-    box-shadow: 0 0 5px #198754; /* vert Bootstrap */
+    box-shadow: 0 0 5px #198754; 
 }

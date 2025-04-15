@@ -72,7 +72,7 @@ def new_campaign_page():
     """Affiche la page de création de campagne avec les éléments disponibles."""
     groups = get_groups()
     templates = get_templates()
-    pages = get_landing_pages()  # Fonction à créer dans `smartphish_service.py`
+    pages = get_landing_pages() 
     sending_profiles = get_sending_profiles()
 
     return render_template('new-campaign.html', 
@@ -241,6 +241,10 @@ def set_model_frontend():
 def maj_status():
     return render_template('maj-status.html')
 
+
+
+
+
 # ------------------------------------------------------
 # Routes pour les rapports de campagne
 # ------------------------------------------------------
@@ -280,6 +284,8 @@ def report_exists(campaign_id):
 def download_report(campaign_id):
 
     return download_report_styled(campaign_id)
+
+
 
 
 
@@ -352,6 +358,10 @@ def delete_group_frontend(group_id):
     """
     response = delete_group(group_id)
     return jsonify(response)
+
+
+
+
 
 
 
@@ -434,6 +444,10 @@ def delete_template_frontend(template_id):
 
 
 
+
+
+
+
 # ---------------------------
 # Routes pour les Sending Profiles (Profils SMTP)
 # ---------------------------
@@ -460,6 +474,10 @@ def update_smtp_submit(profile_id):
 @bp.route('/config-smtp/<int:profile_id>', methods=['DELETE'])
 def delete_smtp(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+
+
+
 
 
 
@@ -520,5 +538,3 @@ def import_site_frontend():
     data = request.get_json()
     response = import_site(data) 
     return jsonify(response)
-
-

@@ -32,10 +32,6 @@ from docx.shared import Cm, Pt, RGBColor
 
 from user_agents import parse
 
-# Je crois qu'on peut s'en passer sans bug
-#from requests.packages.urllib3.exceptions import InsecureRequestWarning
-#requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 # Fonction utilitaire pour convertir les dictionnaires en objets
 def dict_to_obj(d):
     if isinstance(d, dict):
