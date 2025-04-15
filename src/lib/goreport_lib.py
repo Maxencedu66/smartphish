@@ -14,7 +14,7 @@ from datetime import datetime
 from types import SimpleNamespace
 import json
 
-from src.services.gophish_service import *
+from src.services.smartphish_service import *
 from src.config import Config  # Si config.py est directement sous src/
 
 from src.lib import custom_cve

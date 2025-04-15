@@ -2,7 +2,7 @@
 import os
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session, send_file, abort
 from src.services.llm_service import *
-from src.services.gophish_service import *
+from src.services.smartphish_service import *
 from src.services.report_service import *
 import json
 from io import BytesIO
@@ -12,7 +12,7 @@ import tempfile
 import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from src.services.gophish_service import get_templates
+from src.services.smartphish_service import get_templates
 from src.services.report_service import *
 from functools import wraps
 from src.lib.custom_cve import search_user_agent_vulnerable

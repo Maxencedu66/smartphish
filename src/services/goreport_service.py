@@ -65,7 +65,7 @@ choose between report formats.", required=True)
 @click.option('--combine', is_flag=True, help="Combine all results into one report. The first \
 campaign ID will be used for information such as campaign name, dates, and URL.", required=False)
 @click.option('--complete', is_flag=True, help="Optionally mark the campaign as complete in \
-Gophish.", required=False)
+Smartphish.", required=False)
 @click.option('--config', type=click.Path(exists=True, readable=True, resolve_path=True),
               help="Name an alternate config file for GoReport to use. The default is \
 gophish.config.")

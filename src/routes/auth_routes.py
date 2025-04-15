@@ -48,14 +48,14 @@ def login():
 
 @auth_bp.route("/register", methods=["POST"])
 def create_user():
-    """Inscription d'un utilisateur via l'API GoPhish"""
+    """Inscription d'un utilisateur via l'API Smartphish"""
     data = request.json
     username = data.get("username")
     password = data.get("password")
     role = data.get("role", "user")
     role_id = 1 if role == "admin" else 2
 
-    # Vérifier si l'utilisateur existe déjà dans GoPhish
+    # Vérifier si l'utilisateur existe déjà dans smartphish
     response = requests.get(f"{Config.GOPHISH_API_URL}/api/users/", headers=HEADERS, verify=False)
     
     if response.status_code == 200:
