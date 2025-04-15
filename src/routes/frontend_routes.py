@@ -72,7 +72,7 @@ def new_campaign_page():
     """Affiche la page de création de campagne avec les éléments disponibles."""
     groups = get_groups()
     templates = get_templates()
-    pages = get_landing_pages()  # Fonction à créer dans `gophish_service.py`
+    pages = get_landing_pages()  # Fonction à créer dans `smartphish_service.py`
     sending_profiles = get_sending_profiles()
 
     return render_template('new-campaign.html', 
