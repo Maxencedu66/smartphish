@@ -5,16 +5,26 @@
 {% block content %}
 <div class="container-fluid">
     <div class="mb-5">
-        <div class="d-flex align-items-center">
-            <h2>Détails de la campagne - </h2>
-            <span class="text-primary fw-bold ms-2"> </span>
-            <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
-                {% if campaign.status == "Completed" %}
-                    Complétée
-                {% else %}
-                    En cours
-                {% endif %}
-            </span>
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <h2>Détails de la campagne - </h2>
+                <span class="text-primary fw-bold ms-2"> </span>
+                <span class="status-highlight {% if campaign.status == 'Completed' %}completed{% else %}in-progress{% endif %}">
+                    {% if campaign.status == "Completed" %}
+                        Complétée
+                    {% else %}
+                        En cours
+                    {% endif %}
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button id="retry-btn" class="btn btn-outline-primary btn-sm" title="Générer un rapport">
+                    <i class="bi bi-arrow-repeat"></i>
+                </button>
+                <button id="report-btn" class="btn btn-outline-success btn-sm" title="Télécharger le rapport" disabled>
+                    <i class="bi bi-download"></i>
+                </button>
+            </div>
         </div>
         
         
@@ -35,7 +45,7 @@
         </div>
         
         <hr class="my-4">
-        <!-- 📤 Card principale pour le nombre total d'emails envoyés -->
+        <!-- Card principale pour le nombre total d'emails envoyés -->
         <div class="container mt-4 d-flex justify-content-center">
             <div class="card shadow p-3 fixed-card-email">
                 <h6 class="text-uppercase font-weight-bold text-center">📤 Emails envoyés</h6>

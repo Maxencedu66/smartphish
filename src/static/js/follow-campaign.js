@@ -41,21 +41,35 @@ function completeCampaign(campaignId) {
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/api/gophish/campaigns/${campaignId}/complete`, { method: 'GET' })
-            .then(res => res.json())
-            .then(response => {
-                if (response.success) {
-                    Swal.fire("Campagne terminée", "", "success").then(() => location.reload());
-                } else {
-                    Swal.fire("Erreur", response.error || "Échec", "error");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire("Erreur", "Erreur serveur", "error");
-            });
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        Swal.fire("Campagne terminée", "", "success");
+
+                        const btn = document.getElementById(`complete-btn-${campaignId}`);
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.classList.remove("btn-success");
+                            btn.classList.add("btn-secondary");
+                            btn.innerText = "Terminée";
+                        }
+                        const badge = document.querySelector(`#campaign-row-${campaignId} td:nth-child(4) span`);
+                        if (badge) {
+                            badge.className = "badge bg-success badge-fixed";
+                            badge.innerText = "Complétée";
+                        }
+                    } else {
+                        Swal.fire("Erreur", response.error || "Échec", "error");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire("Erreur", "Erreur serveur", "error");
+                });
         }
     });
 }
+
 
 function handleReport(campaignId, btnElement) {
     Swal.fire({
@@ -149,7 +163,7 @@ function updateDownloadButton(campaignId) {
     if (retryBtn) {
         retryBtn.classList.remove("d-none");
         retryBtn.className = "btn btn-info";
-        retryBtn.innerText = "Régénérer";
+        retryBtn.innerText = "Générer le rapport";
         retryBtn.onclick = () => regenerateReport(campaignId);
     }
 }

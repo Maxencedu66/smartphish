@@ -98,6 +98,173 @@ document.addEventListener("DOMContentLoaded", function () {
                 el.innerHTML = "<p>Erreur lors du chargement des données CVE.</p>";
             });
         });
+
+
+    const editBtn = document.getElementById("retry-btn");
+    const downloadBtn = document.getElementById("report-btn");
+
+    // Vérifie si le rapport est déjà généré
+    fetch(`/report-exists/${campaignId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                enableDownload(campaignId);
+            } else {
+                disableDownload();
+            }
+        });
+
+    editBtn.addEventListener("click", function () {
+        Swal.fire({
+            title: "Génération du rapport...",
+            text: "Merci de patienter.",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch(`/generate-report/${campaignId}`)
+            .then(res => res.json())
+            .then(data => {
+                Swal.close();
+                if (data.error) {
+                    Swal.fire("Erreur", data.error, "error");
+                    return;
+                }
+
+                enableDownload(campaignId);
+
+                Swal.fire({
+                    title: "Rapport généré",
+                    icon: "success",
+                    showCancelButton: true,
+                    confirmButtonText: "Télécharger",
+                    cancelButtonText: "Fermer"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.open(`/download-report/${campaignId}`, "_blank");
+                    }
+                });
+            })
+            .catch(err => {
+                Swal.close();
+                console.error(err);
+                Swal.fire("Erreur", "Impossible de générer le rapport", "error");
+            });
+    });
+
+    downloadBtn.addEventListener("click", function () {
+        if (!downloadBtn.disabled) {
+            window.open(`/download-report/${campaignId}`, "_blank");
+        }
+    });
+
+    function enableDownload(campaignId) {
+        downloadBtn.disabled = false;
+        downloadBtn.querySelector("i").classList.remove("text-secondary");
+        downloadBtn.querySelector("i").classList.add("text-success");
+    }
+
+    function disableDownload() {
+        downloadBtn.disabled = true;
+        downloadBtn.querySelector("i").classList.remove("text-success");
+        downloadBtn.querySelector("i").classList.add("text-secondary");
+    }
 });
 
+function handleReport(campaignId, btnElement) {
+    Swal.fire({
+        title: "Génération du rapport...",
+        text: "Merci de patienter.",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    fetch(`/generate-report/${campaignId}`)
+        .then(res => res.json())
+        .then(data => {
+            Swal.close();
+            if (data.error) {
+                Swal.fire("Erreur", data.error, "error");
+                return;
+            }
+
+            updateDownloadButton(campaignId);
+            Swal.fire({
+                title: "Rapport généré",
+                icon: "success",
+                showCancelButton: true,
+                confirmButtonText: "Télécharger",
+                cancelButtonText: "OK"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.open(`/download-report/${campaignId}`, "_blank");
+                }
+            });
+        })
+        .catch(err => {
+            Swal.close();
+            console.error(err);
+            Swal.fire("Erreur", "Impossible de générer le rapport", "error");
+        });
+}
+
+function regenerateReport(campaignId) {
+    Swal.fire({
+        title: "Régénération du rapport...",
+        text: "Un nouveau rapport va être généré.",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    fetch(`/generate-report/${campaignId}?force=true`)
+        .then(res => res.json())
+        .then(data => {
+            Swal.close();
+            if (data.error) {
+                Swal.fire("Erreur", data.error, "error");
+                return;
+            }
+
+            updateDownloadButton(campaignId);
+            Swal.fire({
+                title: "Nouveau rapport généré",
+                icon: "success",
+                showCancelButton: true,
+                confirmButtonText: "Télécharger",
+                cancelButtonText: "OK"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.open(`/download-report/${campaignId}`, "_blank");
+                }
+            });
+        })
+        .catch(err => {
+            Swal.close();
+            console.error(err);
+            Swal.fire("Erreur", "Impossible de régénérer le rapport", "error");
+        });
+}
+
+function updateDownloadButton(campaignId) {
+    const reportBtn = document.getElementById("report-btn");
+    const retryBtn = document.getElementById("retry-btn");
+
+    if (reportBtn) {
+        reportBtn.innerText = "Télécharger";
+        reportBtn.className = "btn btn-success";
+        reportBtn.onclick = () => {
+            window.open(`/download-report/${campaignId}`, "_blank");
+        };
+    }
+
+    if (retryBtn) {
+        retryBtn.classList.remove("d-none");
+        retryBtn.className = "btn btn-outline-info ms-2";
+        retryBtn.innerText = "Régénérer";
+        retryBtn.onclick = () => regenerateReport(campaignId);
+    }
+}
 
