@@ -14,7 +14,7 @@ from datetime import datetime
 from types import SimpleNamespace
 import json
 
-from src.services.gophish_service import *
+from src.services.smartphish_service import *
 from src.config import Config  # Si config.py est directement sous src/
 
 from src.lib import custom_cve
@@ -31,10 +31,6 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Cm, Pt, RGBColor
 
 from user_agents import parse
-
-# Je crois qu'on peut s'en passer sans bug
-#from requests.packages.urllib3.exceptions import InsecureRequestWarning
-#requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Fonction utilitaire pour convertir les dictionnaires en objets
 def dict_to_obj(d):

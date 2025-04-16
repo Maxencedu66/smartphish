@@ -31,7 +31,7 @@ def start_docker():
         print("❌ Docker n'est pas démarré. Démarrage en cours...")
         subprocess.run(["sudo", "systemctl", "start", "docker"], check=True)
 
-    print("🚀 Lancement de GoPhish via Docker Compose...")
+    print(" Lancement de GoPhish via Docker Compose...")
     subprocess.run(DOCKER_COMPOSE_CMD + ["-f", DOCKER_COMPOSE_PATH, "up", "-d"], check=True)
 
 def stop_docker():

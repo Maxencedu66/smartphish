@@ -389,7 +389,7 @@ def generate_ai_analysis(campaign_id):
     Cette fonction s'inspire de la logique de generate_and_save_report_to_db sans sauvegarder en BDD.
     """
     # Importer la fonction get_campaign et la fonction utilitaire dict_to_obj
-    from src.services.gophish_service import get_campaign
+    from src.services.smartphish_service import get_campaign
     from src.lib.goreport_lib import dict_to_obj
 
     # Instancier et configurer GoReport pour récupérer les infos de la campagne

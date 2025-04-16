@@ -2,7 +2,7 @@
 import os
 from flask import Blueprint, render_template, Flask, render_template, request, jsonify, redirect, url_for, session, send_file, abort
 from src.services.llm_service import *
-from src.services.gophish_service import *
+from src.services.smartphish_service import *
 from src.services.report_service import *
 import json
 from io import BytesIO
@@ -12,7 +12,7 @@ import tempfile
 import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from src.services.gophish_service import get_templates
+from src.services.smartphish_service import get_templates
 from src.services.report_service import *
 from functools import wraps
 from src.lib.custom_cve import search_user_agent_vulnerable
@@ -72,7 +72,7 @@ def new_campaign_page():
     """Affiche la page de création de campagne avec les éléments disponibles."""
     groups = get_groups()
     templates = get_templates()
-    pages = get_landing_pages()  # Fonction à créer dans `gophish_service.py`
+    pages = get_landing_pages() 
     sending_profiles = get_sending_profiles()
 
     return render_template('new-campaign.html', 
@@ -241,6 +241,10 @@ def set_model_frontend():
 def maj_status():
     return render_template('maj-status.html')
 
+
+
+
+
 # ------------------------------------------------------
 # Routes pour les rapports de campagne
 # ------------------------------------------------------
@@ -280,6 +284,8 @@ def report_exists(campaign_id):
 def download_report(campaign_id):
 
     return download_report_styled(campaign_id)
+
+
 
 
 
@@ -352,6 +358,10 @@ def delete_group_frontend(group_id):
     """
     response = delete_group(group_id)
     return jsonify(response)
+
+
+
+
 
 
 
@@ -434,6 +444,10 @@ def delete_template_frontend(template_id):
 
 
 
+
+
+
+
 # ---------------------------
 # Routes pour les Sending Profiles (Profils SMTP)
 # ---------------------------
@@ -460,6 +474,10 @@ def update_smtp_submit(profile_id):
 @bp.route('/config-smtp/<int:profile_id>', methods=['DELETE'])
 def delete_smtp(profile_id):
     return jsonify(delete_sending_profile(profile_id))
+
+
+
+
 
 
 
@@ -520,5 +538,3 @@ def import_site_frontend():
     data = request.get_json()
     response = import_site(data) 
     return jsonify(response)
-
-

@@ -19,7 +19,7 @@ def get_latest_goreport_docx(campaign_id):
     return candidates[0] if candidates else None
 
 def generate_docx_with_goreport(campaign_id, force=False):
-    print(f"🚀 Génération GoReport pour la campagne {campaign_id}")
+    print(f" Génération GoReport pour la campagne {campaign_id}")
 
     # Dossier de stockage des rapports
     reports_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reports"))
@@ -31,7 +31,7 @@ def generate_docx_with_goreport(campaign_id, force=False):
         for f in reports_path.glob(pattern):
             try:
                 os.remove(f)
-                print(f"🗑 Suppression de l'ancien rapport : {f}")
+                print(f" Suppression de l'ancien rapport : {f}")
             except Exception as e:
                 print("Erreur lors de la suppression :", e)
 
@@ -46,10 +46,10 @@ def generate_docx_with_goreport(campaign_id, force=False):
     )
 
     if result.returncode != 0:
-        print("❌ GoReport Error:", result.stderr)
+        print(" GoReport Error:", result.stderr)
         raise RuntimeError("Erreur GoReport : " + result.stderr)
 
-    print("✅ GoReport exécuté avec succès")
+    print(" GoReport exécuté avec succès")
 
     # Récupérer le dernier fichier généré
     latest_file = None
@@ -60,7 +60,7 @@ def generate_docx_with_goreport(campaign_id, force=False):
     if not latest_file:
         raise FileNotFoundError("Aucun fichier DOCX généré par GoReport")
 
-    print(f"📄 Rapport trouvé : {latest_file}")
+    print(f"Rapport trouvé : {latest_file}")
 
     # Génération du texte d'analyse via l'IA
     ai_data = generate_ai_analysis(campaign_id)
