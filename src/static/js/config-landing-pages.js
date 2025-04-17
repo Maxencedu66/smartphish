@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Charger les landing pages via l'API
-    fetch('/api/gophish/landing_pages')
+    fetch('/api/smartphish/landing_pages')
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById("landingPageTableBody");
@@ -85,7 +85,7 @@ function assignEditEvents() {
     document.querySelectorAll(".edit-landing-page").forEach(btn => {
         btn.addEventListener("click", function() {
             const pageId = this.getAttribute("data-id");
-            fetch(`/api/gophish/landing_pages/${pageId}`)
+            fetch(`/api/smartphish/landing_pages/${pageId}`)
                 .then(response => response.json())
                 .then(data => {
                     // Utiliser ici les IDs du modal d'édition (non réinitialisés)
@@ -117,7 +117,7 @@ function assignDeleteEvents() {
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/api/gophish/landing_pages/${pageId}`, { method: "DELETE" })
+                    fetch(`/api/smartphish/landing_pages/${pageId}`, { method: "DELETE" })
                         .then(res => res.json())
                         .then(data => {
                             if (data.error) {
@@ -223,7 +223,7 @@ function submitNewLandingPage() {
         redirect_url: document.getElementById("newRedirectUrl").value.trim() || null
     };
 
-    fetch("/api/gophish/landing_pages", {
+    fetch("/api/smartphish/landing_pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -268,7 +268,7 @@ function submitEditedLandingPage() {
         redirect_url: document.getElementById("editRedirectUrl").value.trim() || null
     };
 
-    fetch(`/api/gophish/landing_pages/${pageId}`, {
+    fetch(`/api/smartphish/landing_pages/${pageId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

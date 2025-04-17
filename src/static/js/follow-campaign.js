@@ -10,7 +10,7 @@ function deleteCampaign(campaignId) {
         cancelButtonText: "Annuler"
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/api/gophish/campaigns/${campaignId}`, { method: "DELETE" })
+            fetch(`/api/smartphish/campaigns/${campaignId}`, { method: "DELETE" })
             .then(res => res.json())
             .then(response => {
                 if (response.success) {
@@ -40,7 +40,7 @@ function completeCampaign(campaignId) {
         cancelButtonText: "Annuler"
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/api/gophish/campaigns/${campaignId}/complete`, { method: 'GET' })
+            fetch(`/api/smartphish/campaigns/${campaignId}/complete`, { method: 'GET' })
                 .then(res => res.json())
                 .then(response => {
                     if (response.success) {
