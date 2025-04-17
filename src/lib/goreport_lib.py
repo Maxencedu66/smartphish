@@ -1750,14 +1750,14 @@ Personnes ayant soumis des données: {self.total_unique_submitted}
                                 run = p.add_run(f"- ")
                                 run = p.add_run(f"{high_severity_count} ")
                                 run.bold = True
-                                run = p.add_run(f' vulnérabilités ')
+                                run = p.add_run(f'vulnérabilités ')
                                 run = p.add_run(f'ÉLEVÉE \n')
                                 run.italic = True
 
                                 run = p.add_run(f"- ")
                                 run = p.add_run(f"{critical_severity_count} ")
                                 run.bold = True
-                                run = p.add_run(f' vulnérabilités ')
+                                run = p.add_run(f'vulnérabilités ')
                                 run = p.add_run(f'CRITIQUE \n')
                                 run.italic = True
                             

@@ -45,7 +45,7 @@ header {
 .header-buttons {
     display: flex;
     align-items: center;
-    margin-right: 8px; 
+    /* margin-right: 8px;  */
     gap: 30px; 
 }
 .header-buttons button {
