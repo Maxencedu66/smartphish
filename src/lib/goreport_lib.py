@@ -1806,7 +1806,7 @@ Personnes ayant soumis des données: {self.total_unique_submitted}
 
         print("[+] Finished writing Detailed Analysis section...")
         # End of the detailed results and the beginning of browser, location, and OS stats
-        d.add_heading("Statistics", 1)
+        d.add_heading("Statistiques", 1)
         p = d.add_paragraph("Le tableau suivant présente les navigateurs observés :")
         # Create browser table
         browser_table = d.add_table(rows=1, cols=4, style="GoReport")
