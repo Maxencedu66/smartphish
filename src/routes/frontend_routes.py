@@ -42,12 +42,30 @@ def login_page():
 @bp.route("/register")
 @admin_required
 def register_page():
-    return render_template("register.html")
+    # Appel GoPhish pour récupérer les utilisateurs
+    response = requests.get(f"{Config.GOPHISH_API_URL}/api/users/", headers=HEADERS, verify=False)
+    users = []
+    if response.status_code == 200:
+        for u in response.json():
+            if u["username"] == "admin":
+                continue 
+            role_obj = u.get("role", {})
+            slug = role_obj.get("slug", "")
+            role_label = "Administrateur" if slug == "admin" else "Utilisateur"
+            users.append({
+                "username": u["username"],
+                "role": role_label
+            })
+
+    return render_template("register.html", users=users, current_user=session.get("user"))
 
 @bp.route("/logout")
 def logout():
-    session.pop("user", None)  # Supprime l'utilisateur de la session
+    # session.pop("user", None)  # Supprime l'utilisateur de la session
+    session.clear()
     return redirect(url_for("frontend.login_page"))
+
+
 
 # Routes pour afficher les pages HTML
 
@@ -538,3 +556,66 @@ def import_site_frontend():
     data = request.get_json()
     response = import_site(data) 
     return jsonify(response)
+
+
+# ---------------------------
+@bp.route("/mon-compte")
+def mon_compte_page():
+    return render_template("account.html", current_user=session.get("user"))
+@bp.route("/mon-compte/update", methods=["PUT"])
+def update_mon_compte():
+    data = request.json
+    current_user = session.get("user")
+    new_username = data.get("username")
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+
+    if not current_user:
+        return jsonify({"error": "Utilisateur non connecté"}), 401
+
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE username = ?", (current_user,)).fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({"error": "Utilisateur introuvable"}), 404
+
+    # Vérification de mot de passe uniquement si changement demandé
+    if new_password:
+        if not old_password:
+            conn.close()
+            return jsonify({"error": "Mot de passe actuel requis pour changer le mot de passe"}), 400
+
+        if not bcrypt.checkpw(old_password.encode("utf-8"), user["hash"].encode("utf-8")):
+            conn.close()
+            return jsonify({"error": "Mot de passe actuel incorrect"}), 401
+
+        import re
+        regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+        if not re.match(regex, new_password):
+            conn.close()
+            return jsonify({
+                "error": "Mot de passe trop faible",
+                "details": """
+                    <h5 style='text-align:left; font-size:16px'>Mot de passe trop faible</h5>
+                    <ul style='text-align:left; font-size:16px; margin-top:10px'>
+                        <li>8 caractères minimum</li>
+                        <li>Une majuscule, une minuscule, un chiffre, un caractère spécial</li>
+                    </ul>
+                """
+            }), 400
+
+        new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        conn.execute("UPDATE users SET hash = ? WHERE username = ?", (new_hash, current_user))
+
+    # Changement du nom d’utilisateur
+    if new_username and new_username != current_user:
+        conn.execute("UPDATE users SET username = ? WHERE username = ?", (new_username, current_user))
+        session["user"] = new_username  # Mise à jour de la session
+        current_user = new_username
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Mise à jour réussie"}), 200
+

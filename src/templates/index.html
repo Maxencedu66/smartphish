@@ -111,11 +111,18 @@
                     <span>Paramètres du LLM</span>
                 </div>
             </a></li>
+            <li><a class="menu-link {% if request.path == '/mon-compte' %}active{% endif %}" href="/mon-compte">
+                <div class="menu-item">
+                    <img src="{{ url_for('static', filename='img/teamwork.png') }}" alt="team" class="icon"> 
+                    <span>Gestion de compte</span>
+                </div>
+            </a></li>
+
             {% if session.role == 'admin' %}
                 <li><a class="menu-link {% if request.path == '/register' %}active{% endif %}" href="/register">
                     <div class="menu-item">
                         <img src="{{ url_for('static', filename='img/teamwork.png') }}" alt="team" class="icon"> 
-                        <span>Création de compte</span>
+                        <span>Gestion Utilisateurs</span>
                     </div>
                 </a></li>
             {% endif %}

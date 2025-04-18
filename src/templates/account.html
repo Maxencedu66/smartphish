@@ -1,0 +1,85 @@
+{% extends 'index.html' %}
+{% block title %}Mon compte{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Modifier mes informations</h2>
+
+  <form onsubmit="updateMyAccount(event)" class="card p-4 shadow-sm">
+    <div class="mb-3">
+      <label class="form-label"><strong>Nom d'utilisateur</strong></label>
+      <input type="text" class="form-control" id="usernameEdit" value="{{ current_user }}" />
+    </div>
+
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" id="edit-password-switch" checked onchange="togglePasswordFields()">
+      <label class="form-check-label" for="edit-password-switch">Ne pas modifier le mot de passe</label>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Mot de passe actuel</label>
+      <input type="password" class="form-control" id="old-password" disabled />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nouveau mot de passe</label>
+      <input type="password" class="form-control" id="new-password" disabled />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+  </form>
+</div>
+
+<script>
+function togglePasswordFields() {
+    const isChecked = document.getElementById("edit-password-switch").checked;
+    document.getElementById("old-password").disabled = isChecked;
+    document.getElementById("new-password").disabled = isChecked;
+}
+
+function updateMyAccount(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("usernameEdit").value;
+    const old_password = document.getElementById("old-password").value;
+    const new_password = document.getElementById("new-password").value;
+    const changePassword = !document.getElementById("edit-password-switch").checked;
+
+    if (changePassword && (!old_password || !new_password)) {
+        Swal.fire({
+            icon: "warning",
+            title: "Champs manquants",
+            text: "Veuillez remplir l'ancien et le nouveau mot de passe."
+        });
+        return;
+    }
+
+    fetch("/mon-compte/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: username,
+            old_password: old_password,
+            new_password: changePassword ? new_password : ""
+        })
+    })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+        if (!ok) throw data;
+        Swal.fire({
+            icon: "success",
+            title: "Succès",
+            text: data.message
+        }).then(() => location.reload());
+    })
+    .catch(err => {
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            html: err.details || `<p>${err.error || "Erreur inconnue"}</p>`
+        });
+    });
+
+}
+</script>
+{% endblock %}

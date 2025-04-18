@@ -21,22 +21,35 @@
             </tr>
         </thead>
         <tbody id="user-table-body">
-            <!-- Les utilisateurs seront injectés ici -->
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                  <button class="btn btn-sm btn-warning"
+                          data-username="{{ user.username }}"
+                          data-role="{{ 'admin' if user.role == 'Administrateur' else 'user' }}"
+                          onclick="editUser(this.dataset.username, this.dataset.role)">
+                      Modifier
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser('{{ user.username }}')">Supprimer</button>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- Modal de création/modification -->
+<!-- Modal de création -->
 <div class="modal fade" id="userModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="userForm" onsubmit="submitUserForm(event)">
+      <form id="userForm" onsubmit="registerFromModal(event)">
         <div class="modal-header">
           <h5 class="modal-title" id="modalTitle">Créer un utilisateur</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-            <input type="hidden" id="edit-username" />
             <div class="mb-3">
                 <label class="form-label"><strong>Nom d'utilisateur</strong></label>
                 <input type="text" class="form-control" id="username"/>
@@ -60,6 +73,64 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de modification -->
+<div class="modal fade" id="userModalEdit" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="userFormEdit" onsubmit="editUserForm(event)">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitleEdit">Modifier l'utilisateur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+
+          <div class="mb-3">
+              <label class="form-label"><strong>Nom d'utilisateur</strong></label>
+              <input type="text" class="form-control" id="usernameEdit" />
+          </div>
+
+          <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="edit-password-switch" checked onchange="toggleEditPasswordFields()">
+              <label class="form-check-label" for="edit-password-switch">Ne pas modifier le mot de passe</label>
+          </div>
+
+          <!-- Ancien mot de passe -->
+          <div class="mb-3">
+            <label class="form-label">Ancien mot de passe</label>
+            <input type="password" class="form-control" id="old-password" disabled />
+          </div>
+
+          <!-- Nouveau mot de passe -->
+          <div class="mb-3">
+            <label class="form-label">Nouveau mot de passe</label>
+            <input type="password" class="form-control" id="new-password" disabled />
+          </div>
+
+
+          <div class="mb-3">
+              <label class="form-label">Rôle</label>
+              <select class="form-control" id="roleEdit">
+                  <option value="user">Utilisateur</option>
+                  <option value="admin">Administrateur</option>
+              </select>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Valider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const CURRENT_USER = "{{ current_user }}";
+</script>
+
+
 
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 {% endblock %}

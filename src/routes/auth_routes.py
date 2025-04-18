@@ -104,43 +104,80 @@ def list_users():
 def update_user(username):
     data = request.json
     new_username = data.get("username")
-    password = data.get("password")
     role_slug = data.get("role", "user")
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
 
-    try:
-        # Récupération de tous les utilisateurs
-        response = requests.get(f"{Config.GOPHISH_API_URL}/api/users/", headers=HEADERS, verify=False)
-        if response.status_code != 200:
-            return jsonify({"error": "Impossible de récupérer les utilisateurs"}), 500
+    print("Payload reçu :", data)
 
-        users = response.json()
-        user = next((u for u in users if u["username"] == username), None)
-        if not user:
-            return jsonify({"error": "Utilisateur introuvable"}), 404
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
 
-        user_id = user["id"]  # c’est cet ID qu’il faut utiliser dans l’URL
-        payload = {
-            "username": new_username,
-            "password": password,
-            "role": role_slug
-        }
+    if not user:
+        conn.close()
+        return jsonify({"error": "Utilisateur introuvable"}), 404
 
-        print(f" Modification utilisateur ID={user_id} ➜ {payload}")
+    if old_password and new_password:
+        stored_hash = user["hash"]
+        if not bcrypt.checkpw(old_password.encode("utf-8"), stored_hash.encode("utf-8")):
+            conn.close()
+            return jsonify({"error": "Ancien mot de passe incorrect"}), 401
 
-        update_response = requests.put(
-            f"{Config.GOPHISH_API_URL}/api/users/{user_id}",
-            json=payload,
-            headers=HEADERS,
-            verify=False
+        import re
+        regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+        if not re.match(regex, new_password):
+            conn.close()
+            return jsonify({"error": "Nouveau mot de passe non valide"}), 400
+
+        hashed_pw = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+        conn.execute(
+            "UPDATE users SET hash = ?, role_id = ? WHERE username = ?",
+            (hashed_pw, 1 if role_slug == "admin" else 2, username)
         )
+        conn.commit()
+    else:
+        conn.execute(
+            "UPDATE users SET role_id = ? WHERE username = ?",
+            (1 if role_slug == "admin" else 2, username)
+        )
+        conn.commit()
 
-        if update_response.status_code == 200:
-            return jsonify({"message": "Utilisateur modifié avec succès"}), 200
-        else:
-            return jsonify({"error": "Erreur lors de la mise à jour", "details": update_response.text}), 500
+    conn.close()
 
-    except Exception as e:
-        return jsonify({"error": "Erreur interne", "details": str(e)}), 500
+    # Update GoPhish
+    response = requests.get(f"{Config.GOPHISH_API_URL}/api/users/", headers=HEADERS, verify=False)
+    if response.status_code != 200:
+        return jsonify({"error": "Erreur récupération GoPhish"}), 500
+
+    users = response.json()
+    gophish_user = next((u for u in users if u["username"] == username), None)
+    if not gophish_user:
+        return jsonify({"error": "Utilisateur introuvable dans GoPhish"}), 404
+
+    payload = {
+        "username": new_username,
+        "role": role_slug
+    }
+
+    if old_password and new_password:
+        payload["password"] = new_password
+
+    update_response = requests.put(
+        f"{Config.GOPHISH_API_URL}/api/users/{gophish_user['id']}",
+        json=payload,
+        headers=HEADERS,
+        verify=False
+    )
+
+    print("Réponse GoPhish :", update_response.status_code, update_response.text)
+
+    if update_response.status_code != 200:
+        return jsonify({"error": f"Erreur API GoPhish: {update_response.text}"}), 500
+
+    return jsonify({"message": "Utilisateur modifié avec succès"}), 200
+
+
 
 
 
@@ -151,7 +188,16 @@ def delete_user(username):
     if response.status_code == 200:
         users = response.json()
         user = next((u for u in users if u["username"] == username), None)
+        # if user:
+        #     delete_response = requests.delete(f"{Config.GOPHISH_API_URL}/api/users/{user['id']}", headers=HEADERS, verify=False)
+        #     return jsonify(delete_response.json()), delete_response.status_code
         if user:
             delete_response = requests.delete(f"{Config.GOPHISH_API_URL}/api/users/{user['id']}", headers=HEADERS, verify=False)
-            return jsonify(delete_response.json()), delete_response.status_code
+            
+            if delete_response.status_code == 200 or delete_response.status_code == 204:
+                return jsonify({"message": f"Utilisateur {username} supprimé avec succès"}), 200
+            else:
+                return jsonify({"error": "Erreur lors de la suppression", "details": delete_response.text}), 500
+
+    
     return jsonify({"error": "Utilisateur introuvable"}), 404
